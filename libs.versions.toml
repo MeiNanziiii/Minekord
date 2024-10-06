@@ -10,6 +10,11 @@ fabric-api="0.102.0+1.21"
 kordex="2.2.1-SNAPSHOT"
 konf="1.1.2"
 
+discord-reserializer="4.3.0"
+simple-ast="2.2.8"
+
+kyori="5.14.1"
+
 [libraries]
 
 minecraft = { module = "net.minecraft:minecraft", version.ref = "minecraft" }
@@ -22,3 +27,8 @@ fabric-kotlin = { module = "net.fabricmc:fabric-language-kotlin", version.ref = 
 kordex = { module = "dev.kordex:kord-extensions", version.ref = "kordex" }
 konf-core = { module = "com.uchuhimo:konf-core", version.ref = "konf" }
 konf-toml = { module = "com.uchuhimo:konf-toml", version.ref = "konf" }
+
+discord-reserializer = { module = "dev.vankka:mcdiscordreserializer", version.ref = "discord-reserializer"}
+simple-ast = { module = "dev.vankka:SimpleAST", version.ref = "simple-ast"}
+
+kyori = { module = "net.kyori:adventure-platform-fabric", version.ref = "kyori"}

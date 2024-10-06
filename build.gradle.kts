@@ -38,6 +38,14 @@ dependencies {
     includeImplementation(libs.konf.core)
     includeImplementation(libs.konf.toml)
 
+    implementation(libs.discord.reserializer)
+    include(libs.discord.reserializer)
+    implementation(libs.simple.ast)
+    include(libs.simple.ast)
+
+    modImplementation(libs.kyori)
+    include(libs.kyori)
+
     handleIncludes(includeImplementation)
 }
 
