@@ -18,6 +18,7 @@ version = "$modVersion+${libs.versions.minecraft.get()}"
 group = mavenGroup
 
 repositories {
+    maven("https://maven.nucleoid.xyz")
     maven("https://snapshots-repo.kordex.dev")
     maven("https://repo.kord.dev/snapshots")
 }
@@ -38,13 +39,11 @@ dependencies {
     includeImplementation(libs.konf.core)
     includeImplementation(libs.konf.toml)
 
-    implementation(libs.discord.reserializer)
-    include(libs.discord.reserializer)
-    implementation(libs.simple.ast)
-    include(libs.simple.ast)
+    implementAndInclude(libs.discord.reserializer)
+    implementAndInclude(libs.simple.ast)
 
-    modImplementation(libs.kyori)
-    include(libs.kyori)
+    implementAndInclude(libs.kyori)
+    implementAndInclude(libs.placeholder.api)
 
     handleIncludes(includeImplementation)
 }
@@ -122,4 +121,9 @@ fun DependencyHandlerScope.handleIncludes(configuration: Configuration) {
         configurations.modImplementation.get().resolvedConfiguration.firstLevelModuleDependencies
             .first { it.moduleGroup == "net.fabricmc" && it.moduleName == "fabric-language-kotlin" },
     )
+}
+
+fun DependencyHandlerScope.implementAndInclude(dep: Any) {
+    modImplementation(dep)
+    include(dep)
 }

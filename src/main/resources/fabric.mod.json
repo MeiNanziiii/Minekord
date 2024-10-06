@@ -13,7 +13,7 @@
     "environment": "server",
     "entrypoints": {
         "main": [
-            "ua.mei.minekord.Minekord"
+            "ua.mei.minekord.Minekord::INSTANCE"
         ]
     },
     "mixins": [

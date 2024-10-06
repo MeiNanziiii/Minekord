@@ -13,6 +13,7 @@ konf="1.1.2"
 discord-reserializer="4.3.0"
 simple-ast="2.2.8"
 
+placeholder-api="2.4.1+1.21"
 kyori="5.14.1"
 
 [libraries]
@@ -32,3 +33,4 @@ discord-reserializer = { module = "dev.vankka:mcdiscordreserializer", version.re
 simple-ast = { module = "dev.vankka:SimpleAST", version.ref = "simple-ast"}
 
 kyori = { module = "net.kyori:adventure-platform-fabric", version.ref = "kyori"}
+placeholder-api = { module = "eu.pb4:placeholder-api", version.ref = "placeholder-api" }
