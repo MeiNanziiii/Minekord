@@ -1,0 +1,1 @@
+Discord SRV but better (for Fabric)
