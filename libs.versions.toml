@@ -1,0 +1,24 @@
+[versions]
+
+minecraft="1.21"
+yarn="1.21+build.9"
+
+fabric-loader="0.16.5"
+fabric-kotlin="1.12.2+kotlin.2.0.20"
+fabric-api="0.102.0+1.21"
+
+kordex="2.2.1-SNAPSHOT"
+konf="1.1.2"
+
+[libraries]
+
+minecraft = { module = "net.minecraft:minecraft", version.ref = "minecraft" }
+yarn = { module = "net.fabricmc:yarn", version.ref = "yarn" }
+
+fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
+fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
+fabric-kotlin = { module = "net.fabricmc:fabric-language-kotlin", version.ref = "fabric-kotlin" }
+
+kordex = { module = "dev.kordex:kord-extensions", version.ref = "kordex" }
+konf-core = { module = "com.uchuhimo:konf-core", version.ref = "konf" }
+konf-toml = { module = "com.uchuhimo:konf-toml", version.ref = "konf" }
