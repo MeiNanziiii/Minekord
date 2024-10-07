@@ -4,8 +4,7 @@
     "package": "ua.mei.minekord.mixin",
     "compatibilityLevel": "JAVA_21",
     "mixins": [
-    ],
-    "client": [
+        "ServerLoginNetworkHandlerMixin"
     ],
     "injectors": {
         "defaultRequire": 1
