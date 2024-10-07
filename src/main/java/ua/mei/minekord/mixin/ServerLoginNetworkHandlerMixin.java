@@ -1,10 +1,7 @@
 package ua.mei.minekord.mixin;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
-import net.minecraft.network.packet.s2c.login.LoginHelloS2CPacket;
-import net.minecraft.network.packet.s2c.login.LoginSuccessS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.text.Text;
@@ -27,16 +24,23 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
     @Shadow protected abstract void sendSuccessPacket(GameProfile gameProfile);
 
+    @Shadow @Final MinecraftServer server;
+
     @Inject(method = "onHello", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isOnlineMode()Z"), cancellable = true)
     private void minekord$trueUuids(LoginHelloC2SPacket loginHelloC2SPacket, CallbackInfo ci) {
         if (SnowflakeToUUID.INSTANCE.enabled()) {
+            if (this.server.isOnlineMode() && !SnowflakeToUUID.INSTANCE.allowOfflinePlayers() && !SnowflakeToUUID.INSTANCE.premiumPlayer(loginHelloC2SPacket.comp_907())) {
+                this.disconnect(Text.literal("test1"));
+                ci.cancel();
+            }
+
             UUID trueUuid = SnowflakeToUUID.INSTANCE.generateFromNickname(loginHelloC2SPacket.comp_765());
 
             if (trueUuid != null) {
                 this.profile = new GameProfile(trueUuid, loginHelloC2SPacket.comp_765());
-                sendSuccessPacket(this.profile);
+                this.sendSuccessPacket(this.profile);
             } else {
-                this.disconnect(Text.literal("lol"));
+                this.disconnect(Text.literal("test2"));
             }
 
             ci.cancel();

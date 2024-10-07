@@ -11,6 +11,9 @@ chat = 0
 # Works with offline and online mode.
 uuidFromSnowflake = false
 
+# If true, offline players can join server if online mode enabled.
+allowOfflinePlayers = false
+
 # Roles which required for server join.
 # Can be empty.
 requiredRoles = []
