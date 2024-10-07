@@ -12,8 +12,24 @@ chat = 0
 uuidFromSnowflake = false
 
 # If true, offline players can join server if online mode enabled.
+# If online mode disabled, ignore.
+# Made for servers which uses EasyAuth with premium-auto-login.
 allowOfflinePlayers = false
 
 # Roles which required for server join.
 # Can be empty.
 requiredRoles = []
+
+# When player trying to join server, bot will send embed to player DM,
+# embed contains IP from which player are joining, player can confirm
+# is this ip are they, and then successful join server.
+#
+# Every new IP, bot will request confirmation.
+# Player can join only with last confirmed IP.
+#
+# Option made for players, who are lazy to type /login and /register,
+# or for best safety.
+loginByIp = false
+
+# Don't request IP confirmation to premium players.
+ignorePremiumIp = false

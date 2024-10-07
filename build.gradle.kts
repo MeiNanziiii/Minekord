@@ -7,6 +7,8 @@ plugins {
 
 loom {
     serverOnlyMinecraftJar()
+
+    accessWidenerPath = file("src/main/resources/minekord.accesswidener")
 }
 
 val modVersion: String by project

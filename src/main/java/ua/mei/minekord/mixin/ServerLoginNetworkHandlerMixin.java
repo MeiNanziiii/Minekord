@@ -18,19 +18,25 @@ import java.util.UUID;
 
 @Mixin(ServerLoginNetworkHandler.class)
 public abstract class ServerLoginNetworkHandlerMixin {
-    @Shadow public abstract void disconnect(Text text);
+    @Shadow
+    @Final
+    MinecraftServer server;
 
-    @Shadow @Nullable private GameProfile profile;
+    @Shadow
+    @Nullable
+    private GameProfile profile;
 
-    @Shadow protected abstract void sendSuccessPacket(GameProfile gameProfile);
+    @Shadow
+    public abstract void disconnect(Text text);
 
-    @Shadow @Final MinecraftServer server;
+    @Shadow
+    protected abstract void sendSuccessPacket(GameProfile gameProfile);
 
     @Inject(method = "onHello", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isOnlineMode()Z"), cancellable = true)
     private void minekord$trueUuids(LoginHelloC2SPacket loginHelloC2SPacket, CallbackInfo ci) {
         if (SnowflakeToUUID.INSTANCE.enabled()) {
             if (this.server.isOnlineMode() && !SnowflakeToUUID.INSTANCE.allowOfflinePlayers() && !SnowflakeToUUID.INSTANCE.premiumPlayer(loginHelloC2SPacket.comp_907())) {
-                this.disconnect(Text.literal("test1"));
+                this.disconnect(Text.translatable("multiplayer.disconnect.generic"));
                 ci.cancel();
             }
 
@@ -40,10 +46,19 @@ public abstract class ServerLoginNetworkHandlerMixin {
                 this.profile = new GameProfile(trueUuid, loginHelloC2SPacket.comp_765());
                 this.sendSuccessPacket(this.profile);
             } else {
-                this.disconnect(Text.literal("test2"));
+                this.disconnect(Text.translatable("multiplayer.disconnect.generic"));
             }
 
             ci.cancel();
+        }
+    }
+
+    @Inject(method = "sendSuccessPacket", at = @At("HEAD"))
+    private void minekord$checkRoles(GameProfile gameProfile, CallbackInfo ci) {
+        if (!SnowflakeToUUID.INSTANCE.enabled()) {
+            if (SnowflakeToUUID.INSTANCE.getPlayer(gameProfile.getName()) == null) {
+                this.disconnect(Text.translatable("multiplayer.disconnect.generic"));
+            }
         }
     }
 }

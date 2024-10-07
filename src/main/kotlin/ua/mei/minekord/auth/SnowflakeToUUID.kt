@@ -4,9 +4,7 @@ import dev.kord.common.annotation.KordExperimental
 import dev.kord.core.entity.Member
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.timeout
 import io.ktor.client.request.get
-import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
@@ -35,12 +33,19 @@ object SnowflakeToUUID {
     }
 
     @OptIn(KordExperimental::class)
+    fun getPlayer(nickname: String): Member? {
+        return runBlocking {
+            MinekordBot.guild?.getMembers(nickname)?.filter { member ->
+                val trueRoleIds: List<ULong> = member.roleIds.map { it.value }
+                config[AuthSpec.requiredRoles].all { it in trueRoleIds }
+            }?.firstOrNull()
+        }
+    }
+
     fun generateFromNickname(nickname: String): UUID? {
         return runBlocking {
             try {
-                val member: Member = MinekordBot.guild?.getMembers(nickname)?.filter {
-                    it.roleIds.map { it.value }.all { it in config[AuthSpec.requiredRoles] }
-                }?.firstOrNull() ?: return@runBlocking null
+                val member: Member = getPlayer(nickname) ?: return@runBlocking null
 
                 generateFromId(member.id.value)
             } catch (_: Throwable) {

@@ -19,6 +19,7 @@
     "mixins": [
         "minekord.mixins.json"
     ],
+    "accessWidener": "minekord.accesswidener",
     "depends": {
         "fabricloader": ">=${loader_version}",
         "fabric-language-kotlin": ">=${kotlin_loader_version}",
