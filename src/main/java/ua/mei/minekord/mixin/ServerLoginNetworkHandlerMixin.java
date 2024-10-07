@@ -12,7 +12,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import ua.mei.minekord.auth.SnowflakeToUUID;
+import ua.mei.minekord.bot.DiscordUtils;
+import ua.mei.minekord.config.AuthSpec;
+import ua.mei.minekord.config.MinekordConfigKt;
 
 import java.util.UUID;
 
@@ -34,13 +36,13 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
     @Inject(method = "onHello", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isOnlineMode()Z"), cancellable = true)
     private void minekord$trueUuids(LoginHelloC2SPacket loginHelloC2SPacket, CallbackInfo ci) {
-        if (SnowflakeToUUID.INSTANCE.enabled()) {
-            if (this.server.isOnlineMode() && !SnowflakeToUUID.INSTANCE.allowOfflinePlayers() && !SnowflakeToUUID.INSTANCE.premiumPlayer(loginHelloC2SPacket.comp_907())) {
+        if (MinekordConfigKt.getConfig().get(AuthSpec.INSTANCE.getUuidFromSnowflake())) {
+            if (this.server.isOnlineMode() && !MinekordConfigKt.getConfig().get(AuthSpec.INSTANCE.getAllowOfflinePlayers()) && !DiscordUtils.INSTANCE.premiumPlayer(loginHelloC2SPacket.comp_907())) {
                 this.disconnect(Text.translatable("multiplayer.disconnect.generic"));
                 ci.cancel();
             }
 
-            UUID trueUuid = SnowflakeToUUID.INSTANCE.generateFromNickname(loginHelloC2SPacket.comp_765());
+            UUID trueUuid = DiscordUtils.INSTANCE.generateFromNickname(loginHelloC2SPacket.comp_765());
 
             if (trueUuid != null) {
                 this.profile = new GameProfile(trueUuid, loginHelloC2SPacket.comp_765());
@@ -50,15 +52,6 @@ public abstract class ServerLoginNetworkHandlerMixin {
             }
 
             ci.cancel();
-        }
-    }
-
-    @Inject(method = "sendSuccessPacket", at = @At("HEAD"))
-    private void minekord$checkRoles(GameProfile gameProfile, CallbackInfo ci) {
-        if (!SnowflakeToUUID.INSTANCE.enabled()) {
-            if (SnowflakeToUUID.INSTANCE.getPlayer(gameProfile.getName()) == null) {
-                this.disconnect(Text.translatable("multiplayer.disconnect.generic"));
-            }
         }
     }
 }

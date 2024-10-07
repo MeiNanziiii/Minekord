@@ -6,6 +6,8 @@ import net.fabricmc.loader.api.FabricLoader
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import ua.mei.minekord.bot.MinekordBot
+import ua.mei.minekord.cache.IPCache
+import ua.mei.minekord.config.AuthSpec
 import ua.mei.minekord.config.CONFIG_PATH
 import ua.mei.minekord.config.config
 import java.nio.file.Files
@@ -27,6 +29,8 @@ object Minekord : ModInitializer {
 
         config.validateRequired()
 
-        ServerLifecycleEvents.SERVER_STARTING.register { MinekordBot.launchBot() }
+        if (config[AuthSpec.loginByIp]) IPCache.load()
+
+        MinekordBot.launchBot()
     }
 }

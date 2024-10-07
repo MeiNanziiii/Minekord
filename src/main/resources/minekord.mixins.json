@@ -4,6 +4,7 @@
     "package": "ua.mei.minekord.mixin",
     "compatibilityLevel": "JAVA_21",
     "mixins": [
+        "PlayerManagerMixin",
         "ServerLoginNetworkHandlerMixin"
     ],
     "injectors": {
