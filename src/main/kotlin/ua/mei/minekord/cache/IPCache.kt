@@ -7,10 +7,9 @@ import net.fabricmc.loader.api.FabricLoader
 import java.io.FileReader
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.UUID
 
 object IPCache {
-    private var cache: MutableMap<UUID, String> = mutableMapOf()
+    private var cache: MutableMap<String, String> = mutableMapOf()
     val path: Path = FabricLoader.getInstance().gameDir.resolve("ip-cache.json")
     val gson: Gson = GsonBuilder()
         .setPrettyPrinting()
@@ -22,7 +21,7 @@ object IPCache {
             Files.write(path, "{}".toByteArray())
         }
         val reader: JsonReader = JsonReader(FileReader(path.toFile()))
-        cache = gson.fromJson(reader, MutableMap::class.java)
+        cache = gson.fromJson(reader, Map::class.java)
         reader.close()
     }
 
@@ -33,12 +32,12 @@ object IPCache {
         Files.write(path, gson.toJson(cache).toByteArray())
     }
 
-    fun putIntoCache(uuid: UUID, ip: String) {
-        cache[uuid] = ip
+    fun putIntoCache(nickname: String, ip: String) {
+        cache[nickname] = ip
         save()
     }
 
-    fun getFromCache(uuid: UUID): String {
-        return cache[uuid] ?: ""
+    fun getFromCache(nickname: String): String {
+        return cache[nickname] ?: ""
     }
 }

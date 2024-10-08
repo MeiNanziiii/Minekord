@@ -30,6 +30,3 @@ requiredRoles = []
 # Option made for players, who are lazy to type /login and /register,
 # or for best safety.
 loginByIp = false
-
-# Don't request IP confirmation to premium players.
-ignorePremiumIp = false

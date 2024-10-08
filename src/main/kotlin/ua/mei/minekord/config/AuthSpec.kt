@@ -7,5 +7,4 @@ object AuthSpec : ConfigSpec() {
     val allowOfflinePlayers by required<Boolean>()
     val requiredRoles by required<List<ULong>>()
     val loginByIp by required<Boolean>()
-    val ignorePremiumIp by required<Boolean>()
 }

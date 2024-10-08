@@ -7,9 +7,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ua.mei.minekord.bot.extensions.IPCheckExtension
+import ua.mei.minekord.bot.extensions.SetupExtension
 import ua.mei.minekord.config.BotSpec
 import ua.mei.minekord.config.config
-import ua.mei.minekord.bot.extensions.SetupExtension
 import kotlin.coroutines.CoroutineContext
 
 object MinekordBot : CoroutineScope {
