@@ -25,7 +25,7 @@ class IPCheckExtension : Extension() {
     override val name: String = "IP Check Extension"
 
     override suspend fun setup() {
-        IPCheckEvent.event.register { address, profile ->
+        IPCheckEvent.event.register { socketAddress, profile ->
             MinekordBot.launch {
                 try {
                     if (!config[ExperimentalSpec.DiscordSpec.enabled]) return@launch
@@ -39,7 +39,7 @@ class IPCheckExtension : Extension() {
 
                             field {
                                 name = "> IP"
-                                value = "> ${address.address}"
+                                value = "> ${socketAddress.address}"
                                 inline = true
                             }
                             field {
@@ -54,7 +54,7 @@ class IPCheckExtension : Extension() {
                                 style = ButtonStyle.Success
 
                                 action {
-                                    IPCache.putIntoCache(profile.name, address.address)
+                                    IPCache.putIntoCache(profile.name, socketAddress.address)
 
                                     edit {
                                         components {

@@ -3,8 +3,10 @@ package ua.mei.minekord.cache
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.stream.JsonReader
+import io.ktor.util.network.address
 import net.fabricmc.loader.api.FabricLoader
 import java.io.FileReader
+import java.net.SocketAddress
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -37,7 +39,7 @@ object IPCache {
         save()
     }
 
-    fun getFromCache(nickname: String): String {
-        return cache[nickname] ?: ""
+    fun haveInCache(nickname: String, socketAddress: SocketAddress): Boolean {
+        return cache[nickname] == socketAddress.address
     }
 }

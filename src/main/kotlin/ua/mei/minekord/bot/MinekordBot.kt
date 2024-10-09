@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import ua.mei.minekord.bot.extensions.IPCheckExtension
 import ua.mei.minekord.bot.extensions.SetupExtension
 import ua.mei.minekord.config.BotSpec
+import ua.mei.minekord.config.ExperimentalSpec
 import ua.mei.minekord.config.config
 import kotlin.coroutines.CoroutineContext
 
@@ -23,15 +24,13 @@ object MinekordBot : CoroutineScope {
             bot = ExtensibleBot(config[BotSpec.token]) {
                 extensions {
                     add(::SetupExtension)
-                    add(::IPCheckExtension)
+
+                    if (config[ExperimentalSpec.DiscordSpec.enabled])
+                        add(::IPCheckExtension)
                 }
             }
 
-            try {
-                bot.start()
-            } catch (_: Throwable) {
-                println("LOX")
-            }
+            bot.start()
         }
     }
 
