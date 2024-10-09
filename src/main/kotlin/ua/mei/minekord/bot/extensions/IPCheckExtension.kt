@@ -14,9 +14,11 @@ import dev.kordex.core.time.toDiscord
 import io.ktor.util.network.address
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import ua.mei.minekord.bot.DiscordUtils
+import ua.mei.minekord.bot.ExperimentalUtils
 import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.cache.IPCache
+import ua.mei.minekord.config.ExperimentalSpec
+import ua.mei.minekord.config.config
 import ua.mei.minekord.event.IPCheckEvent
 
 class IPCheckExtension : Extension() {
@@ -26,7 +28,9 @@ class IPCheckExtension : Extension() {
         IPCheckEvent.event.register { address, profile ->
             MinekordBot.launch {
                 try {
-                    val discordId: ULong = DiscordUtils.uuidToDiscord(profile.id)
+                    if (!config[ExperimentalSpec.DiscordSpec.enabled]) return@launch
+
+                    val discordId: ULong = ExperimentalUtils.uuidToDiscord(profile.id)
                     val user: User? = kord.getUser(Snowflake(discordId))
 
                     user?.getDmChannelOrNull()?.createMessage {
@@ -36,10 +40,12 @@ class IPCheckExtension : Extension() {
                             field {
                                 name = "> IP"
                                 value = "> ${address.address}"
+                                inline = true
                             }
                             field {
                                 name = "> Time"
                                 value = "> ${Clock.System.now().toDiscord(TimestampType.Default)}"
+                                inline = true
                             }
                         }
                         components {

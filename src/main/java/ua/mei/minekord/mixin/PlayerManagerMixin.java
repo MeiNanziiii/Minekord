@@ -7,9 +7,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import ua.mei.minekord.bot.DiscordUtils;
 import ua.mei.minekord.cache.IPCache;
-import ua.mei.minekord.config.AuthSpec;
+import ua.mei.minekord.config.ExperimentalSpec;
 import ua.mei.minekord.config.MinekordConfigKt;
 import ua.mei.minekord.event.IPCheckEvent;
 
@@ -20,18 +19,10 @@ import java.net.SocketAddress;
 public class PlayerManagerMixin {
     @Inject(method = "checkCanJoin", at = @At("RETURN"), cancellable = true)
     private void minekord$checkRoles(SocketAddress socketAddress, GameProfile gameProfile, CallbackInfoReturnable<Text> cir) {
-        if (cir.getReturnValue() == null) {
-            boolean uuidFromSnowflake = MinekordConfigKt.getConfig().get(AuthSpec.INSTANCE.getUuidFromSnowflake());
-            boolean requiredRoles = !MinekordConfigKt.getConfig().get(AuthSpec.INSTANCE.getRequiredRoles()).isEmpty();
-            boolean loginByIp = MinekordConfigKt.getConfig().get(AuthSpec.INSTANCE.getLoginByIp());
+        if (cir.getReturnValue() == null && MinekordConfigKt.getConfig().get(ExperimentalSpec.DiscordSpec.INSTANCE.getEnabled())) {
+            boolean loginByIp = MinekordConfigKt.getConfig().get(ExperimentalSpec.DiscordSpec.INSTANCE.getLoginByIp());
             String playerName = gameProfile.getName();
             String cachedIp = IPCache.INSTANCE.getFromCache(playerName);
-
-            if (!uuidFromSnowflake && requiredRoles) {
-                if (DiscordUtils.INSTANCE.getPlayer(playerName) == null) {
-                    cir.setReturnValue(Text.translatable("multiplayer.disconnect.generic"));
-                }
-            }
 
             if (loginByIp && socketAddress instanceof InetSocketAddress inet && !cachedIp.equals(inet.getHostName())) {
                 IPCheckEvent.Companion.getEvent().invoker().request(socketAddress, gameProfile);

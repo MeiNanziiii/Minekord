@@ -8,12 +8,12 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
-import ua.mei.minekord.config.AuthSpec
+import ua.mei.minekord.config.ExperimentalSpec
 import ua.mei.minekord.config.config
 import java.util.UUID
 import kotlin.experimental.inv
 
-object DiscordUtils {
+object ExperimentalUtils {
     private val client: HttpClient = HttpClient()
 
     fun premiumPlayer(uuid: UUID): Boolean {
@@ -32,7 +32,7 @@ object DiscordUtils {
         return runBlocking {
             MinekordBot.guild?.getMembers(nickname)?.filter { member ->
                 val trueRoleIds: List<ULong> = member.roleIds.map { it.value }
-                config[AuthSpec.requiredRoles].all { it in trueRoleIds }
+                config[ExperimentalSpec.DiscordSpec.requiredRoles].all { it in trueRoleIds }
             }?.firstOrNull()
         }
     }

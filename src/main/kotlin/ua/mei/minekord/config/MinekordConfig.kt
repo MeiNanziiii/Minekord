@@ -6,6 +6,6 @@ import net.fabricmc.loader.api.FabricLoader
 
 const val CONFIG_PATH: String = "minekord.toml"
 
-val config: Config = Config { addSpec(BotSpec); addSpec(AuthSpec) }
+val config: Config = Config { addSpec(BotSpec); addSpec(ExperimentalSpec) }
     .from.toml.resource(CONFIG_PATH)
     .from.toml.watchFile(FabricLoader.getInstance().configDir.resolve(CONFIG_PATH).toFile())

@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import ua.mei.minekord.bot.DiscordUtils;
-import ua.mei.minekord.config.AuthSpec;
+import ua.mei.minekord.bot.ExperimentalUtils;
+import ua.mei.minekord.config.ExperimentalSpec;
 import ua.mei.minekord.config.MinekordConfigKt;
 
 import java.util.UUID;
@@ -36,13 +36,13 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
     @Inject(method = "onHello", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isOnlineMode()Z"), cancellable = true)
     private void minekord$trueUuids(LoginHelloC2SPacket loginHelloC2SPacket, CallbackInfo ci) {
-        if (MinekordConfigKt.getConfig().get(AuthSpec.INSTANCE.getUuidFromSnowflake())) {
-            if (this.server.isOnlineMode() && !MinekordConfigKt.getConfig().get(AuthSpec.INSTANCE.getAllowOfflinePlayers()) && !DiscordUtils.INSTANCE.premiumPlayer(loginHelloC2SPacket.comp_907())) {
+        if (MinekordConfigKt.getConfig().get(ExperimentalSpec.DiscordSpec.INSTANCE.getEnabled())) {
+            if (this.server.isOnlineMode() && !MinekordConfigKt.getConfig().get(ExperimentalSpec.DiscordSpec.INSTANCE.getAllowOfflinePlayers()) && !ExperimentalUtils.INSTANCE.premiumPlayer(loginHelloC2SPacket.comp_907())) {
                 this.disconnect(Text.translatable("multiplayer.disconnect.generic"));
                 ci.cancel();
             }
 
-            UUID trueUuid = DiscordUtils.INSTANCE.generateFromNickname(loginHelloC2SPacket.comp_765());
+            UUID trueUuid = ExperimentalUtils.INSTANCE.generateFromNickname(loginHelloC2SPacket.comp_765());
 
             if (trueUuid != null) {
                 this.profile = new GameProfile(trueUuid, loginHelloC2SPacket.comp_765());

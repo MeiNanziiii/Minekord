@@ -27,7 +27,11 @@ object MinekordBot : CoroutineScope {
                 }
             }
 
-            bot.start()
+            try {
+                bot.start()
+            } catch (_: Throwable) {
+                println("LOX")
+            }
         }
     }
 
