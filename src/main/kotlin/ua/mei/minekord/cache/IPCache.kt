@@ -17,6 +17,8 @@ object IPCache {
         .setPrettyPrinting()
         .create()
 
+    val blockedIps: MutableList<String> = mutableListOf()
+
     fun load() {
         if (!Files.exists(path)) {
             Files.createFile(path)
@@ -39,7 +41,11 @@ object IPCache {
         save()
     }
 
-    fun haveInCache(nickname: String, socketAddress: SocketAddress): Boolean {
+    fun containsInCache(nickname: String, socketAddress: SocketAddress): Boolean {
         return cache[nickname] == socketAddress.address
+    }
+
+    fun isBlockedIp(socketAddress: SocketAddress): Boolean {
+        return blockedIps.contains(socketAddress.address)
     }
 }

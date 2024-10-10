@@ -19,7 +19,11 @@ public class PlayerManagerMixin {
     @Inject(method = "checkCanJoin", at = @At("RETURN"), cancellable = true)
     private void minekord$checkRoles(SocketAddress socketAddress, GameProfile gameProfile, CallbackInfoReturnable<Text> cir) {
         if (cir.getReturnValue() == null && MinekordConfigKt.getConfig().get(ExperimentalSpec.DiscordSpec.INSTANCE.getEnabled()) && MinekordConfigKt.getConfig().get(ExperimentalSpec.DiscordSpec.INSTANCE.getLoginByIp())) {
-            if (!IPCache.INSTANCE.haveInCache(gameProfile.getName(), socketAddress)) {
+            if (IPCache.INSTANCE.isBlockedIp(socketAddress)) {
+                cir.setReturnValue(Text.translatable("multiplayer.disconnect.generic"));
+            }
+
+            if (!IPCache.INSTANCE.containsInCache(gameProfile.getName(), socketAddress)) {
                 IPCheckEvent.Companion.getEvent().invoker().request(socketAddress, gameProfile);
                 cir.setReturnValue(Text.translatable("multiplayer.disconnect.generic"));
             }

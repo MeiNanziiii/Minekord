@@ -71,11 +71,54 @@ class IPCheckExtension : Extension() {
                                 style = ButtonStyle.Danger
 
                                 action {
+                                    IPCache.blockedIps += socketAddress.address
+
                                     edit {
+                                        embed {
+                                            title = "IP was blocked!"
+
+                                            field {
+                                                name = "> IP"
+                                                value = "> ${socketAddress.address}"
+                                                inline = true
+                                            }
+                                            field {
+                                                name = "> Time"
+                                                value = "> ${Clock.System.now().toDiscord(TimestampType.Default)}"
+                                                inline = true
+                                            }
+                                        }
                                         components {
-                                            disabledButton {
-                                                label = "No"
+                                            publicButton {
+                                                label = "Unblock"
                                                 style = ButtonStyle.Danger
+
+                                                action {
+                                                    IPCache.blockedIps.removeAll { it == socketAddress.address }
+
+                                                    edit {
+                                                        embed {
+                                                            title = "IP was unblocked!"
+
+                                                            field {
+                                                                name = "> IP"
+                                                                value = "> ${socketAddress.address}"
+                                                                inline = true
+                                                            }
+                                                            field {
+                                                                name = "> Time"
+                                                                value = "> ${Clock.System.now().toDiscord(TimestampType.Default)}"
+                                                                inline = true
+                                                            }
+                                                        }
+                                                        components {
+                                                            disabledButton {
+                                                                label = "Unblock"
+                                                                style = ButtonStyle.Danger
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
