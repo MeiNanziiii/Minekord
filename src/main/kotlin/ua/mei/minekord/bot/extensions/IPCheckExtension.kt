@@ -14,7 +14,7 @@ import dev.kordex.core.time.toDiscord
 import io.ktor.util.network.address
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import ua.mei.minekord.bot.ExperimentalUtils
+import ua.mei.minekord.utils.ExperimentalUtils
 import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.cache.IPCache
 import ua.mei.minekord.config.ExperimentalSpec

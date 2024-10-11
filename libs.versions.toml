@@ -13,8 +13,8 @@ konf="1.1.2"
 discord-reserializer="4.3.0"
 simple-ast="2.2.8"
 
-placeholder-api="2.4.1+1.21"
 kyori="5.14.1"
+placeholder-api="2.4.1+1.21"
 
 [libraries]
 

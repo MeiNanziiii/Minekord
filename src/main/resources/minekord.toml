@@ -4,6 +4,16 @@ token = ""
 guild = 0
 chat = 0
 
+[Chat]
+
+allowMentions = true
+convertMarkdown = true
+
+    [Chat.Webhook]
+
+    webhookName = "Тест"
+    avatarUrl = "https://api.bonfiremc.site/attachments/avatars/MeiNanziiii.png?size=128"
+
 # Experimental and unstable features.
 # USE AT YOUR OWN RISK!!!
 [Experimental]

@@ -1,4 +1,4 @@
-package ua.mei.minekord.bot
+package ua.mei.minekord.utils
 
 import dev.kord.common.annotation.KordExperimental
 import dev.kord.core.entity.Member
@@ -8,6 +8,7 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
+import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.config.ExperimentalSpec
 import ua.mei.minekord.config.config
 import java.util.UUID
@@ -30,11 +31,19 @@ object ExperimentalUtils {
     @OptIn(KordExperimental::class)
     fun getPlayer(nickname: String): Member? {
         return runBlocking {
-            MinekordBot.guild?.getMembers(nickname)?.filter { member ->
+            MinekordBot.guild.getMembers(nickname).filter { member ->
                 val trueRoleIds: List<ULong> = member.roleIds.map { it.value }
                 config[ExperimentalSpec.DiscordSpec.requiredRoles].all { it in trueRoleIds }
-            }?.firstOrNull()
+            }.firstOrNull()
         }
+    }
+
+    @OptIn(KordExperimental::class)
+    suspend fun getPlayerSuspend(nickname: String): Member? {
+        return MinekordBot.guild.getMembers(nickname).filter { member ->
+            val trueRoleIds: List<ULong> = member.roleIds.map { it.value }
+            config[ExperimentalSpec.DiscordSpec.requiredRoles].all { it in trueRoleIds }
+        }.firstOrNull()
     }
 
     fun generateFromNickname(nickname: String): UUID? {
