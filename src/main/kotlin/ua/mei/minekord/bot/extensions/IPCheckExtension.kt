@@ -14,12 +14,12 @@ import dev.kordex.core.time.toDiscord
 import io.ktor.util.network.address
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import ua.mei.minekord.utils.ExperimentalUtils
 import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.cache.IPCache
 import ua.mei.minekord.config.ExperimentalSpec
 import ua.mei.minekord.config.config
 import ua.mei.minekord.event.IPCheckEvent
+import ua.mei.minekord.utils.ExperimentalUtils
 
 class IPCheckExtension : Extension() {
     override val name: String = "IP Check Extension"

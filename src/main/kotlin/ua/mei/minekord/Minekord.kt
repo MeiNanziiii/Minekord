@@ -1,6 +1,7 @@
 package ua.mei.minekord
 
 import net.fabricmc.api.ModInitializer
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
 import net.fabricmc.loader.api.FabricLoader
 import org.apache.logging.log4j.LogManager
@@ -32,7 +33,7 @@ object Minekord : ModInitializer {
 
         if (config[ExperimentalSpec.DiscordSpec.loginByIp]) IPCache.load()
 
-        MinekordBot.launchBot()
+        ServerLifecycleEvents.SERVER_STARTING.register(MinekordBot::launchBot)
 
         ServerMessageEvents.CHAT_MESSAGE.register { message, sender, type ->
             PlayerMessageEvent.event.invoker().message(sender.gameProfile, message.content, sender.server.registryManager)
