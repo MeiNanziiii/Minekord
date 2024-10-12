@@ -8,13 +8,14 @@ import dev.vankka.mcdiscordreserializer.renderer.implementation.DefaultMinecraft
 import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
+import net.kyori.adventure.text.format.TextDecoration
 import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.config.ChatSpec
 import ua.mei.minekord.config.config
 
 class MinekordMinecraftRenderer : DefaultMinecraftRenderer() {
     override fun link(part: Component, link: String): Component {
-        return super.link(part, link).color(LINK)
+        return super.link(part, link).color(LINK).decorate(TextDecoration.UNDERLINED)
     }
 
     override fun appendChannelMention(component: Component, id: String): Component {

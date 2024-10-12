@@ -9,6 +9,7 @@ const val CONFIG_PATH: String = "minekord.toml"
 val config: Config = Config {
     addSpec(BotSpec)
     addSpec(ChatSpec)
+    addSpec(PresenceSpec)
     addSpec(ExperimentalSpec)
 }
     .from.toml.resource(CONFIG_PATH)

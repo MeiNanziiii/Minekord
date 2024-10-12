@@ -15,34 +15,30 @@ import dev.vankka.mcdiscordreserializer.discord.DiscordSerializer
 import dev.vankka.mcdiscordreserializer.discord.DiscordSerializerOptions
 import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializer
 import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializerOptions
-import eu.pb4.placeholders.api.ParserContext
-import eu.pb4.placeholders.api.node.DynamicTextNode
-import eu.pb4.placeholders.api.parsers.NodeParser
-import eu.pb4.placeholders.api.parsers.TagLikeParser
+import eu.pb4.placeholders.api.PlaceholderContext
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
+import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextComponent
 import net.minecraft.server.MinecraftServer
 import net.minecraft.text.Text
 import org.koin.core.component.inject
-import ua.mei.minekord.Minekord
 import ua.mei.minekord.bot.MinekordBot
+import ua.mei.minekord.config.ActivityType
 import ua.mei.minekord.config.BotSpec
 import ua.mei.minekord.config.ChatSpec
+import ua.mei.minekord.config.PresenceSpec
 import ua.mei.minekord.config.config
-import ua.mei.minekord.event.PlayerMessageEvent
 import ua.mei.minekord.utils.MinekordMinecraftRenderer
 import ua.mei.minekord.utils.SerializerUtils
-import ua.mei.minekord.utils.asString
 import ua.mei.minekord.utils.literal
+import ua.mei.minekord.utils.parse
 import ua.mei.minekord.utils.summary
 import ua.mei.minekord.utils.toAdventure
 import ua.mei.minekord.utils.toNative
-
-import java.util.function.Function as JavaFunction
 
 class MessageExtension : Extension() {
     override val name: String = "Message Extension"
@@ -58,13 +54,6 @@ class MessageExtension : Extension() {
         .addRenderer(MinekordMinecraftRenderer())
 
     private val server: MinecraftServer by inject()
-    private val dynamicKey: ParserContext.Key<JavaFunction<String, Text?>> = DynamicTextNode.key(Minekord.MOD_ID)
-    private val parser: NodeParser = NodeParser.builder()
-        .simplifiedTextFormat()
-        .quickText()
-        .globalPlaceholders()
-        .placeholders(TagLikeParser.PLACEHOLDER_ALTERNATIVE, dynamicKey)
-        .build()
 
     override suspend fun setup() {
         mentions.add(AllowedMentionType.UserMentions)
@@ -76,7 +65,7 @@ class MessageExtension : Extension() {
 
             action {
                 val message: Message = event.message
-                val sender: Member = message.getAuthorAsMember()
+                val sender: Member = message.getAuthorAsMemberOrNull() ?: return@action
 
                 server.submit {
 
@@ -86,20 +75,13 @@ class MessageExtension : Extension() {
                         message.content.literal()
 
                     if (message.referencedMessage != null) {
-                        val replyComponent: Component = MinecraftSerializer.INSTANCE.serialize(message.referencedMessage!!.content, minecraftOptions)
+                        val replyText: Text = MinecraftSerializer.INSTANCE.serialize(message.referencedMessage!!.content, minecraftOptions).toNative(server.registryManager)
 
-                        val replyPlaceholders: Map<String, Text> = mapOf(
-                            "sender" to sender.effectiveName.literal(),
-                            "message" to replyComponent.toNative(server.registryManager),
-                            "summary" to replyComponent.asString().summary().literal()
-                        )
-                        val reply = parser.parseText(
-                            config[ChatSpec.MinecraftSpec.replyFormat],
-                            ParserContext.of(
-                                dynamicKey,
-                                JavaFunction { replyPlaceholders[it] }
-                            )
-                        )
+                        val reply = parse(config[ChatSpec.MinecraftSpec.replyFormat], PlaceholderContext.of(server)) {
+                            "sender" to sender.effectiveName.literal()
+                            "message" to replyText
+                            "summary" to replyText.string.summary().literal()
+                        }
 
                         content = Text.empty()
                             .append(reply)
@@ -107,36 +89,49 @@ class MessageExtension : Extension() {
                             .append(content)
                     }
 
-                    val contentPlaceholders: Map<String, Text> = mapOf(
-                        "sender" to sender.effectiveName.literal(),
-                        "message" to content,
-                    )
-                    content = parser.parseText(
-                        config[ChatSpec.MinecraftSpec.messageFormat],
-                        ParserContext.of(
-                            dynamicKey,
-                            JavaFunction { contentPlaceholders[it] }
-                        )
-                    )
+                    content = parse(config[ChatSpec.MinecraftSpec.messageFormat], PlaceholderContext.of(server)) {
+                        "sender" to sender.effectiveName.literal()
+                        "message" to content
+                    }
 
                     server.playerManager.broadcast(content, false)
                 }
             }
         }
 
-        PlayerMessageEvent.event.register { profile, message, wrapperLookup ->
+        ServerMessageEvents.CHAT_MESSAGE.register { message, sender, type ->
             MinekordBot.launch {
                 MinekordBot.webhook.execute(MinekordBot.webhook.token!!) {
                     allowedMentions = mentions
-                    username = profile.name
+                    username = sender.gameProfile.name
 
                     content = DiscordSerializer.INSTANCE.serialize(
-                        message.toAdventure(wrapperLookup), discordOptions
+                        message.content.toAdventure(server.registryManager), discordOptions
                     ).let { if (config[ChatSpec.convertMentions]) SerializerUtils.convertMentions(it) else it }.takeIf { it.isNotBlank() } ?: return@launch
 
-                    avatarUrl = config[ChatSpec.WebhookSpec.playerAvatar].let {
-                        val texture: String = profile.properties.get("textures").firstOrNull()?.value ?: ""
-                        it.replace("nickname", profile.name).replace("texture", texture)
+                    avatarUrl = parse(config[ChatSpec.WebhookSpec.playerAvatar], PlaceholderContext.of(sender)) {
+                        "nickname" to sender.gameProfile.name.literal()
+                        "texture" to (sender.gameProfile.properties?.get("textures")?.firstOrNull()?.value ?: "").literal()
+                    }.string
+                }
+            }
+        }
+
+        ServerTickEvents.END_SERVER_TICK.register { server ->
+            if (config[PresenceSpec.activityType] != ActivityType.NONE) {
+                if (server.ticks % config[PresenceSpec.updateTicks] == 0) {
+                    MinekordBot.launch {
+                        kord.editPresence {
+                            val text: String = parse(config[PresenceSpec.activityText], server).string
+
+                            when (config[PresenceSpec.activityType]) {
+                                ActivityType.NONE -> Unit
+                                ActivityType.PLAYING -> playing(text)
+                                ActivityType.LISTENING -> listening(text)
+                                ActivityType.WATCHING -> watching(text)
+                                ActivityType.COMPETING -> competing(text)
+                            }
+                        }
                     }
                 }
             }
