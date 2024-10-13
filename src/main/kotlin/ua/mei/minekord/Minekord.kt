@@ -31,6 +31,6 @@ object Minekord : ModInitializer {
 
         if (config[ExperimentalSpec.DiscordSpec.loginByIp]) IPCache.load()
 
-        MinekordBot.launchBot()
+        ServerLifecycleEvents.SERVER_STARTING.register(MinekordBot::launchBot)
     }
 }

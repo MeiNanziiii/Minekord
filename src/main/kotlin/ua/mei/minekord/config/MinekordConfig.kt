@@ -5,6 +5,7 @@ import com.uchuhimo.konf.source.toml
 import net.fabricmc.loader.api.FabricLoader
 import ua.mei.minekord.config.spec.BotSpec
 import ua.mei.minekord.config.spec.ChatSpec
+import ua.mei.minekord.config.spec.CommandsSpec
 import ua.mei.minekord.config.spec.ExperimentalSpec
 import ua.mei.minekord.config.spec.PresenceSpec
 
@@ -14,6 +15,7 @@ val config: Config = Config {
     addSpec(BotSpec)
     addSpec(ChatSpec)
     addSpec(PresenceSpec)
+    addSpec(CommandsSpec)
     addSpec(ExperimentalSpec)
 }
     .from.toml.resource(CONFIG_PATH)
