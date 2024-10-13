@@ -4,28 +4,27 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.Message
 import dev.kord.core.event.message.MessageCreateEvent
-import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kordex.core.checks.inChannel
 import dev.kordex.core.checks.isNotBot
 import dev.kordex.core.extensions.event
 import dev.vankka.mcdiscordreserializer.discord.DiscordSerializer
 import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializer
 import eu.pb4.placeholders.api.PlaceholderContext
-import kotlinx.coroutines.runBlocking
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
-import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.advancement.AdvancementDisplay
 import net.minecraft.advancement.AdvancementFrame
-import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import ua.mei.minekord.config.config
 import ua.mei.minekord.config.spec.BotSpec
 import ua.mei.minekord.config.spec.ChatSpec
 import ua.mei.minekord.config.spec.PresenceSpec
-import ua.mei.minekord.event.AdvancementGrantEvent
+import ua.mei.minekord.event.minekord.MinekordPlayerAdvancementGrantEvent
+import ua.mei.minekord.event.minekord.MinekordPlayerDeathEvent
+import ua.mei.minekord.event.minekord.MinekordPlayerJoinEvent
+import ua.mei.minekord.event.minekord.MinekordPlayerLeaveEvent
+import ua.mei.minekord.event.minekord.MinekordPlayerMessageEvent
+import ua.mei.minekord.event.minekord.MinekordServerEndTickEvent
+import ua.mei.minekord.event.minekord.MinekordServerStartEvent
+import ua.mei.minekord.event.minekord.MinekordServerStoppedEvent
 import ua.mei.minekord.extension.MinekordExtension
 import ua.mei.minekord.utils.MinekordActivityType
 import ua.mei.minekord.utils.MinekordColor
@@ -75,122 +74,108 @@ class MessageExtension : MinekordExtension() {
             }
         }
 
-        ServerMessageEvents.CHAT_MESSAGE.register { message, sender, type ->
-            createWebhookMessage {
-                username = sender.gameProfile.name
+        event<MinekordPlayerMessageEvent> {
+            action {
+                createWebhookMessage {
+                    username = event.player.gameProfile.name
+                    avatarUrl = event.playerAvatar
 
-                content = DiscordSerializer.INSTANCE.serialize(
-                    message.content.toAdventure(server.registryManager), discordOptions
-                ).let { if (config[ChatSpec.convertMentions]) SerializerUtils.convertMentions(it) else it }.takeIf { it.isNotBlank() } ?: return@createWebhookMessage
-
-                avatarUrl = parse(config[ChatSpec.WebhookSpec.playerAvatar], PlaceholderContext.of(sender)) {
-                    "nickname" to sender.gameProfile.name.literal()
-                    "texture" to (sender.gameProfile.properties?.get("textures")?.firstOrNull()?.value ?: "").literal()
-                }.string
+                    content = DiscordSerializer.INSTANCE.serialize(
+                        event.message.toAdventure(server.registryManager), discordOptions
+                    ).let { if (config[ChatSpec.convertMentions]) SerializerUtils.convertMentions(it) else it }.takeIf { it.isNotBlank() } ?: return@createWebhookMessage
+                }
             }
         }
 
-        ServerPlayConnectionEvents.JOIN.register { handler, sender, server ->
-            createWebhookEmbed {
-                author {
-                    name = parse(config[ChatSpec.DiscordSpec.joinMessage], handler.player).string
-                    icon = parse(config[ChatSpec.WebhookSpec.playerAvatar], PlaceholderContext.of(handler.player)) {
-                        "nickname" to handler.player.gameProfile.name.literal()
-                        "texture" to (handler.player.gameProfile.properties?.get("textures")?.firstOrNull()?.value ?: "").literal()
-                    }.string
-                }
-                color = MinekordColor.GREEN
-            }
-        }
-
-        ServerPlayConnectionEvents.DISCONNECT.register { handler, server ->
-            val builder: EmbedBuilder.() -> Unit = {
-                author {
-                    name = parse(config[ChatSpec.DiscordSpec.leaveMessage], handler.player).string
-                    icon = parse(config[ChatSpec.WebhookSpec.playerAvatar], PlaceholderContext.of(handler.player)) {
-                        "nickname" to handler.player.gameProfile.name.literal()
-                        "texture" to (handler.player.gameProfile.properties?.get("textures")?.firstOrNull()?.value ?: "").literal()
-                    }.string
-                }
-                color = MinekordColor.RED
-            }
-            if (server.isStopping) {
-                runBlocking {
-                    createWebhookEmbedSync(builder)
-                }
-            } else {
-                createWebhookEmbed(builder)
-            }
-        }
-
-        ServerLivingEntityEvents.ALLOW_DEATH.register { entity, source, amount ->
-            if (entity is ServerPlayerEntity) {
+        event<MinekordPlayerJoinEvent> {
+            action {
                 createWebhookEmbed {
                     author {
-                        name = parse(config[ChatSpec.DiscordSpec.deathMessage], PlaceholderContext.of(entity)) {
-                            "message" to source.getDeathMessage(entity)
-                        }.string
-                        icon = parse(config[ChatSpec.WebhookSpec.playerAvatar], PlaceholderContext.of(entity)) {
-                            "nickname" to entity.gameProfile.name.literal()
-                            "texture" to (entity.gameProfile.properties?.get("textures")?.firstOrNull()?.value ?: "").literal()
+                        name = parse(config[ChatSpec.DiscordSpec.joinMessage], event.player).string
+                        icon = event.playerAvatar
+                    }
+                    color = MinekordColor.GREEN
+                }
+            }
+        }
+
+        event<MinekordPlayerLeaveEvent> {
+            action {
+                createWebhookEmbed {
+                    author {
+                        name = parse(config[ChatSpec.DiscordSpec.leaveMessage], event.player).string
+                        icon = event.playerAvatar
+                    }
+                    color = MinekordColor.RED
+                }
+            }
+        }
+
+        event<MinekordPlayerDeathEvent> {
+            action {
+                createWebhookEmbed {
+                    author {
+                        icon = event.playerAvatar
+                        name = parse(config[ChatSpec.DiscordSpec.deathMessage], PlaceholderContext.of(event.player)) {
+                            "message" to event.source.getDeathMessage(event.player)
                         }.string
                     }
                     color = MinekordColor.YELLOW
                 }
             }
-            true
         }
 
-        AdvancementGrantEvent.EVENT.register { player, advancement ->
-            val display: AdvancementDisplay = advancement.comp_1913.get()
+        event<MinekordPlayerAdvancementGrantEvent> {
+            action {
+                val display: AdvancementDisplay = event.advancement.comp_1913.get()
 
-            createWebhookEmbed {
-                author {
-                    name = parse(
-                        when (display.frame) {
-                            AdvancementFrame.CHALLENGE -> config[ChatSpec.DiscordSpec.challengeMessage]
-                            AdvancementFrame.GOAL -> config[ChatSpec.DiscordSpec.goalMessage]
-                            else -> config[ChatSpec.DiscordSpec.advancementMessage]
-                        },
-                        PlaceholderContext.of(player)
-                    ) {
-                        "advancement" to display.title
-                    }.string
-                    icon = parse(config[ChatSpec.WebhookSpec.playerAvatar], PlaceholderContext.of(player)) {
-                        "nickname" to player.gameProfile.name.literal()
-                        "texture" to (player.gameProfile.properties?.get("textures")?.firstOrNull()?.value ?: "").literal()
-                    }.string
-                }
-                footer {
-                    text = display.description.string
-                }
-                color = when (display.frame) {
-                    AdvancementFrame.CHALLENGE -> MinekordColor.FUCHSIA
-                    else -> MinekordColor.GREEN
+                createWebhookEmbed {
+                    author {
+                        icon = event.playerAvatar
+                        name = parse(
+                            when (display.frame) {
+                                AdvancementFrame.CHALLENGE -> config[ChatSpec.DiscordSpec.challengeMessage]
+                                AdvancementFrame.GOAL -> config[ChatSpec.DiscordSpec.goalMessage]
+                                else -> config[ChatSpec.DiscordSpec.advancementMessage]
+                            },
+                            PlaceholderContext.of(event.player)
+                        ) {
+                            "advancement" to display.title
+                        }.string
+                    }
+                    footer {
+                        text = display.description.string
+                    }
+                    color = when (display.frame) {
+                        AdvancementFrame.CHALLENGE -> MinekordColor.FUCHSIA
+                        else -> MinekordColor.GREEN
+                    }
                 }
             }
         }
 
-        ServerLifecycleEvents.SERVER_STARTED.register { server ->
-            createWebhookEmbed {
-                title = parse(config[ChatSpec.DiscordSpec.startMessage], server).string
-                color = MinekordColor.GREEN
+        event<MinekordServerStartEvent> {
+            action {
+                createWebhookEmbed {
+                    title = parse(config[ChatSpec.DiscordSpec.startMessage], event.server).string
+                    color = MinekordColor.GREEN
+                }
             }
         }
 
-        ServerLifecycleEvents.SERVER_STOPPED.register { server ->
-            runBlocking {
-                createWebhookEmbedSync {
+        event<MinekordServerStoppedEvent> {
+            action {
+                createWebhookEmbed {
                     title = parse(config[ChatSpec.DiscordSpec.stopMessage], server).string
                     color = MinekordColor.RED
                 }
             }
         }
 
-        ServerTickEvents.END_SERVER_TICK.register { server ->
-            if (config[PresenceSpec.activityType] != MinekordActivityType.NONE) {
-                if (server.ticks % config[PresenceSpec.updateTicks] == 0) {
-                    launch {
+        event<MinekordServerEndTickEvent> {
+            action {
+                if (config[PresenceSpec.activityType] != MinekordActivityType.NONE) {
+                    if (server.ticks % config[PresenceSpec.updateTicks] == 0) {
                         kord.editPresence {
                             val text: String = parse(config[PresenceSpec.activityText], server).string
 

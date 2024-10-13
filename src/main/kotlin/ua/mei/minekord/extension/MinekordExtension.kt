@@ -46,31 +46,15 @@ abstract class MinekordExtension : Extension() {
 
     open val webhook: Webhook = MinekordBot.webhook
 
-    open suspend fun createWebhookMessageSync(builder: suspend WebhookMessageCreateBuilder.() -> Unit) {
+    open suspend fun createWebhookMessage(builder: suspend WebhookMessageCreateBuilder.() -> Unit) {
         webhook.execute(webhook.token!!, null) {
             allowedMentions = mentions
             builder()
         }
     }
 
-    open fun createWebhookMessage(builder: suspend WebhookMessageCreateBuilder.() -> Unit) {
-        launch {
-            createWebhookMessageSync(builder)
-        }
-    }
-
-    open suspend fun createWebhookEmbedSync(builder: EmbedBuilder.() -> Unit) {
-        createWebhookMessageSync {
-            embed(builder)
-        }
-    }
-
-    open fun createWebhookEmbed(builder: EmbedBuilder.() -> Unit) {
-        launch {
-            createWebhookMessageSync {
-                embed(builder)
-            }
-        }
+    open suspend fun createWebhookEmbed(builder: EmbedBuilder.() -> Unit) {
+        createWebhookMessage { embed(builder) }
     }
 
     open fun launch(block: suspend CoroutineScope.() -> Unit) {
