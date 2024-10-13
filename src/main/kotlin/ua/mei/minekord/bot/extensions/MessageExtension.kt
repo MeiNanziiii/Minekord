@@ -120,7 +120,7 @@ class MessageExtension : MinekordExtension() {
                             "message" to event.source.getDeathMessage(event.player)
                         }.string
                     }
-                    color = MinekordColor.YELLOW
+                    color = MinekordColor.ORANGE
                 }
             }
         }
@@ -147,8 +147,8 @@ class MessageExtension : MinekordExtension() {
                         text = display.description.string
                     }
                     color = when (display.frame) {
-                        AdvancementFrame.CHALLENGE -> MinekordColor.FUCHSIA
-                        else -> MinekordColor.GREEN
+                        AdvancementFrame.CHALLENGE -> MinekordColor.PURPLE
+                        else -> MinekordColor.BLUE
                     }
                 }
             }
