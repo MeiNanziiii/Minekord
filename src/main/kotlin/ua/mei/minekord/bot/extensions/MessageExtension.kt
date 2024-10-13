@@ -11,7 +11,6 @@ import dev.kordex.core.extensions.event
 import dev.vankka.mcdiscordreserializer.discord.DiscordSerializer
 import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializer
 import eu.pb4.placeholders.api.PlaceholderContext
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
@@ -22,7 +21,6 @@ import net.minecraft.advancement.AdvancementDisplay
 import net.minecraft.advancement.AdvancementFrame
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
-import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.config.config
 import ua.mei.minekord.config.spec.BotSpec
 import ua.mei.minekord.config.spec.ChatSpec
@@ -50,10 +48,11 @@ class MessageExtension : MinekordExtension() {
                 val message: Message = event.message
                 val sender: Member = event.member ?: return@action
 
-                var content: Text = if (config[ChatSpec.convertMarkdown])
+                var content: Text = if (config[ChatSpec.convertMarkdown]) {
                     MinecraftSerializer.INSTANCE.serialize(message.content, minecraftOptions).toNative(server.registryManager)
-                else
+                } else {
                     message.content.literal()
+                }
 
                 if (message.referencedMessage != null) {
                     val replyText: Text = MinecraftSerializer.INSTANCE.serialize(message.referencedMessage!!.content, minecraftOptions).toNative(server.registryManager)
@@ -64,10 +63,7 @@ class MessageExtension : MinekordExtension() {
                         "summary" to replyText.string.summary().literal()
                     }
 
-                    content = Text.empty()
-                        .append(reply)
-                        .append("\n")
-                        .append(content)
+                    content = Text.empty().append(reply).append("\n").append(content)
                 }
 
                 content = parse(config[ChatSpec.MinecraftSpec.messageFormat], PlaceholderContext.of(server)) {
@@ -194,7 +190,7 @@ class MessageExtension : MinekordExtension() {
         ServerTickEvents.END_SERVER_TICK.register { server ->
             if (config[PresenceSpec.activityType] != MinekordActivityType.NONE) {
                 if (server.ticks % config[PresenceSpec.updateTicks] == 0) {
-                    MinekordBot.launch {
+                    launch {
                         kord.editPresence {
                             val text: String = parse(config[PresenceSpec.activityText], server).string
 

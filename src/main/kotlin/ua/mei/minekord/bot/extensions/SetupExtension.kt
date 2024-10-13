@@ -17,15 +17,9 @@ class SetupExtension : Extension() {
 
     override suspend fun setup() {
         MinekordBot.guild = kord.getGuild(Snowflake(config[BotSpec.guild]))
-        MinekordBot.chat = MinekordBot.guild.getChannel(Snowflake(config[BotSpec.channel])) as TextChannel
-        MinekordBot.webhook = MinekordBot.chat.webhooks.firstOrNull { it.name == config[ChatSpec.WebhookSpec.webhookName] }.let {
-            if (it == null) {
-                MinekordBot.chat.createWebhook(config[ChatSpec.WebhookSpec.webhookName]) {
-                    avatar = Image.fromUrl(HttpClient(), config[ChatSpec.WebhookSpec.webhookAvatar])
-                }
-            } else {
-                it
-            }
+        MinekordBot.channel = MinekordBot.guild.getChannel(Snowflake(config[BotSpec.channel])) as TextChannel
+        MinekordBot.webhook = MinekordBot.channel.webhooks.firstOrNull { it.name == config[ChatSpec.WebhookSpec.webhookName] } ?: MinekordBot.channel.createWebhook(config[ChatSpec.WebhookSpec.webhookName]) {
+            avatar = Image.fromUrl(HttpClient(), config[ChatSpec.WebhookSpec.webhookAvatar])
         }
     }
 }

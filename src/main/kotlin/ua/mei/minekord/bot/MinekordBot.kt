@@ -4,6 +4,7 @@ import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Webhook
 import dev.kord.core.entity.channel.TextChannel
 import dev.kordex.core.ExtensibleBot
+import dev.kordex.core.extensions.Extension
 import dev.kordex.core.utils.loadModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,15 +21,21 @@ import ua.mei.minekord.config.spec.ExperimentalSpec
 import kotlin.coroutines.CoroutineContext
 
 object MinekordBot : CoroutineScope {
-    lateinit var bot: ExtensibleBot
+    private lateinit var bot: ExtensibleBot
+
+    val extensions: MutableList<() -> Extension> = mutableListOf()
 
     lateinit var guild: Guild
-    lateinit var chat: TextChannel
+    lateinit var channel: TextChannel
     lateinit var webhook: Webhook
 
     fun launchBot(server: MinecraftServer) {
         launch {
             bot = ExtensibleBot(config[BotSpec.token]) {
+                applicationCommands {
+                    enabled = true
+                }
+
                 extensions {
                     add(::SetupExtension)
                     add(::MessageExtension)
@@ -36,8 +43,14 @@ object MinekordBot : CoroutineScope {
                     if (config[CommandsSpec.PlayerListSpec.enabled])
                         add(::PlayerListExtension)
 
-                    if (config[ExperimentalSpec.DiscordSpec.enabled])
+                    if (config[ExperimentalSpec.DiscordSpec.loginByIp])
                         add(::IPCheckExtension)
+
+                    extensions.forEach { add(it) }
+                }
+
+                members {
+                    fill(config[BotSpec.guild])
                 }
 
                 hooks {

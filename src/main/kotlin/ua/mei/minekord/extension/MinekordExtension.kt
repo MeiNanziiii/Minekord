@@ -73,7 +73,7 @@ abstract class MinekordExtension : Extension() {
         }
     }
 
-    fun launch(block: suspend CoroutineScope.() -> Unit) {
+    open fun launch(block: suspend CoroutineScope.() -> Unit) {
         MinekordBot.launch { block() }
     }
 }
