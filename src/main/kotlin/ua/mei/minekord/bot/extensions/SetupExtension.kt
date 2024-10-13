@@ -25,9 +25,10 @@ import ua.mei.minekord.event.player.MinekordPlayerDeathEvent
 import ua.mei.minekord.event.player.MinekordPlayerJoinEvent
 import ua.mei.minekord.event.player.MinekordPlayerLeaveEvent
 import ua.mei.minekord.event.player.MinekordPlayerMessageEvent
-import ua.mei.minekord.event.server.MinekordServerEndTickEvent
+import ua.mei.minekord.event.server.MinekordEndServerTickEvent
 import ua.mei.minekord.event.server.MinekordServerStartedEvent
 import ua.mei.minekord.event.server.MinekordServerStoppedEvent
+import ua.mei.minekord.event.server.MinekordStartServerTickEvent
 
 class SetupExtension : Extension() {
     override val name: String = "Setup Extension"
@@ -64,13 +65,19 @@ class SetupExtension : Extension() {
             MinekordBot.launch { MinekordBot.bot?.send(MinekordPlayerMessageEvent(sender, message.content)) }
         }
         ServerTickEvents.END_SERVER_TICK.register { server ->
-            MinekordBot.launch { MinekordBot.bot?.send(MinekordServerEndTickEvent(server)) }
+            MinekordBot.launch { MinekordBot.bot?.send(MinekordEndServerTickEvent(server)) }
         }
         ServerLifecycleEvents.SERVER_STARTED.register { server ->
             MinekordBot.launch { MinekordBot.bot?.send(MinekordServerStartedEvent(server)) }
         }
         ServerLifecycleEvents.SERVER_STOPPED.register { server ->
-            runBlocking { MinekordBot.bot?.send(MinekordServerStoppedEvent(server)) }
+            runBlocking {
+                MinekordBot.bot?.send(MinekordServerStoppedEvent(server))
+                kord.shutdown()
+            }
+        }
+        ServerTickEvents.START_SERVER_TICK.register { server ->
+            MinekordBot.launch { MinekordBot.bot?.send(MinekordStartServerTickEvent(server)) }
         }
     }
 }

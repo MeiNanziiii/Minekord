@@ -22,7 +22,7 @@ import ua.mei.minekord.event.player.MinekordPlayerDeathEvent
 import ua.mei.minekord.event.player.MinekordPlayerJoinEvent
 import ua.mei.minekord.event.player.MinekordPlayerLeaveEvent
 import ua.mei.minekord.event.player.MinekordPlayerMessageEvent
-import ua.mei.minekord.event.server.MinekordServerEndTickEvent
+import ua.mei.minekord.event.server.MinekordEndServerTickEvent
 import ua.mei.minekord.event.server.MinekordServerStartedEvent
 import ua.mei.minekord.event.server.MinekordServerStoppedEvent
 import ua.mei.minekord.extension.MinekordExtension
@@ -172,7 +172,7 @@ class MessageExtension : MinekordExtension() {
             }
         }
 
-        event<MinekordServerEndTickEvent> {
+        event<MinekordEndServerTickEvent> {
             action {
                 if (config[PresenceSpec.activityType] != MinekordActivityType.NONE) {
                     if (server.ticks % config[PresenceSpec.updateTicks] == 0) {
