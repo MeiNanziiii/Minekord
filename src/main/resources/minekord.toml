@@ -34,7 +34,7 @@ convertMarkdown = true
     [Chat.Webhook]
 
     webhookName = "Server"
-    webhookAvatar = "https://api.bonfiremc.site/attachments/avatars/MeiNanziiii.png?size=128"
+    webhookAvatar = "https://i.imgur.com/lc8ZHiG.png"
     playerAvatar = "https://mc-heads.net/head/{nickname}.png/128"
 
 [Presence]
@@ -51,6 +51,14 @@ updateTicks = 1200
     description = "Gets the online players"
     title = "%server:online%/%server:max_players%"
     format = "%player:displayname%"
+
+[Colors]
+
+red = "#ED4245"
+orange = "#E67E22"
+green = "#57F287"
+blue = "#3498DB"
+purple = "#9B59B6"
 
 # Experimental and unstable features.
 # USE AT YOUR OWN RISK!!!

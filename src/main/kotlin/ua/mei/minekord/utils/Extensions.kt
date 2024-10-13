@@ -1,5 +1,6 @@
 package ua.mei.minekord.utils
 
+import dev.kord.common.Color
 import eu.pb4.placeholders.api.ParserContext
 import eu.pb4.placeholders.api.PlaceholderContext
 import eu.pb4.placeholders.api.node.DynamicTextNode
@@ -78,3 +79,5 @@ fun parse(input: String, player: ServerPlayerEntity): Text {
         PlaceholderContext.of(player).asParserContext()
     )
 }
+
+fun colorFromString(hex: String): Color = Color(hex.removePrefix("#").toInt(16))
