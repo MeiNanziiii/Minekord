@@ -46,7 +46,7 @@ object MinekordBot : CoroutineScope {
                     if (config[ExperimentalSpec.DiscordSpec.loginByIp])
                         add(::IPCheckExtension)
 
-                    extensions.forEach { add(it) }
+                    MinekordBot.extensions.forEach { add(it) }
                 }
 
                 members {
