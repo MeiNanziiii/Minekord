@@ -17,13 +17,13 @@ import ua.mei.minekord.config.config
 import ua.mei.minekord.config.spec.BotSpec
 import ua.mei.minekord.config.spec.ChatSpec
 import ua.mei.minekord.config.spec.PresenceSpec
-import ua.mei.minekord.event.minekord.MinekordPlayerAdvancementGrantEvent
+import ua.mei.minekord.event.minekord.MinekordAdvancementGrantEvent
 import ua.mei.minekord.event.minekord.MinekordPlayerDeathEvent
 import ua.mei.minekord.event.minekord.MinekordPlayerJoinEvent
 import ua.mei.minekord.event.minekord.MinekordPlayerLeaveEvent
 import ua.mei.minekord.event.minekord.MinekordPlayerMessageEvent
 import ua.mei.minekord.event.minekord.MinekordServerEndTickEvent
-import ua.mei.minekord.event.minekord.MinekordServerStartEvent
+import ua.mei.minekord.event.minekord.MinekordServerStartedEvent
 import ua.mei.minekord.event.minekord.MinekordServerStoppedEvent
 import ua.mei.minekord.extension.MinekordExtension
 import ua.mei.minekord.utils.MinekordActivityType
@@ -125,7 +125,7 @@ class MessageExtension : MinekordExtension() {
             }
         }
 
-        event<MinekordPlayerAdvancementGrantEvent> {
+        event<MinekordAdvancementGrantEvent> {
             action {
                 val display: AdvancementDisplay = event.advancement.comp_1913.get()
 
@@ -154,7 +154,7 @@ class MessageExtension : MinekordExtension() {
             }
         }
 
-        event<MinekordServerStartEvent> {
+        event<MinekordServerStartedEvent> {
             action {
                 createWebhookEmbed {
                     title = parse(config[ChatSpec.DiscordSpec.startMessage], event.server).string

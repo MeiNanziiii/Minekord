@@ -5,7 +5,7 @@ import net.minecraft.advancement.Advancement
 import net.minecraft.server.network.ServerPlayerEntity
 import ua.mei.minekord.event.base.MinekordPlayerBaseEvent
 
-data class MinekordPlayerAdvancementGrantEvent(
+data class MinekordAdvancementGrantEvent(
     override val player: ServerPlayerEntity,
     val advancement: Advancement
 ) : KordExEvent, MinekordPlayerBaseEvent
