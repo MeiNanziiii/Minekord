@@ -1,4 +1,4 @@
-package ua.mei.minekord.event.minekord
+package ua.mei.minekord.event.server
 
 import dev.kordex.core.events.KordExEvent
 import net.minecraft.server.MinecraftServer

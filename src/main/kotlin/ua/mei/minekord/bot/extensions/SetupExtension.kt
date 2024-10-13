@@ -20,14 +20,14 @@ import ua.mei.minekord.config.config
 import ua.mei.minekord.config.spec.BotSpec
 import ua.mei.minekord.config.spec.ChatSpec
 import ua.mei.minekord.event.AdvancementGrantEvent
-import ua.mei.minekord.event.minekord.MinekordAdvancementGrantEvent
-import ua.mei.minekord.event.minekord.MinekordPlayerDeathEvent
-import ua.mei.minekord.event.minekord.MinekordPlayerJoinEvent
-import ua.mei.minekord.event.minekord.MinekordPlayerLeaveEvent
-import ua.mei.minekord.event.minekord.MinekordPlayerMessageEvent
-import ua.mei.minekord.event.minekord.MinekordServerEndTickEvent
-import ua.mei.minekord.event.minekord.MinekordServerStartedEvent
-import ua.mei.minekord.event.minekord.MinekordServerStoppedEvent
+import ua.mei.minekord.event.player.MinekordAdvancementGrantEvent
+import ua.mei.minekord.event.player.MinekordPlayerDeathEvent
+import ua.mei.minekord.event.player.MinekordPlayerJoinEvent
+import ua.mei.minekord.event.player.MinekordPlayerLeaveEvent
+import ua.mei.minekord.event.player.MinekordPlayerMessageEvent
+import ua.mei.minekord.event.server.MinekordServerEndTickEvent
+import ua.mei.minekord.event.server.MinekordServerStartedEvent
+import ua.mei.minekord.event.server.MinekordServerStoppedEvent
 
 class SetupExtension : Extension() {
     override val name: String = "Setup Extension"
