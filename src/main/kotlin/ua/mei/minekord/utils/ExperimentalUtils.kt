@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import ua.mei.minekord.bot.MinekordBot
-import ua.mei.minekord.config.ExperimentalSpec
 import ua.mei.minekord.config.config
+import ua.mei.minekord.config.spec.ExperimentalSpec
 import java.util.UUID
 import kotlin.experimental.inv
 

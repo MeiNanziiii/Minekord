@@ -8,9 +8,9 @@ import dev.kordex.core.extensions.Extension
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.firstOrNull
 import ua.mei.minekord.bot.MinekordBot
-import ua.mei.minekord.config.BotSpec
-import ua.mei.minekord.config.ChatSpec
 import ua.mei.minekord.config.config
+import ua.mei.minekord.config.spec.BotSpec
+import ua.mei.minekord.config.spec.ChatSpec
 
 class SetupExtension : Extension() {
     override val name: String = "Setup Extension"

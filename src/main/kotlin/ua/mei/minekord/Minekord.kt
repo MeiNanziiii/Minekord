@@ -2,16 +2,14 @@ package ua.mei.minekord
 
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
 import net.fabricmc.loader.api.FabricLoader
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.cache.IPCache
 import ua.mei.minekord.config.CONFIG_PATH
-import ua.mei.minekord.config.ExperimentalSpec
 import ua.mei.minekord.config.config
-import ua.mei.minekord.event.PlayerMessageEvent
+import ua.mei.minekord.config.spec.ExperimentalSpec
 import java.nio.file.Files
 
 object Minekord : ModInitializer {
@@ -33,10 +31,6 @@ object Minekord : ModInitializer {
 
         if (config[ExperimentalSpec.DiscordSpec.loginByIp]) IPCache.load()
 
-        ServerLifecycleEvents.SERVER_STARTING.register(MinekordBot::launchBot)
-
-        ServerMessageEvents.CHAT_MESSAGE.register { message, sender, type ->
-            PlayerMessageEvent.event.invoker().message(sender.gameProfile, message.content, sender.server.registryManager)
-        }
+        MinekordBot.launchBot()
     }
 }

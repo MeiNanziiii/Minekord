@@ -3,6 +3,10 @@ package ua.mei.minekord.config
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.source.toml
 import net.fabricmc.loader.api.FabricLoader
+import ua.mei.minekord.config.spec.BotSpec
+import ua.mei.minekord.config.spec.ChatSpec
+import ua.mei.minekord.config.spec.ExperimentalSpec
+import ua.mei.minekord.config.spec.PresenceSpec
 
 const val CONFIG_PATH: String = "minekord.toml"
 

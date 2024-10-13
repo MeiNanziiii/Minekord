@@ -10,10 +10,10 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 import ua.mei.minekord.bot.MinekordBot
-import ua.mei.minekord.config.ChatSpec
 import ua.mei.minekord.config.config
+import ua.mei.minekord.config.spec.ChatSpec
 
-class MinekordMinecraftRenderer : DefaultMinecraftRenderer() {
+object MinekordMinecraftRenderer : DefaultMinecraftRenderer() {
     override fun link(part: Component, link: String): Component {
         return super.link(part, link).color(LINK).decorate(TextDecoration.UNDERLINED)
     }
@@ -46,8 +46,6 @@ class MinekordMinecraftRenderer : DefaultMinecraftRenderer() {
         }
     }
 
-    companion object {
-        val MENTION: TextColor = TextColor.fromHexString(config[ChatSpec.MinecraftSpec.mentionColor])!!
-        val LINK: TextColor = TextColor.fromHexString(config[ChatSpec.MinecraftSpec.linkColor])!!
-    }
+    val MENTION: TextColor = TextColor.fromHexString(config[ChatSpec.MinecraftSpec.mentionColor])!!
+    val LINK: TextColor = TextColor.fromHexString(config[ChatSpec.MinecraftSpec.linkColor])!!
 }

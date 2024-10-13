@@ -9,11 +9,12 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.minecraft.registry.RegistryWrapper
 import net.minecraft.server.MinecraftServer
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import ua.mei.minekord.Minekord
-import ua.mei.minekord.config.ChatSpec
 import ua.mei.minekord.config.config
+import ua.mei.minekord.config.spec.ChatSpec
 import java.util.function.Function as JavaFunction
 
 val dynamicKey: ParserContext.Key<JavaFunction<String, Text?>> = DynamicTextNode.key(Minekord.MOD_ID)
@@ -68,5 +69,12 @@ fun parse(input: String, server: MinecraftServer): Text {
     return parser.parseText(
         input,
         PlaceholderContext.of(server).asParserContext()
+    )
+}
+
+fun parse(input: String, player: ServerPlayerEntity): Text {
+    return parser.parseText(
+        input,
+        PlaceholderContext.of(player).asParserContext()
     )
 }

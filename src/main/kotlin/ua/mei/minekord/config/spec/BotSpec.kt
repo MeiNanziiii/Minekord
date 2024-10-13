@@ -1,4 +1,4 @@
-package ua.mei.minekord.config
+package ua.mei.minekord.config.spec
 
 import com.uchuhimo.konf.ConfigSpec
 

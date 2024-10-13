@@ -16,8 +16,8 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.cache.IPCache
-import ua.mei.minekord.config.ExperimentalSpec
 import ua.mei.minekord.config.config
+import ua.mei.minekord.config.spec.ExperimentalSpec
 import ua.mei.minekord.event.IPCheckEvent
 import ua.mei.minekord.utils.ExperimentalUtils
 
@@ -25,7 +25,7 @@ class IPCheckExtension : Extension() {
     override val name: String = "IP Check Extension"
 
     override suspend fun setup() {
-        IPCheckEvent.event.register { socketAddress, profile ->
+        IPCheckEvent.EVENT.register { socketAddress, profile ->
             MinekordBot.launch {
                 try {
                     if (!config[ExperimentalSpec.DiscordSpec.enabled]) return@launch

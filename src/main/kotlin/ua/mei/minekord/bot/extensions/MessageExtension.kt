@@ -7,6 +7,7 @@ import dev.kord.core.entity.Member
 import dev.kord.core.entity.Message
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.rest.builder.message.AllowedMentionsBuilder
+import dev.kord.rest.builder.message.embed
 import dev.kordex.core.checks.inChannel
 import dev.kordex.core.checks.isNotBot
 import dev.kordex.core.extensions.Extension
@@ -20,18 +21,25 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.kyori.adventure.text.Component
+import net.minecraft.advancement.AdvancementDisplay
+import net.minecraft.advancement.AdvancementFrame
 import net.minecraft.server.MinecraftServer
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
-import org.koin.core.component.inject
 import ua.mei.minekord.bot.MinekordBot
-import ua.mei.minekord.config.ActivityType
-import ua.mei.minekord.config.BotSpec
-import ua.mei.minekord.config.ChatSpec
-import ua.mei.minekord.config.PresenceSpec
 import ua.mei.minekord.config.config
+import ua.mei.minekord.config.spec.BotSpec
+import ua.mei.minekord.config.spec.ChatSpec
+import ua.mei.minekord.config.spec.PresenceSpec
+import ua.mei.minekord.event.AdvancementGrantEvent
+import ua.mei.minekord.utils.MinekordActivityType
+import ua.mei.minekord.utils.MinekordColor
 import ua.mei.minekord.utils.MinekordMinecraftRenderer
 import ua.mei.minekord.utils.SerializerUtils
 import ua.mei.minekord.utils.literal
@@ -51,9 +59,9 @@ class MessageExtension : Extension() {
         .withTranslationProvider(SerializerUtils::translatableToString)
 
     private val minecraftOptions: MinecraftSerializerOptions<Component> = MinecraftSerializerOptions.defaults()
-        .addRenderer(MinekordMinecraftRenderer())
+        .addRenderer(MinekordMinecraftRenderer)
 
-    private val server: MinecraftServer by inject()
+    private lateinit var server: MinecraftServer
 
     override suspend fun setup() {
         mentions.add(AllowedMentionType.UserMentions)
@@ -117,19 +125,138 @@ class MessageExtension : Extension() {
             }
         }
 
+        ServerPlayConnectionEvents.JOIN.register { handler, sender, server ->
+            MinekordBot.launch {
+                MinekordBot.webhook.execute(MinekordBot.webhook.token!!) {
+                    embed {
+                        author {
+                            name = parse(config[ChatSpec.DiscordSpec.joinMessage], handler.player).string
+                            icon = parse(config[ChatSpec.WebhookSpec.playerAvatar], PlaceholderContext.of(handler.player)) {
+                                "nickname" to handler.player.gameProfile.name.literal()
+                                "texture" to (handler.player.gameProfile.properties?.get("textures")?.firstOrNull()?.value ?: "").literal()
+                            }.string
+                        }
+                        color = MinekordColor.GREEN
+                    }
+                    allowedMentions = mentions
+                }
+            }
+        }
+
+        ServerPlayConnectionEvents.DISCONNECT.register { handler, server ->
+            MinekordBot.launch {
+                MinekordBot.webhook.execute(MinekordBot.webhook.token!!) {
+                    embed {
+                        author {
+                            name = parse(config[ChatSpec.DiscordSpec.leaveMessage], handler.player).string
+                            icon = parse(config[ChatSpec.WebhookSpec.playerAvatar], PlaceholderContext.of(handler.player)) {
+                                "nickname" to handler.player.gameProfile.name.literal()
+                                "texture" to (handler.player.gameProfile.properties?.get("textures")?.firstOrNull()?.value ?: "").literal()
+                            }.string
+                        }
+                        color = MinekordColor.RED
+                    }
+                    allowedMentions = mentions
+                }
+            }
+        }
+
+        ServerLivingEntityEvents.ALLOW_DEATH.register { entity, source, amount ->
+            if (entity is ServerPlayerEntity) {
+                MinekordBot.launch {
+                    MinekordBot.webhook.execute(MinekordBot.webhook.token!!) {
+                        embed {
+                            author {
+                                name = parse(config[ChatSpec.DiscordSpec.deathMessage], PlaceholderContext.of(entity)) {
+                                    "message" to source.getDeathMessage(entity)
+                                }.string
+                                icon = parse(config[ChatSpec.WebhookSpec.playerAvatar], PlaceholderContext.of(entity)) {
+                                    "nickname" to entity.gameProfile.name.literal()
+                                    "texture" to (entity.gameProfile.properties?.get("textures")?.firstOrNull()?.value ?: "").literal()
+                                }.string
+                            }
+                            color = MinekordColor.YELLOW
+                        }
+                        allowedMentions = mentions
+                    }
+                }
+            }
+            true
+        }
+
+        AdvancementGrantEvent.EVENT.register { player, advancement ->
+            val display: AdvancementDisplay = advancement.comp_1913.get()
+
+            MinekordBot.launch {
+                MinekordBot.webhook.execute(MinekordBot.webhook.token!!) {
+                    embed {
+                        author {
+                            name = parse(
+                                when (display.frame) {
+                                    AdvancementFrame.CHALLENGE -> config[ChatSpec.DiscordSpec.challengeMessage]
+                                    AdvancementFrame.GOAL -> config[ChatSpec.DiscordSpec.goalMessage]
+                                    else -> config[ChatSpec.DiscordSpec.advancementMessage]
+                                },
+                                PlaceholderContext.of(player)
+                            ) {
+                                "advancement" to display.title
+                            }.string
+                            icon = parse(config[ChatSpec.WebhookSpec.playerAvatar], PlaceholderContext.of(player)) {
+                                "nickname" to player.gameProfile.name.literal()
+                                "texture" to (player.gameProfile.properties?.get("textures")?.firstOrNull()?.value ?: "").literal()
+                            }.string
+                        }
+                        footer {
+                            text = display.description.string
+                        }
+                        color = when (display.frame) {
+                            AdvancementFrame.CHALLENGE -> MinekordColor.FUCHSIA
+                            else -> MinekordColor.GREEN
+                        }
+                    }
+                    allowedMentions = mentions
+                }
+            }
+        }
+
+        ServerLifecycleEvents.SERVER_STARTED.register { server ->
+            this.server = server
+            MinekordBot.launch {
+                MinekordBot.webhook.execute(MinekordBot.webhook.token!!) {
+                    embed {
+                        title = parse(config[ChatSpec.DiscordSpec.startMessage], server).string
+                        color = MinekordColor.GREEN
+                    }
+                    allowedMentions = mentions
+                }
+            }
+        }
+
+        ServerLifecycleEvents.SERVER_STOPPED.register { server ->
+            MinekordBot.launch {
+                MinekordBot.webhook.execute(MinekordBot.webhook.token!!) {
+                    embed {
+                        title = parse(config[ChatSpec.DiscordSpec.stopMessage], server).string
+                        color = MinekordColor.RED
+                    }
+                    allowedMentions = mentions
+                }
+            }
+        }
+
         ServerTickEvents.END_SERVER_TICK.register { server ->
-            if (config[PresenceSpec.activityType] != ActivityType.NONE) {
+            if (config[PresenceSpec.activityType] != MinekordActivityType.NONE) {
                 if (server.ticks % config[PresenceSpec.updateTicks] == 0) {
                     MinekordBot.launch {
                         kord.editPresence {
                             val text: String = parse(config[PresenceSpec.activityText], server).string
 
                             when (config[PresenceSpec.activityType]) {
-                                ActivityType.NONE -> Unit
-                                ActivityType.PLAYING -> playing(text)
-                                ActivityType.LISTENING -> listening(text)
-                                ActivityType.WATCHING -> watching(text)
-                                ActivityType.COMPETING -> competing(text)
+                                MinekordActivityType.NONE -> Unit
+                                MinekordActivityType.PLAYING -> playing(text)
+                                MinekordActivityType.LISTENING -> listening(text)
+                                MinekordActivityType.WATCHING -> watching(text)
+                                MinekordActivityType.COMPETING -> competing(text)
                             }
                         }
                     }
