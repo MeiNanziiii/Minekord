@@ -23,6 +23,7 @@ import ua.mei.minekord.event.AdvancementGrantEvent
 import ua.mei.minekord.event.minekord.MinekordAdvancementGrantEvent
 import ua.mei.minekord.event.minekord.MinekordPlayerDeathEvent
 import ua.mei.minekord.event.minekord.MinekordPlayerJoinEvent
+import ua.mei.minekord.event.minekord.MinekordPlayerLeaveEvent
 import ua.mei.minekord.event.minekord.MinekordPlayerMessageEvent
 import ua.mei.minekord.event.minekord.MinekordServerEndTickEvent
 import ua.mei.minekord.event.minekord.MinekordServerStartedEvent
@@ -51,10 +52,12 @@ class SetupExtension : Extension() {
             MinekordBot.launch { MinekordBot.bot?.send(MinekordPlayerJoinEvent(handler.player)) }
         }
         ServerPlayConnectionEvents.DISCONNECT.register { handler, server ->
+            val event: MinekordPlayerLeaveEvent = MinekordPlayerLeaveEvent(handler.player)
+
             if (server.isStopping) {
-                runBlocking { MinekordBot.bot?.send(MinekordPlayerJoinEvent(handler.player)) }
+                runBlocking { MinekordBot.bot?.send(event) }
             } else {
-                MinekordBot.launch { MinekordBot.bot?.send(MinekordPlayerJoinEvent(handler.player)) }
+                MinekordBot.launch { MinekordBot.bot?.send(event) }
             }
         }
         ServerMessageEvents.CHAT_MESSAGE.register { message, sender, type ->
