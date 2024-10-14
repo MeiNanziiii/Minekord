@@ -71,7 +71,6 @@ tasks {
             expand(
                 "version" to modVersion,
                 "minecraft_version" to libs.versions.minecraft.get(),
-                "loader_version" to libs.versions.fabric.loader.get(),
                 "kotlin_loader_version" to libs.versions.fabric.kotlin.get()
             )
         }
@@ -89,7 +88,6 @@ fun DependencyHandlerScope.includeTransitive(
     checkedDependencies: MutableSet<ResolvedDependency> = HashSet()
 ) {
     val minecraftDependencies = listOf(
-        "icu4j",
         "slf4j-api",
         "commons-logging",
         "oshi-core",

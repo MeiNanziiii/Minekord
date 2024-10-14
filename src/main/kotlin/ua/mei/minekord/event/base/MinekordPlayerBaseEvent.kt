@@ -6,6 +6,7 @@ import ua.mei.minekord.config.config
 import ua.mei.minekord.config.spec.ChatSpec
 import ua.mei.minekord.utils.literal
 import ua.mei.minekord.utils.parse
+import ua.mei.minekord.utils.texture
 
 interface MinekordPlayerBaseEvent {
     val player: ServerPlayerEntity
@@ -13,6 +14,6 @@ interface MinekordPlayerBaseEvent {
     val playerAvatar: String
         get() = parse(config[ChatSpec.WebhookSpec.playerAvatar], PlaceholderContext.of(player)) {
             "nickname" to player.gameProfile.name.literal()
-            "texture" to (player.gameProfile.properties?.get("textures")?.firstOrNull()?.value ?: "").literal()
+            "texture" to player.gameProfile.texture().literal()
         }.string
 }

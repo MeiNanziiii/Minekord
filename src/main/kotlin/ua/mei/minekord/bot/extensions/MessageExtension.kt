@@ -10,6 +10,9 @@ import dev.kordex.core.extensions.event
 import dev.vankka.mcdiscordreserializer.discord.DiscordSerializer
 import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializer
 import eu.pb4.placeholders.api.PlaceholderContext
+import kotlinx.coroutines.runBlocking
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.advancement.AdvancementDisplay
 import net.minecraft.advancement.AdvancementFrame
 import net.minecraft.text.Text
@@ -99,7 +102,33 @@ class MessageExtension : MinekordExtension() {
             }
         }
 
-        event<MinekordPlayerLeaveEvent> {
+        ServerPlayConnectionEvents.DISCONNECT.register { handler, server ->
+            val event: MinekordPlayerLeaveEvent = MinekordPlayerLeaveEvent(handler.player)
+
+            if (server.isStopping) {
+                runBlocking {
+                    createWebhookEmbed {
+                        author {
+                            name = parse(config[ChatSpec.DiscordSpec.leaveMessage], event.player).string
+                            icon = event.playerAvatar
+                        }
+                        color = MinekordColor.RED
+                    }
+                }
+            } else {
+                launch {
+                    createWebhookEmbed {
+                        author {
+                            name = parse(config[ChatSpec.DiscordSpec.leaveMessage], event.player).string
+                            icon = event.playerAvatar
+                        }
+                        color = MinekordColor.RED
+                    }
+                }
+            }
+        }
+
+        /* event<MinekordPlayerLeaveEvent> {
             action {
                 createWebhookEmbed {
                     author {
@@ -109,7 +138,7 @@ class MessageExtension : MinekordExtension() {
                     color = MinekordColor.RED
                 }
             }
-        }
+        } */
 
         event<MinekordPlayerDeathEvent> {
             action {
@@ -163,14 +192,23 @@ class MessageExtension : MinekordExtension() {
             }
         }
 
-        event<MinekordServerStoppedEvent> {
-            action {
+        ServerLifecycleEvents.SERVER_STOPPED.register { server ->
+            runBlocking {
                 createWebhookEmbed {
                     title = parse(config[ChatSpec.DiscordSpec.stopMessage], server).string
                     color = MinekordColor.RED
                 }
             }
         }
+
+        /* event<MinekordServerStoppedEvent> {
+            action {
+                createWebhookEmbed {
+                    title = parse(config[ChatSpec.DiscordSpec.stopMessage], server).string
+                    color = MinekordColor.RED
+                }
+            }
+        } */
 
         event<MinekordEndServerTickEvent> {
             action {

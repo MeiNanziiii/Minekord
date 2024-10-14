@@ -36,9 +36,7 @@ class SetupExtension : Extension() {
     override suspend fun setup() {
         MinekordBot.guild = kord.getGuild(Snowflake(config[BotSpec.guild]))
         MinekordBot.channel = MinekordBot.guild.getChannel(Snowflake(config[BotSpec.channel])) as TextChannel
-        MinekordBot.webhook = MinekordBot.channel.webhooks.firstOrNull { it.name == config[ChatSpec.WebhookSpec.webhookName] } ?: MinekordBot.channel.createWebhook(config[ChatSpec.WebhookSpec.webhookName]) {
-            avatar = Image.fromUrl(HttpClient(), config[ChatSpec.WebhookSpec.webhookAvatar])
-        }
+        MinekordBot.webhook = MinekordBot.channel.webhooks.firstOrNull { it.name == config[ChatSpec.WebhookSpec.webhookName] } ?: MinekordBot.channel.createWebhook(config[ChatSpec.WebhookSpec.webhookName])
 
         AdvancementGrantEvent.EVENT.register { player, advancement ->
             MinekordBot.launch { MinekordBot.bot?.send(MinekordAdvancementGrantEvent(player, advancement)) }
@@ -71,10 +69,7 @@ class SetupExtension : Extension() {
             MinekordBot.launch { MinekordBot.bot?.send(MinekordServerStartedEvent(server)) }
         }
         ServerLifecycleEvents.SERVER_STOPPED.register { server ->
-            runBlocking {
-                MinekordBot.bot?.send(MinekordServerStoppedEvent(server))
-                kord.shutdown()
-            }
+            runBlocking { MinekordBot.bot?.send(MinekordServerStoppedEvent(server)) }
         }
         ServerTickEvents.START_SERVER_TICK.register { server ->
             MinekordBot.launch { MinekordBot.bot?.send(MinekordStartServerTickEvent(server)) }

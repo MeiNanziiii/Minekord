@@ -49,6 +49,7 @@ abstract class MinekordExtension : Extension() {
     open suspend fun createWebhookMessage(builder: suspend WebhookMessageCreateBuilder.() -> Unit) {
         webhook.execute(webhook.token!!, null) {
             allowedMentions = mentions
+            avatarUrl = config[ChatSpec.WebhookSpec.webhookAvatar]
             builder()
         }
     }

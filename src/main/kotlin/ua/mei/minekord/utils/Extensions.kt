@@ -1,5 +1,7 @@
 package ua.mei.minekord.utils
 
+import com.google.gson.JsonParser
+import com.mojang.authlib.GameProfile
 import dev.kord.common.Color
 import eu.pb4.placeholders.api.ParserContext
 import eu.pb4.placeholders.api.PlaceholderContext
@@ -16,6 +18,8 @@ import net.minecraft.text.Text
 import ua.mei.minekord.Minekord
 import ua.mei.minekord.config.config
 import ua.mei.minekord.config.spec.ChatSpec
+import java.util.Base64
+import kotlin.collections.firstOrNull
 import java.util.function.Function as JavaFunction
 
 val dynamicKey: ParserContext.Key<JavaFunction<String, Text?>> = DynamicTextNode.key(Minekord.MOD_ID)
@@ -78,6 +82,21 @@ fun parse(input: String, player: ServerPlayerEntity): Text {
         input,
         PlaceholderContext.of(player).asParserContext()
     )
+}
+
+fun GameProfile.texture(): String {
+    return try {
+        JsonParser.parseString(Base64.getDecoder().decode(this.properties.get("textures").firstOrNull()?.value ?: "").toString(Charsets.UTF_8))
+            .getAsJsonObject()
+            .getAsJsonObject("textures")
+            .getAsJsonObject("SKIN")
+            .getAsJsonPrimitive("url")
+            .getAsString()
+            .let { it.substring(it.lastIndexOf('/') + 1) }
+            .takeIf { it.isNotBlank() } ?: ""
+    } catch (_: Throwable) {
+        return ""
+    }
 }
 
 fun colorFromString(hex: String): Color = Color(hex.removePrefix("#").toInt(16))
