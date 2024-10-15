@@ -3,12 +3,9 @@ package ua.mei.minekord.bot.extensions
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createWebhook
 import dev.kord.core.entity.channel.TextChannel
-import dev.kord.rest.Image
 import dev.kordex.core.extensions.Extension
-import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
@@ -27,7 +24,6 @@ import ua.mei.minekord.event.player.MinekordPlayerLeaveEvent
 import ua.mei.minekord.event.player.MinekordPlayerMessageEvent
 import ua.mei.minekord.event.server.MinekordEndServerTickEvent
 import ua.mei.minekord.event.server.MinekordServerStartedEvent
-import ua.mei.minekord.event.server.MinekordServerStoppedEvent
 import ua.mei.minekord.event.server.MinekordStartServerTickEvent
 
 class SetupExtension : Extension() {
@@ -51,13 +47,7 @@ class SetupExtension : Extension() {
             MinekordBot.launch { MinekordBot.bot?.send(MinekordPlayerJoinEvent(handler.player)) }
         }
         ServerPlayConnectionEvents.DISCONNECT.register { handler, server ->
-            val event: MinekordPlayerLeaveEvent = MinekordPlayerLeaveEvent(handler.player)
-
-            if (server.isStopping) {
-                runBlocking { MinekordBot.bot?.send(event) }
-            } else {
-                MinekordBot.launch { MinekordBot.bot?.send(event) }
-            }
+            MinekordBot.launch { MinekordBot.bot?.send(MinekordPlayerLeaveEvent(handler.player)) }
         }
         ServerMessageEvents.CHAT_MESSAGE.register { message, sender, type ->
             MinekordBot.launch { MinekordBot.bot?.send(MinekordPlayerMessageEvent(sender, message.content)) }
@@ -67,9 +57,6 @@ class SetupExtension : Extension() {
         }
         ServerLifecycleEvents.SERVER_STARTED.register { server ->
             MinekordBot.launch { MinekordBot.bot?.send(MinekordServerStartedEvent(server)) }
-        }
-        ServerLifecycleEvents.SERVER_STOPPED.register { server ->
-            runBlocking { MinekordBot.bot?.send(MinekordServerStoppedEvent(server)) }
         }
         ServerTickEvents.START_SERVER_TICK.register { server ->
             MinekordBot.launch { MinekordBot.bot?.send(MinekordStartServerTickEvent(server)) }

@@ -27,7 +27,6 @@ import ua.mei.minekord.event.player.MinekordPlayerLeaveEvent
 import ua.mei.minekord.event.player.MinekordPlayerMessageEvent
 import ua.mei.minekord.event.server.MinekordEndServerTickEvent
 import ua.mei.minekord.event.server.MinekordServerStartedEvent
-import ua.mei.minekord.event.server.MinekordServerStoppedEvent
 import ua.mei.minekord.extension.MinekordExtension
 import ua.mei.minekord.utils.MinekordActivityType
 import ua.mei.minekord.utils.MinekordColor
@@ -102,33 +101,7 @@ class MessageExtension : MinekordExtension() {
             }
         }
 
-        ServerPlayConnectionEvents.DISCONNECT.register { handler, server ->
-            val event: MinekordPlayerLeaveEvent = MinekordPlayerLeaveEvent(handler.player)
-
-            if (server.isStopping) {
-                runBlocking {
-                    createWebhookEmbed {
-                        author {
-                            name = parse(config[ChatSpec.DiscordSpec.leaveMessage], event.player).string
-                            icon = event.playerAvatar
-                        }
-                        color = MinekordColor.RED
-                    }
-                }
-            } else {
-                launch {
-                    createWebhookEmbed {
-                        author {
-                            name = parse(config[ChatSpec.DiscordSpec.leaveMessage], event.player).string
-                            icon = event.playerAvatar
-                        }
-                        color = MinekordColor.RED
-                    }
-                }
-            }
-        }
-
-        /* event<MinekordPlayerLeaveEvent> {
+        event<MinekordPlayerLeaveEvent> {
             action {
                 createWebhookEmbed {
                     author {
@@ -138,7 +111,7 @@ class MessageExtension : MinekordExtension() {
                     color = MinekordColor.RED
                 }
             }
-        } */
+        }
 
         event<MinekordPlayerDeathEvent> {
             action {
@@ -200,15 +173,6 @@ class MessageExtension : MinekordExtension() {
                 }
             }
         }
-
-        /* event<MinekordServerStoppedEvent> {
-            action {
-                createWebhookEmbed {
-                    title = parse(config[ChatSpec.DiscordSpec.stopMessage], server).string
-                    color = MinekordColor.RED
-                }
-            }
-        } */
 
         event<MinekordEndServerTickEvent> {
             action {
