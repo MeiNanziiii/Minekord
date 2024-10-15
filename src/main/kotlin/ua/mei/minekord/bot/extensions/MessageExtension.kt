@@ -12,7 +12,7 @@ import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializer
 import eu.pb4.placeholders.api.PlaceholderContext
 import kotlinx.coroutines.runBlocking
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.advancement.AdvancementDisplay
 import net.minecraft.advancement.AdvancementFrame
 import net.minecraft.text.Text
@@ -25,7 +25,6 @@ import ua.mei.minekord.event.player.MinekordPlayerDeathEvent
 import ua.mei.minekord.event.player.MinekordPlayerJoinEvent
 import ua.mei.minekord.event.player.MinekordPlayerLeaveEvent
 import ua.mei.minekord.event.player.MinekordPlayerMessageEvent
-import ua.mei.minekord.event.server.MinekordEndServerTickEvent
 import ua.mei.minekord.event.server.MinekordServerStartedEvent
 import ua.mei.minekord.extension.MinekordExtension
 import ua.mei.minekord.utils.MinekordActivityType
@@ -174,8 +173,8 @@ class MessageExtension : MinekordExtension() {
             }
         }
 
-        event<MinekordEndServerTickEvent> {
-            action {
+        ServerTickEvents.END_SERVER_TICK.register { server ->
+            launch {
                 if (config[PresenceSpec.activityType] != MinekordActivityType.NONE) {
                     if (server.ticks % config[PresenceSpec.updateTicks] == 0) {
                         kord.editPresence {

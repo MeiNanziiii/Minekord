@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.server.network.ServerPlayerEntity
@@ -22,9 +21,7 @@ import ua.mei.minekord.event.player.MinekordPlayerDeathEvent
 import ua.mei.minekord.event.player.MinekordPlayerJoinEvent
 import ua.mei.minekord.event.player.MinekordPlayerLeaveEvent
 import ua.mei.minekord.event.player.MinekordPlayerMessageEvent
-import ua.mei.minekord.event.server.MinekordEndServerTickEvent
 import ua.mei.minekord.event.server.MinekordServerStartedEvent
-import ua.mei.minekord.event.server.MinekordStartServerTickEvent
 
 class SetupExtension : Extension() {
     override val name: String = "Setup Extension"
@@ -52,14 +49,8 @@ class SetupExtension : Extension() {
         ServerMessageEvents.CHAT_MESSAGE.register { message, sender, type ->
             MinekordBot.launch { MinekordBot.bot?.send(MinekordPlayerMessageEvent(sender, message.content)) }
         }
-        ServerTickEvents.END_SERVER_TICK.register { server ->
-            MinekordBot.launch { MinekordBot.bot?.send(MinekordEndServerTickEvent(server)) }
-        }
         ServerLifecycleEvents.SERVER_STARTED.register { server ->
             MinekordBot.launch { MinekordBot.bot?.send(MinekordServerStartedEvent(server)) }
-        }
-        ServerTickEvents.START_SERVER_TICK.register { server ->
-            MinekordBot.launch { MinekordBot.bot?.send(MinekordStartServerTickEvent(server)) }
         }
     }
 }
