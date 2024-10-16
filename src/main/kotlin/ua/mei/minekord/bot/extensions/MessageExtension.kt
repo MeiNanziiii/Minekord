@@ -57,7 +57,7 @@ class MessageExtension : MinekordExtension() {
                 if (message.referencedMessage != null) {
                     val replyText: Text = MinecraftSerializer.INSTANCE.serialize(message.referencedMessage!!.content, minecraftOptions).toNative(server.registryManager)
 
-                    val reply = parse(config[ChatSpec.MinecraftSpec.replyFormat], PlaceholderContext.of(server)) {
+                    val reply: Text = parse(config[ChatSpec.MinecraftSpec.replyFormat], PlaceholderContext.of(server)) {
                         "sender" to sender.effectiveName.literal()
                         "message" to replyText
                         "summary" to replyText.string.summary().literal()

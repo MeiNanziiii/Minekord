@@ -38,7 +38,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
     private void minekord$trueUuids(LoginHelloC2SPacket loginHelloC2SPacket, CallbackInfo ci) {
         if (MinekordConfigKt.getConfig().get(ExperimentalSpec.DiscordSpec.INSTANCE.getEnabled())) {
             if (this.server.isOnlineMode() && !MinekordConfigKt.getConfig().get(ExperimentalSpec.DiscordSpec.INSTANCE.getAllowOfflinePlayers()) && !ExperimentalUtils.INSTANCE.premiumPlayer(loginHelloC2SPacket.comp_907())) {
-                this.disconnect(Text.translatable("multiplayer.disconnect.generic"));
+                this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
                 ci.cancel();
             }
 
@@ -48,7 +48,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                 this.profile = new GameProfile(trueUuid, loginHelloC2SPacket.comp_765());
                 this.sendSuccessPacket(this.profile);
             } else {
-                this.disconnect(Text.translatable("multiplayer.disconnect.generic"));
+                this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
             }
 
             ci.cancel();

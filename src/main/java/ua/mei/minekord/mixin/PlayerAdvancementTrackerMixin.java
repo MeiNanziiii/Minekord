@@ -13,7 +13,8 @@ import ua.mei.minekord.event.AdvancementGrantEvent;
 
 @Mixin(PlayerAdvancementTracker.class)
 public abstract class PlayerAdvancementTrackerMixin {
-    @Shadow private ServerPlayerEntity owner;
+    @Shadow
+    private ServerPlayerEntity owner;
 
     @Inject(method = "method_53637", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Z)V"))
     public void bonfire$callEvent(AdvancementEntry advancementEntry, AdvancementDisplay advancementDisplay, CallbackInfo ci) {

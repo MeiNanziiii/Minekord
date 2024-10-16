@@ -18,6 +18,7 @@ import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.cache.IPCache
 import ua.mei.minekord.config.config
 import ua.mei.minekord.config.spec.ExperimentalSpec
+import ua.mei.minekord.config.spec.MessagesSpec
 import ua.mei.minekord.event.IPCheckEvent
 import ua.mei.minekord.utils.ExperimentalUtils
 
@@ -35,7 +36,7 @@ class IPCheckExtension : Extension() {
 
                     user?.getDmChannelOrNull()?.createMessage {
                         embed {
-                            title = "This is your IP?"
+                            title = config[MessagesSpec.embedTitle]
 
                             field {
                                 name = "> IP"
@@ -43,14 +44,14 @@ class IPCheckExtension : Extension() {
                                 inline = true
                             }
                             field {
-                                name = "> Time"
+                                name = "> ${config[MessagesSpec.timeLabel]}"
                                 value = "> ${Clock.System.now().toDiscord(TimestampType.Default)}"
                                 inline = true
                             }
                         }
                         components {
                             publicButton {
-                                label = "Yes"
+                                label = config[MessagesSpec.yesButton]
                                 style = ButtonStyle.Success
 
                                 action {
@@ -59,7 +60,7 @@ class IPCheckExtension : Extension() {
                                     edit {
                                         components {
                                             disabledButton {
-                                                label = "Yes"
+                                                label = config[MessagesSpec.yesButton]
                                                 style = ButtonStyle.Success
                                             }
                                         }
@@ -67,7 +68,7 @@ class IPCheckExtension : Extension() {
                                 }
                             }
                             publicButton {
-                                label = "No"
+                                label = config[MessagesSpec.noButton]
                                 style = ButtonStyle.Danger
 
                                 action {
@@ -75,7 +76,7 @@ class IPCheckExtension : Extension() {
 
                                     edit {
                                         embed {
-                                            title = "IP was blocked!"
+                                            title = config[MessagesSpec.ipBlockedTitle]
 
                                             field {
                                                 name = "> IP"
@@ -83,14 +84,14 @@ class IPCheckExtension : Extension() {
                                                 inline = true
                                             }
                                             field {
-                                                name = "> Time"
+                                                name = "> ${config[MessagesSpec.timeLabel]}"
                                                 value = "> ${Clock.System.now().toDiscord(TimestampType.Default)}"
                                                 inline = true
                                             }
                                         }
                                         components {
                                             publicButton {
-                                                label = "Unblock"
+                                                label = config[MessagesSpec.unblockButton]
                                                 style = ButtonStyle.Danger
 
                                                 action {
@@ -98,7 +99,7 @@ class IPCheckExtension : Extension() {
 
                                                     edit {
                                                         embed {
-                                                            title = "IP was unblocked!"
+                                                            title = config[MessagesSpec.ipUnblockedTitle]
 
                                                             field {
                                                                 name = "> IP"
@@ -106,14 +107,14 @@ class IPCheckExtension : Extension() {
                                                                 inline = true
                                                             }
                                                             field {
-                                                                name = "> Time"
+                                                                name = "> ${config[MessagesSpec.timeLabel]}"
                                                                 value = "> ${Clock.System.now().toDiscord(TimestampType.Default)}"
                                                                 inline = true
                                                             }
                                                         }
                                                         components {
                                                             disabledButton {
-                                                                label = "Unblock"
+                                                                label = config[MessagesSpec.unblockButton]
                                                                 style = ButtonStyle.Danger
                                                             }
                                                         }

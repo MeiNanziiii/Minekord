@@ -12,7 +12,7 @@ import java.nio.file.Path
 
 object IPCache {
     private var cache: MutableMap<String, String> = mutableMapOf()
-    val path: Path = FabricLoader.getInstance().gameDir.resolve("ip-cache.json")
+    val path: Path = FabricLoader.getInstance().gameDir.resolve("minekord/ip-cache.json")
     val gson: Gson = GsonBuilder()
         .setPrettyPrinting()
         .create()

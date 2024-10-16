@@ -20,6 +20,10 @@ object Minekord : ModInitializer {
     override fun onInitialize() {
         logger.info("Initializing Minekord")
 
+        if (!Files.exists(FabricLoader.getInstance().gameDir.resolve("minekord"))) {
+            Files.createDirectories(FabricLoader.getInstance().gameDir.resolve("minekord"))
+        }
+
         if (!Files.exists(FabricLoader.getInstance().configDir.resolve(CONFIG_PATH))) {
             Files.copy(
                 FabricLoader.getInstance().getModContainer(MOD_ID).get().findPath(CONFIG_PATH).get(),
