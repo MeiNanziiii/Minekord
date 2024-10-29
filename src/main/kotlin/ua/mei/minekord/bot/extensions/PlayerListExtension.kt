@@ -4,6 +4,7 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.rest.builder.message.embed
 import dev.kordex.core.extensions.Extension
 import dev.kordex.core.extensions.ephemeralSlashCommand
+import dev.kordex.core.i18n.toKey
 import net.minecraft.server.MinecraftServer
 import org.koin.core.component.inject
 import ua.mei.minekord.config.config
@@ -19,8 +20,8 @@ class PlayerListExtension : Extension() {
 
     override suspend fun setup() {
         ephemeralSlashCommand {
-            name = config[CommandsSpec.PlayerListSpec.name]
-            description = config[CommandsSpec.PlayerListSpec.description]
+            name = config[CommandsSpec.PlayerListSpec.name].toKey()
+            description = config[CommandsSpec.PlayerListSpec.description].toKey()
 
             guild(Snowflake(config[BotSpec.guild]))
 

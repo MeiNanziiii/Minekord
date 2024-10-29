@@ -7,7 +7,7 @@ fabric-loader="0.16.5"
 fabric-kotlin="1.12.2+kotlin.2.0.20"
 fabric-api="0.102.0+1.21"
 
-kordex="2.2.1-SNAPSHOT"
+kordex="2.3.1-SNAPSHOT"
 konf="1.1.2"
 
 discord-reserializer="4.3.0"

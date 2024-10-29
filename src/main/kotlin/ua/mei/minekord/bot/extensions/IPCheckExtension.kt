@@ -9,6 +9,7 @@ import dev.kordex.core.components.components
 import dev.kordex.core.components.disabledButton
 import dev.kordex.core.components.publicButton
 import dev.kordex.core.extensions.Extension
+import dev.kordex.core.i18n.toKey
 import dev.kordex.core.time.TimestampType
 import dev.kordex.core.time.toDiscord
 import io.ktor.util.network.address
@@ -51,7 +52,7 @@ class IPCheckExtension : Extension() {
                         }
                         components {
                             publicButton {
-                                label = config[MessagesSpec.yesButton]
+                                label = config[MessagesSpec.yesButton].toKey()
                                 style = ButtonStyle.Success
 
                                 action {
@@ -60,7 +61,7 @@ class IPCheckExtension : Extension() {
                                     edit {
                                         components {
                                             disabledButton {
-                                                label = config[MessagesSpec.yesButton]
+                                                label = config[MessagesSpec.yesButton].toKey()
                                                 style = ButtonStyle.Success
                                             }
                                         }
@@ -68,7 +69,7 @@ class IPCheckExtension : Extension() {
                                 }
                             }
                             publicButton {
-                                label = config[MessagesSpec.noButton]
+                                label = config[MessagesSpec.noButton].toKey()
                                 style = ButtonStyle.Danger
 
                                 action {
@@ -91,7 +92,7 @@ class IPCheckExtension : Extension() {
                                         }
                                         components {
                                             publicButton {
-                                                label = config[MessagesSpec.unblockButton]
+                                                label = config[MessagesSpec.unblockButton].toKey()
                                                 style = ButtonStyle.Danger
 
                                                 action {
@@ -114,7 +115,7 @@ class IPCheckExtension : Extension() {
                                                         }
                                                         components {
                                                             disabledButton {
-                                                                label = config[MessagesSpec.unblockButton]
+                                                                label = config[MessagesSpec.unblockButton].toKey()
                                                                 style = ButtonStyle.Danger
                                                             }
                                                         }
