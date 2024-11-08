@@ -28,19 +28,25 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
     @Shadow
     @Nullable GameProfile profile;
-    @Shadow
-    ServerLoginNetworkHandler.State state;
-    @Shadow
-    @Final
-    ClientConnection connection;
 
     @Shadow
     public abstract void disconnect(Text text);
 
+    @Shadow public abstract void acceptPlayer();
+
     @Inject(method = "onHello", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isOnlineMode()Z"), cancellable = true)
     private void minekord$trueUuids(LoginHelloC2SPacket loginHelloC2SPacket, CallbackInfo ci) {
         if (MinekordConfigKt.getConfig().get(ExperimentalSpec.DiscordSpec.INSTANCE.getEnabled())) {
-            if (this.server.isOnlineMode() && !MinekordConfigKt.getConfig().get(ExperimentalSpec.DiscordSpec.INSTANCE.getAllowOfflinePlayers()) && !ExperimentalUtils.INSTANCE.premiumPlayer(loginHelloC2SPacket.comp_907().get())) {
+            UUID uuid = null;
+
+            if (loginHelloC2SPacket.comp_907().isPresent()) {
+                uuid = loginHelloC2SPacket.comp_907().get();
+            } else {
+                this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
+                ci.cancel();
+            }
+
+            if (this.server.isOnlineMode() && !MinekordConfigKt.getConfig().get(ExperimentalSpec.DiscordSpec.INSTANCE.getAllowOfflinePlayers()) && !ExperimentalUtils.INSTANCE.premiumPlayer(uuid)) {
                 this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
                 ci.cancel();
             }
@@ -48,8 +54,8 @@ public abstract class ServerLoginNetworkHandlerMixin {
             UUID trueUuid = ExperimentalUtils.INSTANCE.generateFromNickname(loginHelloC2SPacket.comp_765());
 
             if (trueUuid != null) {
-                this.state = ServerLoginNetworkHandler.State.KEY;
-                this.connection.send(new LoginSuccessS2CPacket(this.profile));
+                this.profile = new GameProfile(trueUuid, loginHelloC2SPacket.comp_765());
+                this.acceptPlayer();
             } else {
                 this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
             }
