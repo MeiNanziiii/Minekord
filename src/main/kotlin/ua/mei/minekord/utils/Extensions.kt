@@ -5,9 +5,9 @@ import com.mojang.authlib.GameProfile
 import dev.kord.common.Color
 import eu.pb4.placeholders.api.PlaceholderContext
 import eu.pb4.placeholders.api.Placeholders
+import eu.pb4.placeholders.api.TextParserUtils
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
-import net.minecraft.registry.RegistryWrapper
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.MutableText
@@ -19,11 +19,11 @@ import kotlin.collections.firstOrNull
 
 fun String.literal(): MutableText = Text.literal(this)
 
-fun Component.toNative(wrapperLookup: RegistryWrapper.WrapperLookup): MutableText {
+fun Component.toNative(): MutableText {
     return Text.Serializer.fromJson(GsonComponentSerializer.gson().serialize(this)) ?: Text.empty()
 }
 
-fun Text.toAdventure(wrapperLookup: RegistryWrapper.WrapperLookup): Component {
+fun Text.toAdventure(): Component {
     return GsonComponentSerializer.gson().deserialize(Text.Serializer.toJson(this))
 }
 
@@ -48,28 +48,27 @@ class PlaceholderBuilder {
 }
 
 fun parse(input: String, context: PlaceholderContext, placeholders: PlaceholderBuilder.() -> Unit): Text {
-    PlaceholderBuilder().apply(placeholders).build()
-
     return Placeholders.parseText(
-        input.literal(),
-        context,
-        Placeholders.ALT_PLACEHOLDER_PATTERN
+        Placeholders.parseText(
+            TextParserUtils.formatText(input),
+            Placeholders.ALT_PLACEHOLDER_PATTERN_CUSTOM,
+            PlaceholderBuilder().apply(placeholders).build()
+        ),
+        context
     )
 }
 
 fun parse(input: String, server: MinecraftServer): Text {
     return Placeholders.parseText(
-        input.literal(),
-        PlaceholderContext.of(server),
-        Placeholders.ALT_PLACEHOLDER_PATTERN
+        TextParserUtils.formatText(input),
+        PlaceholderContext.of(server)
     )
 }
 
 fun parse(input: String, player: ServerPlayerEntity): Text {
     return Placeholders.parseText(
-        input.literal(),
-        PlaceholderContext.of(player),
-        Placeholders.ALT_PLACEHOLDER_PATTERN
+        TextParserUtils.formatText(input),
+        PlaceholderContext.of(player)
     )
 }
 

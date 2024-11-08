@@ -49,13 +49,13 @@ class MessageExtension : MinekordExtension() {
                 val sender: Member = event.member ?: return@action
 
                 var content: Text = if (config[ChatSpec.convertMarkdown]) {
-                    MinecraftSerializer.INSTANCE.serialize(message.content, minecraftOptions).toNative(server.registryManager)
+                    MinecraftSerializer.INSTANCE.serialize(message.content, minecraftOptions).toNative()
                 } else {
                     message.content.literal()
                 }
 
                 if (message.referencedMessage != null) {
-                    val replyText: Text = MinecraftSerializer.INSTANCE.serialize(message.referencedMessage!!.content, minecraftOptions).toNative(server.registryManager)
+                    val replyText: Text = MinecraftSerializer.INSTANCE.serialize(message.referencedMessage!!.content, minecraftOptions).toNative()
 
                     val reply: Text = parse(config[ChatSpec.MinecraftSpec.replyFormat], PlaceholderContext.of(server)) {
                         "sender" to sender.effectiveName.literal()
@@ -82,7 +82,7 @@ class MessageExtension : MinekordExtension() {
                     avatarUrl = event.playerAvatar
 
                     content = DiscordSerializer.INSTANCE.serialize(
-                        event.message.toAdventure(server.registryManager), discordOptions
+                        event.message.toAdventure(), discordOptions
                     ).let { if (config[ChatSpec.convertMentions]) SerializerUtils.convertMentions(it) else it }.takeIf { it.isNotBlank() } ?: return@createWebhookMessage
                 }
             }

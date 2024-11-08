@@ -31,7 +31,8 @@ public abstract class ServerLoginNetworkHandlerMixin {
     @Shadow
     public abstract void disconnect(Text text);
 
-    @Shadow public abstract void acceptPlayer();
+    @Shadow
+    public abstract void acceptPlayer();
 
     @Inject(method = "onHello", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isOnlineMode()Z"), cancellable = true)
     private void minekord$trueUuids(LoginHelloC2SPacket loginHelloC2SPacket, CallbackInfo ci) {
