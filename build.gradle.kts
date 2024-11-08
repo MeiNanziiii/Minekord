@@ -98,10 +98,7 @@ fun DependencyHandlerScope.includeTransitive(
         "jna",
         "jna-platform",
         "gson",
-        "commons-lang3",
-        "jackson-annotations",
-        "jackson-core",
-        "jackson-databind"
+        "commons-lang3"
     )
 
     dependencies.forEach {
