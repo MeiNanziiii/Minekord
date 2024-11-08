@@ -46,8 +46,12 @@ dependencies {
 
     implementAndInclude(libs.kyori)
     implementAndInclude(libs.placeholder.api)
+}
 
-    handleIncludes(includeImplementation)
+afterEvaluate {
+    dependencies {
+        handleIncludes(includeImplementation)
+    }
 }
 
 java {

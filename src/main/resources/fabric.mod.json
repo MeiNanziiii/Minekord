@@ -23,6 +23,6 @@
     "depends": {
         "fabric-language-kotlin": "*",
         "fabric": "*",
-        "minecraft": ">=${minecraft_version}"
+        "minecraft": "*"
     }
 }

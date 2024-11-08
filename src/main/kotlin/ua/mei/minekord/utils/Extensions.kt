@@ -3,11 +3,8 @@ package ua.mei.minekord.utils
 import com.google.gson.JsonParser
 import com.mojang.authlib.GameProfile
 import dev.kord.common.Color
-import eu.pb4.placeholders.api.ParserContext
 import eu.pb4.placeholders.api.PlaceholderContext
-import eu.pb4.placeholders.api.node.DynamicTextNode
-import eu.pb4.placeholders.api.parsers.NodeParser
-import eu.pb4.placeholders.api.parsers.TagLikeParser
+import eu.pb4.placeholders.api.Placeholders
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.minecraft.registry.RegistryWrapper
@@ -15,30 +12,19 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
-import ua.mei.minekord.Minekord
 import ua.mei.minekord.config.config
 import ua.mei.minekord.config.spec.ChatSpec
 import java.util.Base64
 import kotlin.collections.firstOrNull
-import java.util.function.Function as JavaFunction
-
-val dynamicKey: ParserContext.Key<JavaFunction<String, Text?>> = DynamicTextNode.key(Minekord.MOD_ID)
-
-val parser: NodeParser = NodeParser.builder()
-    .simplifiedTextFormat()
-    .quickText()
-    .globalPlaceholders()
-    .placeholders(TagLikeParser.PLACEHOLDER_ALTERNATIVE, dynamicKey)
-    .build()
 
 fun String.literal(): MutableText = Text.literal(this)
 
 fun Component.toNative(wrapperLookup: RegistryWrapper.WrapperLookup): MutableText {
-    return Text.Serialization.fromJson(GsonComponentSerializer.gson().serialize(this), wrapperLookup) ?: Text.empty()
+    return Text.Serializer.fromJson(GsonComponentSerializer.gson().serialize(this)) ?: Text.empty()
 }
 
 fun Text.toAdventure(wrapperLookup: RegistryWrapper.WrapperLookup): Component {
-    return GsonComponentSerializer.gson().deserialize(Text.Serialization.toJsonString(this, wrapperLookup))
+    return GsonComponentSerializer.gson().deserialize(Text.Serializer.toJson(this))
 }
 
 fun String.toAdventure(): Component = Component.text(this)
@@ -62,25 +48,28 @@ class PlaceholderBuilder {
 }
 
 fun parse(input: String, context: PlaceholderContext, placeholders: PlaceholderBuilder.() -> Unit): Text {
-    val map: Map<String, Text> = PlaceholderBuilder().apply(placeholders).build()
+    PlaceholderBuilder().apply(placeholders).build()
 
-    return parser.parseText(
-        input,
-        context.asParserContext().with(dynamicKey, JavaFunction { map[it] })
+    return Placeholders.parseText(
+        input.literal(),
+        context,
+        Placeholders.ALT_PLACEHOLDER_PATTERN
     )
 }
 
 fun parse(input: String, server: MinecraftServer): Text {
-    return parser.parseText(
-        input,
-        PlaceholderContext.of(server).asParserContext()
+    return Placeholders.parseText(
+        input.literal(),
+        PlaceholderContext.of(server),
+        Placeholders.ALT_PLACEHOLDER_PATTERN
     )
 }
 
 fun parse(input: String, player: ServerPlayerEntity): Text {
-    return parser.parseText(
-        input,
-        PlaceholderContext.of(player).asParserContext()
+    return Placeholders.parseText(
+        input.literal(),
+        PlaceholderContext.of(player),
+        Placeholders.ALT_PLACEHOLDER_PATTERN
     )
 }
 

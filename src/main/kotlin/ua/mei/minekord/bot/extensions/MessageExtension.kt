@@ -128,7 +128,7 @@ class MessageExtension : MinekordExtension() {
 
         event<MinekordAdvancementGrantEvent> {
             action {
-                val display: AdvancementDisplay = event.advancement.comp_1913.get()
+                val display: AdvancementDisplay = event.advancement.display!!
 
                 createWebhookEmbed {
                     author {
