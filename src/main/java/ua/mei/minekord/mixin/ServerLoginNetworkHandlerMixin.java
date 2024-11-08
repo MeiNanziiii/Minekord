@@ -1,9 +1,8 @@
 package ua.mei.minekord.mixin;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.network.ClientConnection;
+import net.luckperms.api.LuckPermsProvider;
 import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
-import net.minecraft.network.packet.s2c.login.LoginSuccessS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.text.Text;
@@ -53,12 +52,14 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
             UUID trueUuid = ExperimentalUtils.INSTANCE.generateFromNickname(loginHelloC2SPacket.comp_765());
 
-            if (trueUuid != null) {
-                this.profile = new GameProfile(trueUuid, loginHelloC2SPacket.comp_765());
-                this.acceptPlayer();
-            } else {
-                this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
-            }
+            LuckPermsProvider.get().getUserManager().loadUser(trueUuid).thenAcceptAsync(user -> {
+                if (user != null) {
+                    this.profile = new GameProfile(trueUuid, loginHelloC2SPacket.comp_765());
+                    this.acceptPlayer();
+                } else {
+                    this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
+                }
+            });
 
             ci.cancel();
         }

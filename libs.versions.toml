@@ -16,6 +16,8 @@ simple-ast="2.2.8"
 kyori="5.9.0"
 placeholder-api="2.1.3+1.20.1"
 
+luckperms="5.4"
+
 [libraries]
 
 minecraft = { module = "net.minecraft:minecraft", version.ref = "minecraft" }
@@ -34,3 +36,5 @@ simple-ast = { module = "dev.vankka:SimpleAST", version.ref = "simple-ast"}
 
 kyori = { module = "net.kyori:adventure-platform-fabric", version.ref = "kyori"}
 placeholder-api = { module = "eu.pb4:placeholder-api", version.ref = "placeholder-api" }
+
+luckperms = { module = "net.luckperms:api", version.ref = "luckperms" }
