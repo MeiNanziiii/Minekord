@@ -97,6 +97,7 @@ class IPCheckExtension : Extension() {
 
                                                 action {
                                                     IPCache.blockedIps.removeAll { it == socketAddress.address }
+                                                    IPCache.alreadyRequestedIps[profile.name]?.removeAll { it == socketAddress.address }
 
                                                     edit {
                                                         embed {

@@ -3,6 +3,7 @@ package ua.mei.minekord.cache
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.stream.JsonReader
+import com.mojang.authlib.GameProfile
 import io.ktor.util.network.address
 import net.fabricmc.loader.api.FabricLoader
 import java.io.FileReader
@@ -18,6 +19,7 @@ object IPCache {
         .create()
 
     val blockedIps: MutableList<String> = mutableListOf()
+    val alreadyRequestedIps: MutableMap<String, MutableList<String>> = mutableMapOf()
 
     fun load() {
         if (!Files.exists(path)) {
@@ -27,6 +29,14 @@ object IPCache {
         val reader: JsonReader = JsonReader(FileReader(path.toFile()))
         cache = gson.fromJson(reader, Map::class.java)
         reader.close()
+    }
+
+    fun isIpRequested(address: SocketAddress, profile: GameProfile): Boolean {
+        if (alreadyRequestedIps[profile.name]?.contains(address.address) == true) {
+            return true
+        }
+        alreadyRequestedIps.getOrPut(profile.name) { mutableListOf() }.add(address.address)
+        return false
     }
 
     fun save() {
