@@ -51,6 +51,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
             if (config.get(discordSpec.getLoginByIp()) && IPCache.INSTANCE.isBlockedIp(this.connection.getAddress())) {
                 this.disconnect(Text.translatable("multiplayer.disconnect.ip_banned"));
                 ci.cancel();
+                return;
             }
 
             UUID uuid = loginHelloC2SPacket.comp_907().orElse(null);
@@ -58,11 +59,13 @@ public abstract class ServerLoginNetworkHandlerMixin {
             if (uuid == null) {
                 this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
                 ci.cancel();
+                return;
             }
 
             if (this.server.isOnlineMode() && !config.get(discordSpec.getAllowOfflinePlayers()) && !ExperimentalUtils.INSTANCE.premiumPlayer(uuid)) {
                 this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
                 ci.cancel();
+                return;
             }
 
             UUID trueUuid = ExperimentalUtils.INSTANCE.generateFromNickname(loginHelloC2SPacket.comp_765());
@@ -70,6 +73,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
             if (trueUuid == null) {
                 this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
                 ci.cancel();
+                return;
             }
 
             this.profile = new GameProfile(trueUuid, loginHelloC2SPacket.comp_765());
@@ -80,6 +84,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                 }
                 this.disconnect(Text.literal(config.get(MessagesSpec.INSTANCE.getIpKickMessage())));
                 ci.cancel();
+                return;
             }
 
             LuckPermsProvider.get().getUserManager().loadUser(trueUuid).thenAcceptAsync(user -> {
