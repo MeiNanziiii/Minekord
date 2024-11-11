@@ -3,6 +3,7 @@ package ua.mei.minekord.bot.extensions
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.Message
+import dev.kord.core.entity.effectiveName
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kordex.core.checks.inChannel
 import dev.kordex.core.checks.isNotBot
@@ -58,7 +59,7 @@ class MessageExtension : MinekordExtension() {
                     val replyText: Text = MinecraftSerializer.INSTANCE.serialize(message.referencedMessage!!.content, minecraftOptions).toNative()
 
                     val reply: Text = parse(config[ChatSpec.MinecraftSpec.replyFormat], PlaceholderContext.of(server)) {
-                        "sender" to sender.effectiveName.literal()
+                        "sender" to (message.referencedMessage!!.author?.effectiveName ?: message.referencedMessage!!.data.author.username)
                         "message" to replyText
                         "summary" to replyText.string.summary().literal()
                     }
