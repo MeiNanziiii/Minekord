@@ -47,7 +47,7 @@ dependencies {
     implementAndInclude(libs.kyori)
     implementAndInclude(libs.placeholder.api)
 
-    modImplementation(libs.luckperms)
+    modCompileOnly(libs.luckperms)
 }
 
 afterEvaluate {
