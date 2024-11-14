@@ -1,0 +1,55 @@
+[Bot]
+
+token = ""
+guild = 0
+channel = 0
+
+[Chat]
+
+convertMentions = true
+convertMarkdown = true
+
+    [Chat.Minecraft]
+
+    messageFormat = "{sender} » {message}"
+    replyFormat = "<gray>(Replying to @{sender} » <hover:'{message}'>{summary}</hover>)</gray>"
+    summaryMaxLength = 20
+
+    coloredRoles = true
+
+    [Chat.Discord]
+
+    joinMessage = "%player:displayname% joined the game"
+    leaveMessage = "%player:displayname% left the game"
+
+    deathMessage = "{message}"
+
+    advancementMessage = "%player:displayname% has made the advancement [{advancement}]"
+    goalMessage = "%player:displayname% has reached the goal [{advancement}]"
+    challengeMessage = "%player:displayname% has completed the challenge [{advancement}]"
+
+    startMessage = "Server started"
+    stopMessage = "Server stopped"
+
+    [Chat.Webhook]
+
+    webhookName = "Server"
+    webhookAvatar = "https://i.imgur.com/lc8ZHiG.png"
+    playerAvatar = "https://mc-heads.net/head/{nickname}.png/128"
+
+[Presence]
+
+activityType = "PLAYING"
+activityText = "Minecraft | %server:online%/%server:max_players%"
+updateTicks = 1200
+
+[Colors]
+
+red = "#ED4245"
+orange = "#E67E22"
+green = "#57F287"
+blue = "#3498DB"
+purple = "#9B59B6"
+
+mention = "#5865F2"
+link = "#5865F2"

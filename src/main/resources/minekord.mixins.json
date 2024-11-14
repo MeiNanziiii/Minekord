@@ -4,8 +4,7 @@
     "package": "ua.mei.minekord.mixin",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
-        "PlayerAdvancementTrackerMixin",
-        "ServerLoginNetworkHandlerMixin"
+        "PlayerAdvancementTrackerMixin"
     ],
     "injectors": {
         "defaultRequire": 1
