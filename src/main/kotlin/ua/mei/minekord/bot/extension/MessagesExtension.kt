@@ -21,7 +21,7 @@ import ua.mei.minekord.bot.MinekordExtension
 import ua.mei.minekord.config.config
 import ua.mei.minekord.config.spec.BotSpec
 import ua.mei.minekord.config.spec.ChatSpec
-import ua.mei.minekord.utils.MinekordColor
+import ua.mei.minekord.config.spec.ColorsSpec
 import ua.mei.minekord.utils.SerializerUtils
 import ua.mei.minekord.utils.avatar
 import ua.mei.minekord.utils.discordOptions
@@ -30,10 +30,11 @@ import ua.mei.minekord.utils.minecraftOptions
 import ua.mei.minekord.utils.parseText
 import ua.mei.minekord.utils.summary
 import ua.mei.minekord.utils.toAdventure
+import ua.mei.minekord.utils.toColor
 import ua.mei.minekord.utils.toNative
 
 class MessagesExtension : MinekordExtension() {
-    override val name: String = "Messages Extension"
+    override val name: String = "minekord.messages"
 
     override suspend fun setup() {
         event<MessageCreateEvent> {
@@ -72,6 +73,23 @@ class MessagesExtension : MinekordExtension() {
         }
     }
 
+    override suspend fun onChatMessage(player: ServerPlayerEntity, message: Text) {
+        webhookMessage {
+            username = player.gameProfile.name
+            avatarUrl = player.avatar
+
+            content = DiscordSerializer.INSTANCE.serialize(
+                message.toAdventure(), discordOptions
+            ).let {
+                if (config[ChatSpec.convertMentions]) {
+                    SerializerUtils.convertMentions(it)
+                } else {
+                    it
+                }
+            }.takeIf { it.isNotBlank() } ?: return@webhookMessage
+        }
+    }
+
     override suspend fun onAdvancementGrant(player: ServerPlayerEntity, advancement: Advancement) {
         val display: AdvancementDisplay = advancement.display ?: return
         val frame: AdvancementFrame = display.frame
@@ -96,7 +114,27 @@ class MessagesExtension : MinekordExtension() {
             footer {
                 text = display.description.string
             }
-            color = if (frame == AdvancementFrame.CHALLENGE) MinekordColor.PURPLE else MinekordColor.BLUE
+            color = config[if (frame == AdvancementFrame.CHALLENGE) ColorsSpec.purple else ColorsSpec.blue].toColor()
+        }
+    }
+
+    override suspend fun onPlayerJoin(player: ServerPlayerEntity) {
+        webhookEmbed {
+            author {
+                name = parseText(config[ChatSpec.DiscordSpec.joinMessage], player).string
+                icon = player.avatar
+            }
+            color = config[ColorsSpec.green].toColor()
+        }
+    }
+
+    override suspend fun onPlayerLeave(player: ServerPlayerEntity) {
+        webhookEmbed {
+            author {
+                name = parseText(config[ChatSpec.DiscordSpec.leaveMessage], player).string
+                icon = player.avatar
+            }
+            color = config[ColorsSpec.red].toColor()
         }
     }
 
@@ -108,58 +146,21 @@ class MessagesExtension : MinekordExtension() {
                     "message" to source.getDeathMessage(player)
                 }.string
             }
-            color = MinekordColor.ORANGE
-        }
-    }
-
-    override suspend fun onPlayerJoin(player: ServerPlayerEntity) {
-        webhookEmbed {
-            author {
-                name = parseText(config[ChatSpec.DiscordSpec.joinMessage], player).string
-                icon = player.avatar
-            }
-            color = MinekordColor.GREEN
-        }
-    }
-
-    override suspend fun onPlayerLeave(player: ServerPlayerEntity) {
-        webhookEmbed {
-            author {
-                name = parseText(config[ChatSpec.DiscordSpec.leaveMessage], player).string
-                icon = player.avatar
-            }
-            color = MinekordColor.RED
-        }
-    }
-
-    override suspend fun onChatMessage(player: ServerPlayerEntity, message: Text) {
-        webhookMessage {
-            username = player.gameProfile.name
-            avatarUrl = player.avatar
-
-            content = DiscordSerializer.INSTANCE.serialize(
-                message.toAdventure(), discordOptions
-            ).let {
-                if (config[ChatSpec.convertMentions]) {
-                    SerializerUtils.convertMentions(it)
-                } else {
-                    it
-                }
-            }.takeIf { it.isNotBlank() } ?: return@webhookMessage
+            color = config[ColorsSpec.orange].toColor()
         }
     }
 
     override suspend fun onServerStart() {
         webhookEmbed {
             title = parseText(config[ChatSpec.DiscordSpec.startMessage], server).string
-            color = MinekordColor.GREEN
+            color = config[ColorsSpec.green].toColor()
         }
     }
 
     override suspend fun onServerStop() {
         webhookEmbed {
             title = parseText(config[ChatSpec.DiscordSpec.stopMessage], server).string
-            color = MinekordColor.RED
+            color = config[ColorsSpec.red].toColor()
         }
     }
 }

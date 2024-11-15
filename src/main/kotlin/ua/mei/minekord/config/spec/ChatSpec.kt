@@ -15,13 +15,13 @@ object ChatSpec : ConfigSpec() {
     }
 
     object DiscordSpec : ConfigSpec() {
-        val joinMessage by required<String>()
-        val leaveMessage by required<String>()
-        val deathMessage by required<String>()
-
         val advancementMessage by required<String>()
         val goalMessage by required<String>()
         val challengeMessage by required<String>()
+
+        val joinMessage by required<String>()
+        val leaveMessage by required<String>()
+        val deathMessage by required<String>()
 
         val startMessage by required<String>()
         val stopMessage by required<String>()

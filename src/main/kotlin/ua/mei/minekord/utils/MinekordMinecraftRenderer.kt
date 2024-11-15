@@ -47,6 +47,8 @@ object MinekordMinecraftRenderer : DefaultMinecraftRenderer() {
         }
     }
 
-    val MENTION: TextColor = TextColor.fromHexString(config[ColorsSpec.mention])!!
-    val LINK: TextColor = TextColor.fromHexString(config[ColorsSpec.link])!!
+    val MENTION: TextColor
+        get() = TextColor.fromHexString(config[ColorsSpec.mention])!!
+    val LINK: TextColor
+        get() = TextColor.fromHexString(config[ColorsSpec.link])!!
 }

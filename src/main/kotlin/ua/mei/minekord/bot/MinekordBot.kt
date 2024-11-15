@@ -4,6 +4,8 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Webhook
 import dev.kord.core.entity.channel.TopGuildMessageChannel
+import dev.kord.gateway.Intent
+import dev.kord.gateway.PrivilegedIntent
 import dev.kordex.core.ExtensibleBot
 import dev.kordex.core.extensions.Extension
 import dev.kordex.core.utils.ensureWebhook
@@ -19,29 +21,40 @@ import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
-import ua.mei.minekord.bot.extension.MessagesExtension
+import ua.mei.minekord.Minekord
 import ua.mei.minekord.config.config
 import ua.mei.minekord.config.spec.BotSpec
 import ua.mei.minekord.config.spec.ChatSpec
 import ua.mei.minekord.config.spec.PresenceSpec
-import ua.mei.minekord.utils.AdvancementGrantEvent
-import ua.mei.minekord.utils.MinekordActivityType
+import ua.mei.minekord.config.spec.PresenceSpec.MinekordActivityType
+import ua.mei.minekord.event.AdvancementGrantEvent
 import ua.mei.minekord.utils.parseText
 import kotlin.coroutines.CoroutineContext
+import kotlin.reflect.KCallable
 
+@OptIn(PrivilegedIntent::class)
 object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
-    val extensions: MutableList<() -> Extension> = mutableListOf()
+    private lateinit var bot: ExtensibleBot
 
-    lateinit var bot: ExtensibleBot
+    private val extensions: MutableList<() -> Extension> = mutableListOf()
+    private var loaded: Boolean = false
+
     lateinit var guild: Guild
+        private set
     lateinit var channel: TopGuildMessageChannel
+        private set
     lateinit var webhook: Webhook
+        private set
 
     override fun onServerStarting(server: MinecraftServer) {
-        extensions += ::MessagesExtension
-
         runBlocking {
             bot = ExtensibleBot(config[BotSpec.token]) {
+                applicationCommands {
+                    enabled = true
+                }
+                intents {
+                    +Intent.GuildMembers
+                }
                 members {
                     fill(config[BotSpec.guild])
                 }
@@ -59,11 +72,22 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
 
             extensions.forEach { bot.addExtension(it) }
 
+            loaded = true
+
             setup()
         }
-        launch {
-            bot.start()
-        }
+        launch { bot.start() }
+    }
+
+    fun registerExtension(extension: () -> Extension) {
+        if (extension in extensions)
+            throw IllegalArgumentException("Extension already registered!")
+
+        if (loaded)
+            throw IllegalStateException("Cannot register extension after bot startup!")
+
+        extensions += extension
+        Minekord.logger.info("Registered extension: ${(extension as KCallable<*>).returnType}")
     }
 
     fun setup() {
@@ -107,9 +131,7 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
             }
         }
         ServerMessageEvents.CHAT_MESSAGE.register { message, sender, type ->
-            println("test")
             minekordExtensions.forEach {
-                println("test")
                 launch {
                     it.onChatMessage(sender, message.content)
                 }

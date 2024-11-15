@@ -1,9 +1,6 @@
 package ua.mei.minekord.bot
 
 import dev.kord.core.behavior.execute
-import dev.kord.core.entity.Guild
-import dev.kord.core.entity.Webhook
-import dev.kord.core.entity.channel.TopGuildMessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.WebhookMessageCreateBuilder
 import dev.kord.rest.builder.message.embed
@@ -23,12 +20,8 @@ abstract class MinekordExtension : Extension() {
 
     val server: MinecraftServer by inject()
 
-    val guild: Guild = MinekordBot.guild
-    val channel: TopGuildMessageChannel = MinekordBot.channel
-    val webhook: Webhook = MinekordBot.webhook
-
     suspend fun webhookMessage(builder: suspend WebhookMessageCreateBuilder.() -> Unit) {
-        webhook.execute(webhook.token!!) {
+        MinekordBot.webhook.execute(MinekordBot.webhook.token!!) {
             allowedMentions = mentions
             avatarUrl = config[ChatSpec.WebhookSpec.webhookAvatar]
             builder()
@@ -43,24 +36,14 @@ abstract class MinekordExtension : Extension() {
         }
     }
 
-    open suspend fun onAdvancementGrant(player: ServerPlayerEntity, advancement: Advancement) {
-    }
+    open suspend fun onChatMessage(player: ServerPlayerEntity, message: Text) {}
 
-    open suspend fun onPlayerDeath(player: ServerPlayerEntity, source: DamageSource) {
-    }
+    open suspend fun onAdvancementGrant(player: ServerPlayerEntity, advancement: Advancement) {}
 
-    open suspend fun onPlayerJoin(player: ServerPlayerEntity) {
-    }
+    open suspend fun onPlayerJoin(player: ServerPlayerEntity) {}
+    open suspend fun onPlayerLeave(player: ServerPlayerEntity) {}
+    open suspend fun onPlayerDeath(player: ServerPlayerEntity, source: DamageSource) {}
 
-    open suspend fun onPlayerLeave(player: ServerPlayerEntity) {
-    }
-
-    open suspend fun onChatMessage(player: ServerPlayerEntity, message: Text) {
-    }
-
-    open suspend fun onServerStart() {
-    }
-
-    open suspend fun onServerStop() {
-    }
+    open suspend fun onServerStart() {}
+    open suspend fun onServerStop() {}
 }

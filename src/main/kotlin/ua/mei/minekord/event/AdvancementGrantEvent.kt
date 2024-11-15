@@ -1,4 +1,4 @@
-package ua.mei.minekord.utils
+package ua.mei.minekord.event
 
 import net.fabricmc.fabric.api.event.Event
 import net.fabricmc.fabric.api.event.EventFactory

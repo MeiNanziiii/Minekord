@@ -19,14 +19,13 @@ convertMarkdown = true
 
     [Chat.Discord]
 
-    joinMessage = "%player:displayname% joined the game"
-    leaveMessage = "%player:displayname% left the game"
-
-    deathMessage = "{message}"
-
     advancementMessage = "%player:displayname% has made the advancement [{advancement}]"
     goalMessage = "%player:displayname% has reached the goal [{advancement}]"
     challengeMessage = "%player:displayname% has completed the challenge [{advancement}]"
+
+    joinMessage = "%player:displayname% joined the game"
+    leaveMessage = "%player:displayname% left the game"
+    deathMessage = "{message}"
 
     startMessage = "Server started"
     stopMessage = "Server stopped"

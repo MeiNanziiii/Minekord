@@ -6,6 +6,7 @@ import net.fabricmc.loader.api.FabricLoader
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import ua.mei.minekord.bot.MinekordBot
+import ua.mei.minekord.bot.extension.MessagesExtension
 import ua.mei.minekord.config.CONFIG_PATH
 import ua.mei.minekord.config.config
 import java.nio.file.Files
@@ -28,6 +29,8 @@ object Minekord : ModInitializer {
         }
 
         config.validateRequired()
+
+        MinekordBot.registerExtension(::MessagesExtension)
 
         ServerLifecycleEvents.SERVER_STARTING.register(MinekordBot)
     }
