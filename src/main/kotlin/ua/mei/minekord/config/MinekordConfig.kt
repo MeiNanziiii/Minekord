@@ -10,11 +10,19 @@ import ua.mei.minekord.config.spec.PresenceSpec
 
 const val CONFIG_PATH: String = "minekord.toml"
 
-val config: Config = Config {
-    addSpec(BotSpec)
-    addSpec(ChatSpec)
-    addSpec(ColorsSpec)
-    addSpec(PresenceSpec)
+var config: Config = loadConfig()
+    private set
+
+fun loadConfig(): Config {
+    return Config {
+        addSpec(BotSpec)
+        addSpec(ChatSpec)
+        addSpec(ColorsSpec)
+        addSpec(PresenceSpec)
+    }.from.toml.file(FabricLoader.getInstance().configDir.resolve(CONFIG_PATH).toFile())
 }
-    .from.toml.resource(CONFIG_PATH)
-    .from.toml.watchFile(FabricLoader.getInstance().configDir.resolve(CONFIG_PATH).toFile())
+
+fun reloadConfig() {
+    config = loadConfig()
+    config.validateRequired()
+}

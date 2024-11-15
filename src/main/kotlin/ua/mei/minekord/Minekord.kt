@@ -1,6 +1,7 @@
 package ua.mei.minekord
 
 import net.fabricmc.api.ModInitializer
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.loader.api.FabricLoader
 import org.apache.logging.log4j.LogManager
@@ -33,5 +34,6 @@ object Minekord : ModInitializer {
         MinekordBot.registerExtension(::MessagesExtension)
 
         ServerLifecycleEvents.SERVER_STARTING.register(MinekordBot)
+        CommandRegistrationCallback.EVENT.register(MinekordCommands)
     }
 }
