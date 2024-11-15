@@ -8,7 +8,7 @@ import ua.mei.minekord.bot.MinekordBot
 import java.util.Locale
 
 object SerializerUtils {
-    val pingRegex: Regex = Regex("@([a-zA-Z0-9_]{3,16})")
+    val pingRegex: Regex = Regex("@(\\S{1,32})")
 
     suspend fun convertMentions(message: String): String {
         return pingRegex.findAll(message).fold(message) { acc, matchResult ->
