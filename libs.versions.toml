@@ -17,6 +17,7 @@ kyori="5.9.0"
 placeholder-api="2.1.3+1.20.1"
 
 luckperms="5.4"
+permissions="0.3.1"
 
 [libraries]
 
@@ -38,3 +39,4 @@ kyori = { module = "net.kyori:adventure-platform-fabric", version.ref = "kyori"}
 placeholder-api = { module = "eu.pb4:placeholder-api", version.ref = "placeholder-api" }
 
 luckperms = { module = "net.luckperms:api", version.ref = "luckperms" }
+permissions = { module = "me.lucko:fabric-permissions-api", version.ref = "permissions" }

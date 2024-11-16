@@ -6,6 +6,7 @@ import dev.kord.common.Color
 import dev.vankka.mcdiscordreserializer.discord.DiscordSerializerOptions
 import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializerOptions
 import eu.pb4.placeholders.api.PlaceholderContext
+import eu.pb4.placeholders.api.node.EmptyNode
 import eu.pb4.placeholders.api.node.TextNode
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
@@ -64,6 +65,7 @@ fun GameProfile.texture(): String {
 fun String.toColor(): Color = Color(this.removePrefix("#").toInt(16))
 
 fun TextNode.toText(context: PlaceholderContext, placeholders: PlaceholderBuilder.() -> Unit): Text {
+    if (this == EmptyNode.INSTANCE) return Text.empty()
     return this.toText(context.asParserContext().with(DynamicNode.NODES, PlaceholderBuilder().apply(placeholders).map))
 }
 

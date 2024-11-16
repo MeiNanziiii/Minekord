@@ -48,6 +48,7 @@ dependencies {
     implementAndInclude(libs.placeholder.api)
 
     modCompileOnly(libs.luckperms)
+    implementAndInclude(libs.permissions)
 }
 
 afterEvaluate {

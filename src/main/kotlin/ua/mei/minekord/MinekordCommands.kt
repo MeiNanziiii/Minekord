@@ -2,6 +2,7 @@ package ua.mei.minekord
 
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.builder.LiteralArgumentBuilder.literal
+import me.lucko.fabric.api.permissions.v0.Permissions
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.minecraft.command.CommandRegistryAccess
 import net.minecraft.server.command.CommandManager
@@ -13,10 +14,10 @@ object MinekordCommands : CommandRegistrationCallback {
     override fun register(dispatcher: CommandDispatcher<ServerCommandSource>, access: CommandRegistryAccess, environment: CommandManager.RegistrationEnvironment) {
         dispatcher.register(
             literal<ServerCommandSource>("minekord")
-                .requires { source -> source.hasPermissionLevel(4) }
+                .requires(Permissions.require("minekord.main", 4))
                 .then(
                     literal<ServerCommandSource>("reload")
-                        .requires { source -> source.hasPermissionLevel(4) }
+                        .requires(Permissions.require("minekord.reload", 4))
                         .executes { context ->
                             MinekordConfig.load()
 
