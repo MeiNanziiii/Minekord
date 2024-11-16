@@ -1,17 +1,22 @@
 package ua.mei.minekord.bot
 
+import dev.kord.common.entity.AllowedMentionType
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Webhook
 import dev.kord.core.entity.channel.TopGuildMessageChannel
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
+import dev.kord.rest.builder.message.AllowedMentionsBuilder
 import dev.kordex.core.ExtensibleBot
 import dev.kordex.core.extensions.Extension
 import dev.kordex.core.utils.ensureWebhook
 import dev.kordex.core.utils.loadModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
@@ -22,13 +27,10 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import ua.mei.minekord.Minekord
-import ua.mei.minekord.config.config
-import ua.mei.minekord.config.spec.BotSpec
-import ua.mei.minekord.config.spec.ChatSpec
-import ua.mei.minekord.config.spec.PresenceSpec
+import ua.mei.minekord.config.MinekordConfig
 import ua.mei.minekord.config.spec.PresenceSpec.MinekordActivityType
 import ua.mei.minekord.event.AdvancementGrantEvent
-import ua.mei.minekord.utils.parseText
+import ua.mei.minekord.utils.toText
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KCallable
 
@@ -46,9 +48,11 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
     lateinit var webhook: Webhook
         private set
 
+    val mentions: AllowedMentionsBuilder = AllowedMentionsBuilder()
+
     override fun onServerStarting(server: MinecraftServer) {
         runBlocking {
-            bot = ExtensibleBot(config[BotSpec.token]) {
+            bot = ExtensibleBot(MinekordConfig.token) {
                 applicationCommands {
                     enabled = true
                 }
@@ -56,7 +60,7 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
                     +Intent.GuildMembers
                 }
                 members {
-                    fill(config[BotSpec.guild])
+                    fill(MinekordConfig.guild)
                 }
                 hooks {
                     afterKoinSetup {
@@ -66,9 +70,9 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
                     }
                 }
             }
-            guild = bot.kordRef.getGuild(Snowflake(config[BotSpec.guild]))
-            channel = guild.getChannel(Snowflake(config[BotSpec.channel])) as TopGuildMessageChannel
-            webhook = ensureWebhook(channel, config[ChatSpec.WebhookSpec.webhookName])
+            guild = bot.kordRef.getGuild(Snowflake(MinekordConfig.guild))
+            channel = guild.getChannel(Snowflake(MinekordConfig.channel)) as TopGuildMessageChannel
+            webhook = ensureWebhook(channel, MinekordConfig.webhookName)
 
             extensions.forEach { bot.addExtension(it) }
 
@@ -90,7 +94,10 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
         Minekord.logger.info("Registered extension: ${(extension as KCallable<*>).returnType}")
     }
 
-    fun setup() {
+    suspend fun setup() {
+        mentions.add(AllowedMentionType.UserMentions)
+        mentions.roles.addAll(guild.roles.filter { it.mentionable }.map { it.id }.toList())
+
         val minekordExtensions: List<MinekordExtension> = bot.findExtensions()
 
         AdvancementGrantEvent.EVENT.register { player, advancement ->
@@ -153,12 +160,12 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
         }
 
         ServerTickEvents.END_SERVER_TICK.register { server ->
-            if (server.ticks % config[PresenceSpec.updateTicks] == 0 && config[PresenceSpec.activityType] != MinekordActivityType.NONE) {
+            if (server.ticks % MinekordConfig.updateTicks == 0 && MinekordConfig.activityType != MinekordActivityType.NONE) {
                 launch {
                     bot.kordRef.editPresence {
-                        val text: String = parseText(config[PresenceSpec.activityText], server).string
+                        val text: String = MinekordConfig.activityText.toText(server).string
 
-                        when (config[PresenceSpec.activityType]) {
+                        when (MinekordConfig.activityType) {
                             MinekordActivityType.NONE -> Unit
                             MinekordActivityType.PLAYING -> playing(text)
                             MinekordActivityType.LISTENING -> listening(text)

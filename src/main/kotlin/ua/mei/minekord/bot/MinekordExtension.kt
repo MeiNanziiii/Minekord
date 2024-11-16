@@ -11,9 +11,7 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import org.koin.core.component.inject
-import ua.mei.minekord.config.config
-import ua.mei.minekord.config.spec.ChatSpec
-import ua.mei.minekord.utils.mentions
+import ua.mei.minekord.config.MinekordConfig
 
 abstract class MinekordExtension : Extension() {
     abstract override val name: String
@@ -22,8 +20,8 @@ abstract class MinekordExtension : Extension() {
 
     suspend fun webhookMessage(builder: suspend WebhookMessageCreateBuilder.() -> Unit) {
         MinekordBot.webhook.execute(MinekordBot.webhook.token!!) {
-            allowedMentions = mentions
-            avatarUrl = config[ChatSpec.WebhookSpec.webhookAvatar]
+            allowedMentions = MinekordBot.mentions
+            avatarUrl = MinekordConfig.webhookAvatar
             builder()
         }
     }

@@ -10,7 +10,6 @@ import dev.kordex.core.checks.isNotBot
 import dev.kordex.core.extensions.event
 import dev.vankka.mcdiscordreserializer.discord.DiscordSerializer
 import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializer
-import eu.pb4.placeholders.api.PlaceholderContext
 import net.minecraft.advancement.Advancement
 import net.minecraft.advancement.AdvancementDisplay
 import net.minecraft.advancement.AdvancementFrame
@@ -18,20 +17,16 @@ import net.minecraft.entity.damage.DamageSource
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import ua.mei.minekord.bot.MinekordExtension
-import ua.mei.minekord.config.config
-import ua.mei.minekord.config.spec.BotSpec
-import ua.mei.minekord.config.spec.ChatSpec
-import ua.mei.minekord.config.spec.ColorsSpec
+import ua.mei.minekord.config.MinekordConfig
 import ua.mei.minekord.utils.SerializerUtils
 import ua.mei.minekord.utils.avatar
 import ua.mei.minekord.utils.discordOptions
 import ua.mei.minekord.utils.literal
 import ua.mei.minekord.utils.minecraftOptions
-import ua.mei.minekord.utils.parseText
 import ua.mei.minekord.utils.summary
 import ua.mei.minekord.utils.toAdventure
-import ua.mei.minekord.utils.toColor
 import ua.mei.minekord.utils.toNative
+import ua.mei.minekord.utils.toText
 
 class MessagesExtension : MinekordExtension() {
     override val name: String = "minekord.messages"
@@ -39,13 +34,13 @@ class MessagesExtension : MinekordExtension() {
     override suspend fun setup() {
         event<MessageCreateEvent> {
             check { isNotBot() }
-            check { inChannel(Snowflake(config[BotSpec.channel])) }
+            check { inChannel(Snowflake(MinekordConfig.channel)) }
 
             action {
                 val message: Message = event.message
                 val sender: Member = event.member ?: return@action
 
-                var content: Text = if (config[ChatSpec.convertMarkdown]) {
+                var content: Text = if (MinekordConfig.convertMarkdown) {
                     MinecraftSerializer.INSTANCE.serialize(message.content, minecraftOptions).toNative()
                 } else {
                     message.content.literal()
@@ -54,7 +49,7 @@ class MessagesExtension : MinekordExtension() {
                 if (message.referencedMessage != null) {
                     val replyContent: Text = MinecraftSerializer.INSTANCE.serialize(message.referencedMessage!!.content, minecraftOptions).toNative()
 
-                    val reply: Text = parseText(config[ChatSpec.MinecraftSpec.replyFormat], PlaceholderContext.of(server)) {
+                    val reply: Text = MinekordConfig.replyFormat.toText(server) {
                         "sender" to (message.referencedMessage!!.author?.effectiveName ?: message.referencedMessage!!.data.author.username).literal()
                         "message" to replyContent
                         "summary" to replyContent.string.summary().literal()
@@ -63,7 +58,7 @@ class MessagesExtension : MinekordExtension() {
                     content = Text.empty().append(reply).append("\n").append(content)
                 }
 
-                content = parseText(config[ChatSpec.MinecraftSpec.messageFormat], PlaceholderContext.of(server)) {
+                content = MinekordConfig.messageFormat.toText(server) {
                     "sender" to sender.effectiveName.literal()
                     "message" to content
                 }
@@ -81,7 +76,7 @@ class MessagesExtension : MinekordExtension() {
             content = DiscordSerializer.INSTANCE.serialize(
                 message.toAdventure(), discordOptions
             ).let {
-                if (config[ChatSpec.convertMentions]) {
+                if (MinekordConfig.convertMentions) {
                     SerializerUtils.convertMentions(it)
                 } else {
                     it
@@ -94,17 +89,11 @@ class MessagesExtension : MinekordExtension() {
         val display: AdvancementDisplay = advancement.display ?: return
         val frame: AdvancementFrame = display.frame
 
-        val message: String = parseText(
-            when (frame) {
-                AdvancementFrame.CHALLENGE -> config[ChatSpec.DiscordSpec.challengeMessage]
-                AdvancementFrame.GOAL -> config[ChatSpec.DiscordSpec.goalMessage]
-
-                else -> config[ChatSpec.DiscordSpec.advancementMessage]
-            },
-            PlaceholderContext.of(player)
-        ) {
-            "advancement" to display.title
-        }.string
+        val message = when (frame) {
+            AdvancementFrame.CHALLENGE -> MinekordConfig.challengeMessage
+            AdvancementFrame.GOAL -> MinekordConfig.goalMessage
+            AdvancementFrame.TASK -> MinekordConfig.advancementMessage
+        }.toText(player) { "advancement" to display.title }.string
 
         webhookEmbed {
             author {
@@ -114,27 +103,27 @@ class MessagesExtension : MinekordExtension() {
             footer {
                 text = display.description.string
             }
-            color = config[if (frame == AdvancementFrame.CHALLENGE) ColorsSpec.purple else ColorsSpec.blue].toColor()
+            color = if (frame == AdvancementFrame.CHALLENGE) MinekordConfig.purple else MinekordConfig.blue
         }
     }
 
     override suspend fun onPlayerJoin(player: ServerPlayerEntity) {
         webhookEmbed {
             author {
-                name = parseText(config[ChatSpec.DiscordSpec.joinMessage], player).string
+                name = MinekordConfig.joinMessage.toText(player).string
                 icon = player.avatar
             }
-            color = config[ColorsSpec.green].toColor()
+            color = MinekordConfig.green
         }
     }
 
     override suspend fun onPlayerLeave(player: ServerPlayerEntity) {
         webhookEmbed {
             author {
-                name = parseText(config[ChatSpec.DiscordSpec.leaveMessage], player).string
+                name = MinekordConfig.leaveMessage.toText(player).string
                 icon = player.avatar
             }
-            color = config[ColorsSpec.red].toColor()
+            color = MinekordConfig.red
         }
     }
 
@@ -142,25 +131,25 @@ class MessagesExtension : MinekordExtension() {
         webhookEmbed {
             author {
                 icon = player.avatar
-                name = parseText(config[ChatSpec.DiscordSpec.deathMessage], PlaceholderContext.of(player)) {
+                name = MinekordConfig.deathMessage.toText(player) {
                     "message" to source.getDeathMessage(player)
                 }.string
             }
-            color = config[ColorsSpec.orange].toColor()
+            color = MinekordConfig.orange
         }
     }
 
     override suspend fun onServerStart() {
         webhookEmbed {
-            title = parseText(config[ChatSpec.DiscordSpec.startMessage], server).string
-            color = config[ColorsSpec.green].toColor()
+            title = MinekordConfig.startMessage.toText(server).string
+            color = MinekordConfig.green
         }
     }
 
     override suspend fun onServerStop() {
         webhookEmbed {
-            title = parseText(config[ChatSpec.DiscordSpec.stopMessage], server).string
-            color = config[ColorsSpec.red].toColor()
+            title = MinekordConfig.stopMessage.toText(server).string
+            color = MinekordConfig.red
         }
     }
 }

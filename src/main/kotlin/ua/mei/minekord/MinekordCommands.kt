@@ -7,7 +7,7 @@ import net.minecraft.command.CommandRegistryAccess
 import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.text.Text
-import ua.mei.minekord.config.reloadConfig
+import ua.mei.minekord.config.MinekordConfig
 
 object MinekordCommands : CommandRegistrationCallback {
     override fun register(dispatcher: CommandDispatcher<ServerCommandSource>, access: CommandRegistryAccess, environment: CommandManager.RegistrationEnvironment) {
@@ -18,7 +18,7 @@ object MinekordCommands : CommandRegistrationCallback {
                     literal<ServerCommandSource>("reload")
                         .requires { source -> source.hasPermissionLevel(4) }
                         .executes { context ->
-                            reloadConfig()
+                            MinekordConfig.load()
 
                             context.source.sendFeedback({ Text.literal("Config reloaded!") }, false)
 

@@ -8,8 +8,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.bot.extension.MessagesExtension
-import ua.mei.minekord.config.CONFIG_PATH
-import ua.mei.minekord.config.config
+import ua.mei.minekord.config.MinekordConfig
 import java.nio.file.Files
 
 object Minekord : ModInitializer {
@@ -22,14 +21,14 @@ object Minekord : ModInitializer {
 
         val loader: FabricLoader = FabricLoader.getInstance()
 
-        if (!Files.exists(loader.configDir.resolve(CONFIG_PATH))) {
+        if (!Files.exists(loader.configDir.resolve(MinekordConfig.CONFIG_PATH))) {
             Files.copy(
-                loader.getModContainer(MOD_ID).get().findPath(CONFIG_PATH).get(),
-                loader.configDir.resolve(CONFIG_PATH)
+                loader.getModContainer(MOD_ID).get().findPath(MinekordConfig.CONFIG_PATH).get(),
+                loader.configDir.resolve(MinekordConfig.CONFIG_PATH)
             )
         }
 
-        config.validateRequired()
+        MinekordConfig.load()
 
         MinekordBot.registerExtension(::MessagesExtension)
 

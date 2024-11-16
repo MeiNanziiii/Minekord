@@ -12,6 +12,6 @@ object PresenceSpec : ConfigSpec() {
         PLAYING,
         LISTENING,
         WATCHING,
-        COMPETING,
+        COMPETING
     }
 }
