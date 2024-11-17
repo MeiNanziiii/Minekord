@@ -12,7 +12,7 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
-import ua.mei.minekord.config.MinekordConfig
+import ua.mei.minekord.config.MinekordConfig.Chat
 import ua.mei.minekord.parser.DynamicNode
 import java.util.Base64
 
@@ -29,10 +29,10 @@ fun Text.adventure(): Component {
 fun String.adventure(): Component = Component.text(this)
 
 fun String.summary(): String {
-    return if (this.length <= MinekordConfig.summaryMaxLength) {
+    return if (this.length <= Chat.Minecraft.summaryMaxLength) {
         this.trim()
     } else {
-        this.take(MinekordConfig.summaryMaxLength).trim() + "..."
+        this.take(Chat.Minecraft.summaryMaxLength).trim() + "..."
     }
 }
 
@@ -75,7 +75,7 @@ class PlaceholderBuilder {
 }
 
 val ServerPlayerEntity.avatar: String
-    get() = MinekordConfig.playerAvatar.toText(this@avatar) {
+    get() = Chat.Webhook.playerAvatar.toText(this@avatar) {
         "nickname" to this@avatar.gameProfile.name.literal()
         "texture" to this@avatar.gameProfile.texture().literal()
     }.string

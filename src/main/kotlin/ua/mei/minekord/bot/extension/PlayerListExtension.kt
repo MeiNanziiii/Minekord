@@ -5,7 +5,9 @@ import dev.kord.rest.builder.message.embed
 import dev.kordex.core.extensions.ephemeralSlashCommand
 import dev.kordex.core.i18n.toKey
 import ua.mei.minekord.bot.MinekordExtension
-import ua.mei.minekord.config.MinekordConfig
+import ua.mei.minekord.config.MinekordConfig.Bot
+import ua.mei.minekord.config.MinekordConfig.Colors
+import ua.mei.minekord.config.MinekordConfig.Commands
 import ua.mei.minekord.utils.toText
 
 class PlayerListExtension : MinekordExtension() {
@@ -13,18 +15,18 @@ class PlayerListExtension : MinekordExtension() {
 
     override suspend fun setup() {
         ephemeralSlashCommand {
-            name = MinekordConfig.name.toKey()
-            description = MinekordConfig.description.toKey()
+            name = Commands.PlayerList.name.toKey()
+            description = Commands.PlayerList.description.toKey()
 
-            guild(Snowflake(MinekordConfig.guild))
+            guild(Snowflake(Bot.guild))
 
             action {
                 respond {
                     embed {
-                        title = MinekordConfig.title.toText(server).string
-                        color = MinekordConfig.green
+                        title = Commands.PlayerList.title.toText(server).string
+                        color = Colors.green
                         description = server.playerManager.playerList.map {
-                            MinekordConfig.format.toText(it).string
+                            Commands.PlayerList.format.toText(it).string
                         }.joinToString("\n")
                     }
                 }

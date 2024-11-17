@@ -18,7 +18,9 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.bot.MinekordExtension
-import ua.mei.minekord.config.MinekordConfig
+import ua.mei.minekord.config.MinekordConfig.Bot
+import ua.mei.minekord.config.MinekordConfig.Chat
+import ua.mei.minekord.config.MinekordConfig.Colors
 import ua.mei.minekord.utils.MessageSender
 import ua.mei.minekord.utils.SerializerUtils
 import ua.mei.minekord.utils.adventure
@@ -34,13 +36,13 @@ class MessagesExtension : MinekordExtension() {
     override suspend fun setup() {
         event<MessageCreateEvent> {
             check { isNotBot() }
-            check { inChannel(Snowflake(MinekordConfig.channel)) }
+            check { inChannel(Snowflake(Bot.channel)) }
 
             action {
                 val message: Message = event.message
                 val sender: Member = event.member ?: return@action
 
-                var content: Text = if (MinekordConfig.convertMarkdown) {
+                var content: Text = if (Chat.convertMarkdown) {
                     MinecraftSerializer.INSTANCE.serialize(message.content, MinekordBot.minecraftOptions).native()
                 } else {
                     message.content.literal()
@@ -49,7 +51,7 @@ class MessagesExtension : MinekordExtension() {
                 if (message.referencedMessage != null) {
                     val replyContent: Text = MinecraftSerializer.INSTANCE.serialize(message.referencedMessage!!.content, MinekordBot.minecraftOptions).native()
 
-                    val reply: Text = MinekordConfig.replyFormat.toText(server) {
+                    val reply: Text = Chat.Minecraft.replyFormat.toText(server) {
                         "sender" to (message.referencedMessage!!.author?.effectiveName ?: message.referencedMessage!!.data.author.username).literal()
                         "message" to replyContent
                         "summary" to replyContent.string.summary().literal()
@@ -58,7 +60,7 @@ class MessagesExtension : MinekordExtension() {
                     content = Text.empty().append(reply).append("\n").append(content)
                 }
 
-                content = MinekordConfig.messageFormat.toText(server) {
+                content = Chat.Minecraft.messageFormat.toText(server) {
                     "sender" to sender.effectiveName.literal()
                     "message" to content
                 }
@@ -74,7 +76,7 @@ class MessagesExtension : MinekordExtension() {
             avatarUrl = sender.avatar
 
             content = DiscordSerializer.INSTANCE.serialize(message.adventure(), MinekordBot.discordOptions).let {
-                if (MinekordConfig.convertMentions) {
+                if (Chat.convertMentions) {
                     SerializerUtils.convertMentions(it)
                 } else {
                     it
@@ -88,9 +90,9 @@ class MessagesExtension : MinekordExtension() {
         val frame: AdvancementFrame = display.frame
 
         val message = when (frame) {
-            AdvancementFrame.CHALLENGE -> MinekordConfig.challengeMessage
-            AdvancementFrame.GOAL -> MinekordConfig.goalMessage
-            AdvancementFrame.TASK -> MinekordConfig.advancementMessage
+            AdvancementFrame.CHALLENGE -> Chat.Discord.challengeMessage
+            AdvancementFrame.GOAL -> Chat.Discord.goalMessage
+            AdvancementFrame.TASK -> Chat.Discord.advancementMessage
         }.toText(player) { "advancement" to display.title }.string
 
         webhookEmbed {
@@ -101,27 +103,27 @@ class MessagesExtension : MinekordExtension() {
             footer {
                 text = display.description.string
             }
-            color = if (frame == AdvancementFrame.CHALLENGE) MinekordConfig.purple else MinekordConfig.blue
+            color = if (frame == AdvancementFrame.CHALLENGE) Colors.purple else Colors.blue
         }
     }
 
     override suspend fun onPlayerJoin(player: ServerPlayerEntity) {
         webhookEmbed {
             author {
-                name = MinekordConfig.joinMessage.toText(player).string
+                name = Chat.Discord.joinMessage.toText(player).string
                 icon = player.avatar
             }
-            color = MinekordConfig.green
+            color = Colors.green
         }
     }
 
     override suspend fun onPlayerLeave(player: ServerPlayerEntity) {
         webhookEmbed {
             author {
-                name = MinekordConfig.leaveMessage.toText(player).string
+                name = Chat.Discord.leaveMessage.toText(player).string
                 icon = player.avatar
             }
-            color = MinekordConfig.red
+            color = Colors.red
         }
     }
 
@@ -129,25 +131,25 @@ class MessagesExtension : MinekordExtension() {
         webhookEmbed {
             author {
                 icon = player.avatar
-                name = MinekordConfig.deathMessage.toText(player) {
+                name = Chat.Discord.deathMessage.toText(player) {
                     "message" to source.getDeathMessage(player)
                 }.string
             }
-            color = MinekordConfig.orange
+            color = Colors.orange
         }
     }
 
     override suspend fun onServerStart() {
         webhookEmbed {
-            title = MinekordConfig.startMessage.toText(server).string
-            color = MinekordConfig.green
+            title = Chat.Discord.startMessage.toText(server).string
+            color = Colors.green
         }
     }
 
     override suspend fun onServerStop() {
         webhookEmbed {
-            title = MinekordConfig.stopMessage.toText(server).string
-            color = MinekordConfig.red
+            title = Chat.Discord.stopMessage.toText(server).string
+            color = Colors.red
         }
     }
 }

@@ -11,6 +11,7 @@ import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.bot.extension.MessagesExtension
 import ua.mei.minekord.bot.extension.PlayerListExtension
 import ua.mei.minekord.config.MinekordConfig
+import ua.mei.minekord.config.MinekordConfig.Chat
 import ua.mei.minekord.event.ChatMessageEvent
 import ua.mei.minekord.utils.MessageSender
 import ua.mei.minekord.utils.avatar
@@ -36,7 +37,7 @@ object Minekord : ModInitializer {
         MinekordConfig.load()
 
         MinekordBot.registerExtension(::MessagesExtension)
-        if (MinekordConfig.enabled) {
+        if (MinekordConfig.Commands.PlayerList.enabled) {
             MinekordBot.registerExtension(::PlayerListExtension)
         }
 
@@ -47,7 +48,7 @@ object Minekord : ModInitializer {
             if (source.isExecutedByPlayer) {
                 ChatMessageEvent.EVENT.invoker().message(message.content, MessageSender(source.player!!.gameProfile.name, source.player!!.avatar))
             } else {
-                ChatMessageEvent.EVENT.invoker().message(message.content, MessageSender(MinekordConfig.webhookName, MinekordConfig.webhookAvatar))
+                ChatMessageEvent.EVENT.invoker().message(message.content, MessageSender(Chat.Webhook.webhookName, Chat.Webhook.webhookAvatar))
             }
         }
 

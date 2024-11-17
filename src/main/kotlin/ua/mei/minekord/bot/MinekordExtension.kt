@@ -11,7 +11,7 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import org.koin.core.component.inject
-import ua.mei.minekord.config.MinekordConfig
+import ua.mei.minekord.config.MinekordConfig.Chat
 import ua.mei.minekord.utils.MessageSender
 
 abstract class MinekordExtension : Extension() {
@@ -22,7 +22,7 @@ abstract class MinekordExtension : Extension() {
     suspend fun webhookMessage(builder: suspend WebhookMessageCreateBuilder.() -> Unit) {
         MinekordBot.webhook.execute(MinekordBot.webhook.token!!) {
             allowedMentions = MinekordBot.mentions
-            avatarUrl = MinekordConfig.webhookAvatar
+            avatarUrl = Chat.Webhook.webhookAvatar
             builder()
         }
     }

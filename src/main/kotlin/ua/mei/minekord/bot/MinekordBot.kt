@@ -31,7 +31,9 @@ import net.kyori.adventure.text.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import ua.mei.minekord.Minekord
-import ua.mei.minekord.config.MinekordConfig
+import ua.mei.minekord.config.MinekordConfig.Bot
+import ua.mei.minekord.config.MinekordConfig.Chat
+import ua.mei.minekord.config.MinekordConfig.Presence
 import ua.mei.minekord.event.AdvancementGrantEvent
 import ua.mei.minekord.event.ChatMessageEvent
 import ua.mei.minekord.utils.MinekordActivityType
@@ -59,7 +61,7 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
 
     val discordOptions: DiscordSerializerOptions = DiscordSerializerOptions.defaults()
         .withEmbedLinks(false)
-        .withEscapeMarkdown(MinekordConfig.convertMarkdown)
+        .withEscapeMarkdown(Chat.convertMarkdown)
         .withKeybindProvider(SerializerUtils::translatableToString)
         .withTranslationProvider(SerializerUtils::translatableToString)
 
@@ -68,7 +70,7 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
 
     override fun onServerStarting(server: MinecraftServer) {
         runBlocking {
-            bot = ExtensibleBot(MinekordConfig.token) {
+            bot = ExtensibleBot(Bot.token) {
                 applicationCommands {
                     enabled = true
                 }
@@ -77,7 +79,7 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
                     +Intent.GuildMembers
                 }
                 members {
-                    fill(MinekordConfig.guild)
+                    fill(Bot.token)
                 }
                 hooks {
                     afterKoinSetup {
@@ -87,9 +89,9 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
                     }
                 }
             }
-            guild = bot.kordRef.getGuild(Snowflake(MinekordConfig.guild))
-            channel = guild.getChannel(Snowflake(MinekordConfig.channel)) as TopGuildMessageChannel
-            webhook = ensureWebhook(channel, MinekordConfig.webhookName)
+            guild = bot.kordRef.getGuild(Snowflake(Bot.guild))
+            channel = guild.getChannel(Snowflake(Bot.channel)) as TopGuildMessageChannel
+            webhook = ensureWebhook(channel, Chat.Webhook.webhookName)
 
             mentions.add(AllowedMentionType.UserMentions)
             mentions.roles.addAll(guild.roles.filter { it.mentionable }.map { it.id }.toList())
@@ -180,12 +182,12 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
         }
 
         ServerTickEvents.END_SERVER_TICK.register { server ->
-            if (server.ticks % MinekordConfig.updateTicks == 0 && MinekordConfig.activityType != MinekordActivityType.NONE) {
+            if (server.ticks % Presence.updateTicks == 0 && Presence.activityType != MinekordActivityType.NONE) {
                 launch {
                     bot.kordRef.editPresence {
-                        val text: String = MinekordConfig.activityText.toText(server).string
+                        val text: String = Presence.activityText.toText(server).string
 
-                        when (MinekordConfig.activityType) {
+                        when (Presence.activityType) {
                             MinekordActivityType.NONE -> Unit
                             MinekordActivityType.PLAYING -> playing(text)
                             MinekordActivityType.LISTENING -> listening(text)
