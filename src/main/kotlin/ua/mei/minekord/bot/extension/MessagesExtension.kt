@@ -18,9 +18,9 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.bot.MinekordExtension
-import ua.mei.minekord.config.MinekordConfig.Main
 import ua.mei.minekord.config.MinekordConfig.Chat
 import ua.mei.minekord.config.MinekordConfig.Colors
+import ua.mei.minekord.config.MinekordConfig.Main
 import ua.mei.minekord.utils.MessageSender
 import ua.mei.minekord.utils.SerializerUtils
 import ua.mei.minekord.utils.adventure

@@ -31,8 +31,8 @@ import net.kyori.adventure.text.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import ua.mei.minekord.Minekord
-import ua.mei.minekord.config.MinekordConfig.Main
 import ua.mei.minekord.config.MinekordConfig.Chat
+import ua.mei.minekord.config.MinekordConfig.Main
 import ua.mei.minekord.config.MinekordConfig.Presence
 import ua.mei.minekord.event.AdvancementGrantEvent
 import ua.mei.minekord.event.ChatMessageEvent

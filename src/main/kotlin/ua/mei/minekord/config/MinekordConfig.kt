@@ -12,10 +12,10 @@ import eu.pb4.placeholders.api.parsers.StaticPreParser
 import eu.pb4.placeholders.api.parsers.TextParserV1
 import net.fabricmc.loader.api.FabricLoader
 import net.kyori.adventure.text.format.TextColor
-import ua.mei.minekord.config.spec.MainSpec
 import ua.mei.minekord.config.spec.ChatSpec
 import ua.mei.minekord.config.spec.ColorsSpec
 import ua.mei.minekord.config.spec.CommandsSpec
+import ua.mei.minekord.config.spec.MainSpec
 import ua.mei.minekord.config.spec.PresenceSpec
 import ua.mei.minekord.parser.DynamicNode
 import ua.mei.minekord.utils.MinekordActivityType

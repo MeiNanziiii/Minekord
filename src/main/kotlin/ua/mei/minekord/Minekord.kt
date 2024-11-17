@@ -11,7 +11,9 @@ import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.bot.extension.MessagesExtension
 import ua.mei.minekord.bot.extension.PlayerListExtension
 import ua.mei.minekord.config.MinekordConfig
+import ua.mei.minekord.config.MinekordConfig.CONFIG_PATH
 import ua.mei.minekord.config.MinekordConfig.Chat
+import ua.mei.minekord.config.MinekordConfig.Commands
 import ua.mei.minekord.event.ChatMessageEvent
 import ua.mei.minekord.utils.MessageSender
 import ua.mei.minekord.utils.avatar
@@ -27,17 +29,17 @@ object Minekord : ModInitializer {
 
         val loader: FabricLoader = FabricLoader.getInstance()
 
-        if (!Files.exists(loader.configDir.resolve(MinekordConfig.CONFIG_PATH))) {
+        if (!Files.exists(loader.configDir.resolve(CONFIG_PATH))) {
             Files.copy(
-                loader.getModContainer(MOD_ID).get().findPath(MinekordConfig.CONFIG_PATH).get(),
-                loader.configDir.resolve(MinekordConfig.CONFIG_PATH)
+                loader.getModContainer(MOD_ID).get().findPath(CONFIG_PATH).get(),
+                loader.configDir.resolve(CONFIG_PATH)
             )
         }
 
         MinekordConfig.load()
 
         MinekordBot.registerExtension(::MessagesExtension)
-        if (MinekordConfig.Commands.PlayerList.enabled) {
+        if (Commands.PlayerList.enabled) {
             MinekordBot.registerExtension(::PlayerListExtension)
         }
 
