@@ -22,7 +22,7 @@ object MinekordMinecraftRenderer : DefaultMinecraftRenderer() {
             val channel: Channel? = MinekordBot.guild.getChannelOrNull(Snowflake(id))
             val name: String = channel?.data?.name?.value ?: "unknown-channel"
 
-            component.append("#$name".toAdventure().color(MinekordConfig.mention))
+            component.append("#$name".adventure().color(MinekordConfig.mention))
         }
     }
 
@@ -31,7 +31,7 @@ object MinekordMinecraftRenderer : DefaultMinecraftRenderer() {
             val member: Member? = MinekordBot.guild.getMemberOrNull(Snowflake(id))
             val name: String = member?.effectiveName ?: "unknown-member"
 
-            component.append("@$name".toAdventure().color(MinekordConfig.link))
+            component.append("@$name".adventure().color(MinekordConfig.link))
         }
     }
 
@@ -41,7 +41,7 @@ object MinekordMinecraftRenderer : DefaultMinecraftRenderer() {
             val name: String = role?.name ?: "unknown-role"
             val color: TextColor = if (role != null && MinekordConfig.coloredRoles) TextColor.color(role.color.rgb) else MinekordConfig.mention
 
-            component.append("@$name".toAdventure().color(color))
+            component.append("@$name".adventure().color(color))
         }
     }
 }

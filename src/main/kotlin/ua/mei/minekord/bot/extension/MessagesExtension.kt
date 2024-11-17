@@ -18,14 +18,15 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import ua.mei.minekord.bot.MinekordExtension
 import ua.mei.minekord.config.MinekordConfig
+import ua.mei.minekord.utils.MessageSender
 import ua.mei.minekord.utils.SerializerUtils
+import ua.mei.minekord.utils.adventure
 import ua.mei.minekord.utils.avatar
 import ua.mei.minekord.utils.discordOptions
 import ua.mei.minekord.utils.literal
 import ua.mei.minekord.utils.minecraftOptions
+import ua.mei.minekord.utils.native
 import ua.mei.minekord.utils.summary
-import ua.mei.minekord.utils.toAdventure
-import ua.mei.minekord.utils.toNative
 import ua.mei.minekord.utils.toText
 
 class MessagesExtension : MinekordExtension() {
@@ -41,13 +42,13 @@ class MessagesExtension : MinekordExtension() {
                 val sender: Member = event.member ?: return@action
 
                 var content: Text = if (MinekordConfig.convertMarkdown) {
-                    MinecraftSerializer.INSTANCE.serialize(message.content, minecraftOptions).toNative()
+                    MinecraftSerializer.INSTANCE.serialize(message.content, minecraftOptions).native()
                 } else {
                     message.content.literal()
                 }
 
                 if (message.referencedMessage != null) {
-                    val replyContent: Text = MinecraftSerializer.INSTANCE.serialize(message.referencedMessage!!.content, minecraftOptions).toNative()
+                    val replyContent: Text = MinecraftSerializer.INSTANCE.serialize(message.referencedMessage!!.content, minecraftOptions).native()
 
                     val reply: Text = MinekordConfig.replyFormat.toText(server) {
                         "sender" to (message.referencedMessage!!.author?.effectiveName ?: message.referencedMessage!!.data.author.username).literal()
@@ -68,13 +69,13 @@ class MessagesExtension : MinekordExtension() {
         }
     }
 
-    override suspend fun onChatMessage(player: ServerPlayerEntity, message: Text) {
+    override suspend fun onChatMessage(message: Text, sender: MessageSender) {
         webhookMessage {
-            username = player.gameProfile.name
-            avatarUrl = player.avatar
+            username = sender.name
+            avatarUrl = sender.avatar
 
             content = DiscordSerializer.INSTANCE.serialize(
-                message.toAdventure(), discordOptions
+                message.adventure(), discordOptions
             ).let {
                 if (MinekordConfig.convertMentions) {
                     SerializerUtils.convertMentions(it)

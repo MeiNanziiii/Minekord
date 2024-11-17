@@ -29,15 +29,15 @@ val minecraftOptions: MinecraftSerializerOptions<Component> = MinecraftSerialize
 
 fun String.literal(): MutableText = Text.literal(this)
 
-fun Component.toNative(): MutableText {
+fun Component.native(): MutableText {
     return Text.Serializer.fromJson(GsonComponentSerializer.gson().serialize(this)) ?: Text.empty()
 }
 
-fun Text.toAdventure(): Component {
+fun Text.adventure(): Component {
     return GsonComponentSerializer.gson().deserialize(Text.Serializer.toJson(this))
 }
 
-fun String.toAdventure(): Component = Component.text(this)
+fun String.adventure(): Component = Component.text(this)
 
 fun String.summary(): String {
     return if (this.length <= MinekordConfig.summaryMaxLength) {

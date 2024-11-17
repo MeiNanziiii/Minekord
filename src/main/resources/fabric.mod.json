@@ -13,7 +13,10 @@
     "environment": "server",
     "entrypoints": {
         "main": [
-            "ua.mei.minekord.Minekord::INSTANCE"
+            {
+                "value": "ua.mei.minekord.Minekord",
+                "adapter": "kotlin"
+            }
         ]
     },
     "mixins": [

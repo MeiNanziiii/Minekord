@@ -6,6 +6,8 @@ import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Webhook
 import dev.kord.core.entity.channel.TopGuildMessageChannel
 import dev.kord.gateway.Intent
+import dev.kord.gateway.Intents
+import dev.kord.gateway.NON_PRIVILEGED
 import dev.kord.gateway.PrivilegedIntent
 import dev.kord.rest.builder.message.AllowedMentionsBuilder
 import dev.kordex.core.ExtensibleBot
@@ -22,14 +24,14 @@ import kotlinx.coroutines.runBlocking
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
-import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import ua.mei.minekord.Minekord
 import ua.mei.minekord.config.MinekordConfig
-import ua.mei.minekord.config.spec.PresenceSpec.MinekordActivityType
 import ua.mei.minekord.event.AdvancementGrantEvent
+import ua.mei.minekord.event.ChatMessageEvent
+import ua.mei.minekord.utils.MinekordActivityType
 import ua.mei.minekord.utils.toText
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KCallable
@@ -57,6 +59,7 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
                     enabled = true
                 }
                 intents {
+                    +Intents.NON_PRIVILEGED
                     +Intent.GuildMembers
                 }
                 members {
@@ -73,6 +76,9 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
             guild = bot.kordRef.getGuild(Snowflake(MinekordConfig.guild))
             channel = guild.getChannel(Snowflake(MinekordConfig.channel)) as TopGuildMessageChannel
             webhook = ensureWebhook(channel, MinekordConfig.webhookName)
+
+            mentions.add(AllowedMentionType.UserMentions)
+            mentions.roles.addAll(guild.roles.filter { it.mentionable }.map { it.id }.toList())
 
             extensions.forEach { bot.addExtension(it) }
 
@@ -94,11 +100,16 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
         Minekord.logger.info("Registered extension: ${(extension as KCallable<*>).returnType}")
     }
 
-    suspend fun setup() {
-        mentions.add(AllowedMentionType.UserMentions)
-        mentions.roles.addAll(guild.roles.filter { it.mentionable }.map { it.id }.toList())
-
+    fun setup() {
         val minekordExtensions: List<MinekordExtension> = bot.findExtensions()
+
+        ChatMessageEvent.EVENT.register { message, sender ->
+            minekordExtensions.forEach {
+                launch {
+                    it.onChatMessage(message, sender)
+                }
+            }
+        }
 
         AdvancementGrantEvent.EVENT.register { player, advancement ->
             minekordExtensions.forEach {
@@ -107,16 +118,7 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
                 }
             }
         }
-        ServerLivingEntityEvents.ALLOW_DEATH.register { entity, source, amount ->
-            if (entity is ServerPlayerEntity) {
-                minekordExtensions.forEach {
-                    launch {
-                        it.onPlayerDeath(entity, source)
-                    }
-                }
-            }
-            true
-        }
+
         ServerPlayConnectionEvents.JOIN.register { handler, sender, server ->
             minekordExtensions.forEach {
                 launch {
@@ -137,13 +139,17 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
                 }
             }
         }
-        ServerMessageEvents.CHAT_MESSAGE.register { message, sender, type ->
-            minekordExtensions.forEach {
-                launch {
-                    it.onChatMessage(sender, message.content)
+        ServerLivingEntityEvents.ALLOW_DEATH.register { entity, source, amount ->
+            if (entity is ServerPlayerEntity) {
+                minekordExtensions.forEach {
+                    launch {
+                        it.onPlayerDeath(entity, source)
+                    }
                 }
             }
+            true
         }
+
         ServerLifecycleEvents.SERVER_STARTED.register { server ->
             minekordExtensions.forEach {
                 launch {

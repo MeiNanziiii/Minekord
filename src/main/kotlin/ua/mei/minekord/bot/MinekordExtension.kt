@@ -12,6 +12,7 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import org.koin.core.component.inject
 import ua.mei.minekord.config.MinekordConfig
+import ua.mei.minekord.utils.MessageSender
 
 abstract class MinekordExtension : Extension() {
     abstract override val name: String
@@ -34,7 +35,7 @@ abstract class MinekordExtension : Extension() {
         }
     }
 
-    open suspend fun onChatMessage(player: ServerPlayerEntity, message: Text) {}
+    open suspend fun onChatMessage(message: Text, sender: MessageSender) {}
 
     open suspend fun onAdvancementGrant(player: ServerPlayerEntity, advancement: Advancement) {}
 

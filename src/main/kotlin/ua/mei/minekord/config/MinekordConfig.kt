@@ -16,8 +16,8 @@ import ua.mei.minekord.config.spec.BotSpec
 import ua.mei.minekord.config.spec.ChatSpec
 import ua.mei.minekord.config.spec.ColorsSpec
 import ua.mei.minekord.config.spec.PresenceSpec
-import ua.mei.minekord.config.spec.PresenceSpec.MinekordActivityType
 import ua.mei.minekord.parser.DynamicNode
+import ua.mei.minekord.utils.MinekordActivityType
 import ua.mei.minekord.utils.toColor
 
 object MinekordConfig {
