@@ -18,7 +18,7 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.bot.MinekordExtension
-import ua.mei.minekord.config.MinekordConfig.Bot
+import ua.mei.minekord.config.MinekordConfig.Main
 import ua.mei.minekord.config.MinekordConfig.Chat
 import ua.mei.minekord.config.MinekordConfig.Colors
 import ua.mei.minekord.utils.MessageSender
@@ -36,7 +36,7 @@ class MessagesExtension : MinekordExtension() {
     override suspend fun setup() {
         event<MessageCreateEvent> {
             check { isNotBot() }
-            check { inChannel(Snowflake(Bot.channel)) }
+            check { inChannel(Snowflake(Main.channel)) }
 
             action {
                 val message: Message = event.message

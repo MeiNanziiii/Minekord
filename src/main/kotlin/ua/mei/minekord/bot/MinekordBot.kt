@@ -31,7 +31,7 @@ import net.kyori.adventure.text.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import ua.mei.minekord.Minekord
-import ua.mei.minekord.config.MinekordConfig.Bot
+import ua.mei.minekord.config.MinekordConfig.Main
 import ua.mei.minekord.config.MinekordConfig.Chat
 import ua.mei.minekord.config.MinekordConfig.Presence
 import ua.mei.minekord.event.AdvancementGrantEvent
@@ -70,7 +70,7 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
 
     override fun onServerStarting(server: MinecraftServer) {
         runBlocking {
-            bot = ExtensibleBot(Bot.token) {
+            bot = ExtensibleBot(Main.token) {
                 applicationCommands {
                     enabled = true
                 }
@@ -79,7 +79,7 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
                     +Intent.GuildMembers
                 }
                 members {
-                    fill(Bot.token)
+                    fill(Main.token)
                 }
                 hooks {
                     afterKoinSetup {
@@ -89,8 +89,8 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
                     }
                 }
             }
-            guild = bot.kordRef.getGuild(Snowflake(Bot.guild))
-            channel = guild.getChannel(Snowflake(Bot.channel)) as TopGuildMessageChannel
+            guild = bot.kordRef.getGuild(Snowflake(Main.guild))
+            channel = guild.getChannel(Snowflake(Main.channel)) as TopGuildMessageChannel
             webhook = ensureWebhook(channel, Chat.Webhook.webhookName)
 
             mentions.add(AllowedMentionType.UserMentions)

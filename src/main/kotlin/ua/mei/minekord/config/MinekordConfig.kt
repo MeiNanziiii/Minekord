@@ -12,7 +12,7 @@ import eu.pb4.placeholders.api.parsers.StaticPreParser
 import eu.pb4.placeholders.api.parsers.TextParserV1
 import net.fabricmc.loader.api.FabricLoader
 import net.kyori.adventure.text.format.TextColor
-import ua.mei.minekord.config.spec.BotSpec
+import ua.mei.minekord.config.spec.MainSpec
 import ua.mei.minekord.config.spec.ChatSpec
 import ua.mei.minekord.config.spec.ColorsSpec
 import ua.mei.minekord.config.spec.CommandsSpec
@@ -34,7 +34,7 @@ object MinekordConfig {
 
     fun load() {
         config = Config {
-            addSpec(BotSpec)
+            addSpec(MainSpec)
             addSpec(ChatSpec)
             addSpec(PresenceSpec)
             addSpec(CommandsSpec)
@@ -43,7 +43,7 @@ object MinekordConfig {
 
         config.validateRequired()
 
-        Bot.load()
+        Main.load()
         Chat.load()
         Presence.load()
         Commands.load()
@@ -54,7 +54,7 @@ object MinekordConfig {
         return if (text.isEmpty()) EmptyNode.INSTANCE else parser.parseNode(text)
     }
 
-    object Bot {
+    object Main {
         lateinit var token: String
             private set
         var guild: ULong = 0u
@@ -63,9 +63,9 @@ object MinekordConfig {
             private set
 
         internal fun load() {
-            token = config[BotSpec.token]
-            guild = config[BotSpec.guild]
-            channel = config[BotSpec.channel]
+            token = config[MainSpec.token]
+            guild = config[MainSpec.guild]
+            channel = config[MainSpec.channel]
         }
     }
 
