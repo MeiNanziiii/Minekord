@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.bot.extension.MessagesExtension
+import ua.mei.minekord.bot.extension.PlayerListExtension
 import ua.mei.minekord.config.MinekordConfig
 import ua.mei.minekord.event.ChatMessageEvent
 import ua.mei.minekord.utils.MessageSender
@@ -35,6 +36,9 @@ object Minekord : ModInitializer {
         MinekordConfig.load()
 
         MinekordBot.registerExtension(::MessagesExtension)
+        if (MinekordConfig.enabled) {
+            MinekordBot.registerExtension(::PlayerListExtension)
+        }
 
         ServerMessageEvents.CHAT_MESSAGE.register { message, sender, type ->
             ChatMessageEvent.EVENT.invoker().message(message.content, MessageSender(sender.gameProfile.name, sender.avatar))

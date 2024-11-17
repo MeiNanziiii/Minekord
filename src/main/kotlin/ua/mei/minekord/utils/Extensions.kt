@@ -3,8 +3,6 @@ package ua.mei.minekord.utils
 import com.google.gson.JsonParser
 import com.mojang.authlib.GameProfile
 import dev.kord.common.Color
-import dev.vankka.mcdiscordreserializer.discord.DiscordSerializerOptions
-import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializerOptions
 import eu.pb4.placeholders.api.PlaceholderContext
 import eu.pb4.placeholders.api.node.EmptyNode
 import eu.pb4.placeholders.api.node.TextNode
@@ -17,15 +15,6 @@ import net.minecraft.text.Text
 import ua.mei.minekord.config.MinekordConfig
 import ua.mei.minekord.parser.DynamicNode
 import java.util.Base64
-
-val discordOptions: DiscordSerializerOptions = DiscordSerializerOptions.defaults()
-    .withEmbedLinks(false)
-    .withEscapeMarkdown(MinekordConfig.convertMarkdown)
-    .withKeybindProvider(SerializerUtils::translatableToString)
-    .withTranslationProvider(SerializerUtils::translatableToString)
-
-val minecraftOptions: MinecraftSerializerOptions<Component> = MinecraftSerializerOptions.defaults()
-    .addRenderer(MinekordMinecraftRenderer)
 
 fun String.literal(): MutableText = Text.literal(this)
 

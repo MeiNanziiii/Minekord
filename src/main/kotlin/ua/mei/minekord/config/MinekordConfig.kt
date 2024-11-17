@@ -15,6 +15,7 @@ import net.kyori.adventure.text.format.TextColor
 import ua.mei.minekord.config.spec.BotSpec
 import ua.mei.minekord.config.spec.ChatSpec
 import ua.mei.minekord.config.spec.ColorsSpec
+import ua.mei.minekord.config.spec.CommandsSpec
 import ua.mei.minekord.config.spec.PresenceSpec
 import ua.mei.minekord.parser.DynamicNode
 import ua.mei.minekord.utils.MinekordActivityType
@@ -92,6 +93,18 @@ object MinekordConfig {
     var updateTicks: Int = 1200
         private set
 
+    /* Player List */
+    var enabled: Boolean = true
+        private set
+    lateinit var name: String
+        private set
+    lateinit var description: String
+        private set
+    lateinit var title: TextNode
+        private set
+    lateinit var format: TextNode
+        private set
+
     /* Colors */
     lateinit var red: Color
         private set
@@ -113,8 +126,9 @@ object MinekordConfig {
         config = Config {
             addSpec(BotSpec)
             addSpec(ChatSpec)
-            addSpec(ColorsSpec)
             addSpec(PresenceSpec)
+            addSpec(CommandsSpec)
+            addSpec(ColorsSpec)
         }.from.toml.file(FabricLoader.getInstance().configDir.resolve(CONFIG_PATH).toFile())
 
         config.validateRequired()
@@ -150,6 +164,12 @@ object MinekordConfig {
         activityType = config[PresenceSpec.activityType]
         activityText = parseNode(config[PresenceSpec.activityText])
         updateTicks = config[PresenceSpec.updateTicks]
+
+        enabled = config[CommandsSpec.PlayerListSpec.enabled]
+        name = config[CommandsSpec.PlayerListSpec.name]
+        description = config[CommandsSpec.PlayerListSpec.description]
+        title = parseNode(config[CommandsSpec.PlayerListSpec.title])
+        format = parseNode(config[CommandsSpec.PlayerListSpec.format])
 
         red = config[ColorsSpec.red].toColor()
         orange = config[ColorsSpec.orange].toColor()

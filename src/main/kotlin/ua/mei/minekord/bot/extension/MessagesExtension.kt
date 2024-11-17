@@ -16,15 +16,14 @@ import net.minecraft.advancement.AdvancementFrame
 import net.minecraft.entity.damage.DamageSource
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
+import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.bot.MinekordExtension
 import ua.mei.minekord.config.MinekordConfig
 import ua.mei.minekord.utils.MessageSender
 import ua.mei.minekord.utils.SerializerUtils
 import ua.mei.minekord.utils.adventure
 import ua.mei.minekord.utils.avatar
-import ua.mei.minekord.utils.discordOptions
 import ua.mei.minekord.utils.literal
-import ua.mei.minekord.utils.minecraftOptions
 import ua.mei.minekord.utils.native
 import ua.mei.minekord.utils.summary
 import ua.mei.minekord.utils.toText
@@ -42,13 +41,13 @@ class MessagesExtension : MinekordExtension() {
                 val sender: Member = event.member ?: return@action
 
                 var content: Text = if (MinekordConfig.convertMarkdown) {
-                    MinecraftSerializer.INSTANCE.serialize(message.content, minecraftOptions).native()
+                    MinecraftSerializer.INSTANCE.serialize(message.content, MinekordBot.minecraftOptions).native()
                 } else {
                     message.content.literal()
                 }
 
                 if (message.referencedMessage != null) {
-                    val replyContent: Text = MinecraftSerializer.INSTANCE.serialize(message.referencedMessage!!.content, minecraftOptions).native()
+                    val replyContent: Text = MinecraftSerializer.INSTANCE.serialize(message.referencedMessage!!.content, MinekordBot.minecraftOptions).native()
 
                     val reply: Text = MinekordConfig.replyFormat.toText(server) {
                         "sender" to (message.referencedMessage!!.author?.effectiveName ?: message.referencedMessage!!.data.author.username).literal()
@@ -74,9 +73,7 @@ class MessagesExtension : MinekordExtension() {
             username = sender.name
             avatarUrl = sender.avatar
 
-            content = DiscordSerializer.INSTANCE.serialize(
-                message.adventure(), discordOptions
-            ).let {
+            content = DiscordSerializer.INSTANCE.serialize(message.adventure(), MinekordBot.discordOptions).let {
                 if (MinekordConfig.convertMentions) {
                     SerializerUtils.convertMentions(it)
                 } else {

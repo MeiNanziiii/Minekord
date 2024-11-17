@@ -14,6 +14,8 @@ import dev.kordex.core.ExtensibleBot
 import dev.kordex.core.extensions.Extension
 import dev.kordex.core.utils.ensureWebhook
 import dev.kordex.core.utils.loadModule
+import dev.vankka.mcdiscordreserializer.discord.DiscordSerializerOptions
+import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializerOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
@@ -25,6 +27,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
+import net.kyori.adventure.text.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import ua.mei.minekord.Minekord
@@ -32,6 +35,8 @@ import ua.mei.minekord.config.MinekordConfig
 import ua.mei.minekord.event.AdvancementGrantEvent
 import ua.mei.minekord.event.ChatMessageEvent
 import ua.mei.minekord.utils.MinekordActivityType
+import ua.mei.minekord.utils.MinekordMinecraftRenderer
+import ua.mei.minekord.utils.SerializerUtils
 import ua.mei.minekord.utils.toText
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KCallable
@@ -51,6 +56,15 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
         private set
 
     val mentions: AllowedMentionsBuilder = AllowedMentionsBuilder()
+
+    val discordOptions: DiscordSerializerOptions = DiscordSerializerOptions.defaults()
+        .withEmbedLinks(false)
+        .withEscapeMarkdown(MinekordConfig.convertMarkdown)
+        .withKeybindProvider(SerializerUtils::translatableToString)
+        .withTranslationProvider(SerializerUtils::translatableToString)
+
+    val minecraftOptions: MinecraftSerializerOptions<Component> = MinecraftSerializerOptions.defaults()
+        .addRenderer(MinekordMinecraftRenderer)
 
     override fun onServerStarting(server: MinecraftServer) {
         runBlocking {
