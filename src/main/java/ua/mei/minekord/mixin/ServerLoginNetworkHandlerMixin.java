@@ -70,36 +70,26 @@ public abstract class ServerLoginNetworkHandlerMixin {
     public void minekord$replaceUuid(LoginHelloC2SPacket loginHelloC2SPacket, CallbackInfo ci) {
         if (MinekordConfig.Auth.INSTANCE.getSnowflakeBasedUuid() || MinekordConfig.Auth.INSTANCE.getIpBasedLogin() || !MinekordConfig.Auth.INSTANCE.getRequiredRoles().isEmpty()) {
             member = AuthUtils.INSTANCE.findMember(loginHelloC2SPacket.comp_765());
+            if (member == null) {
+                this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
+                ci.cancel();
+                return;
+            }
         }
 
         if (MinekordConfig.Auth.INSTANCE.getSnowflakeBasedUuid() && !server.isOnlineMode()) {
-            if (member == null) {
-                this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
-                ci.cancel();
-            } else {
-                this.profile = new GameProfile(AuthUtils.INSTANCE.uuidFromMember(member), loginHelloC2SPacket.comp_765());
-                LOGGER.info("Snowflake based UUID of player {} is {}", this.profile.getName(), this.profile.getId());
-            }
+            this.profile = new GameProfile(AuthUtils.INSTANCE.uuidFromMember(member), loginHelloC2SPacket.comp_765());
+            LOGGER.info("Snowflake based UUID of player {} is {}", this.profile.getName(), this.profile.getId());
         }
 
         if (MinekordConfig.Auth.INSTANCE.getIpBasedLogin() && this.profile != null) {
-            if (member == null) {
-                this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
-                ci.cancel();
-            } else {
-                if (!IPCache.INSTANCE.containsInCache(this.connection.getAddress(), this.profile)) {
-                    if (!IPCache.INSTANCE.isRequested(this.connection.getAddress(), this.profile)) {
-                        IPCheckEvent.Companion.getEVENT().invoker().check(this.connection.getAddress(), this.profile);
-                    }
-                    this.disconnect(Text.literal(MinekordConfig.Messages.INSTANCE.getIpKickMessage()));
-                    ci.cancel();
+            if (!IPCache.INSTANCE.containsInCache(this.connection.getAddress(), this.profile)) {
+                if (!IPCache.INSTANCE.isRequested(this.connection.getAddress(), this.profile)) {
+                    IPCheckEvent.Companion.getEVENT().invoker().check(this.connection.getAddress(), this.profile);
                 }
+                this.disconnect(Text.literal(MinekordConfig.Messages.INSTANCE.getIpKickMessage()));
+                ci.cancel();
             }
-        }
-
-        if (!MinekordConfig.Auth.INSTANCE.getRequiredRoles().isEmpty() && member == null) {
-            this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
-            ci.cancel();
         }
     }
 
