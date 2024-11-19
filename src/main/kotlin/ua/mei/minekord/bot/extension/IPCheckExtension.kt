@@ -21,7 +21,6 @@ import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.cache.IPCache
 import ua.mei.minekord.config.MinekordConfig.Auth
 import ua.mei.minekord.config.MinekordConfig.Messages
-import ua.mei.minekord.config.spec.MessagesSpec
 import ua.mei.minekord.event.IPCheckEvent
 import ua.mei.minekord.utils.AuthUtils
 import java.net.SocketAddress
@@ -65,7 +64,7 @@ class IPCheckExtension : Extension() {
 
     private fun EmbedBuilder.addTimeField() {
         field {
-            name = "> ${MessagesSpec.timeLabel}"
+            name = "> ${Messages.timeLabel}"
             value = "> ${Clock.System.now().toDiscord(TimestampType.Default)}"
             inline = true
         }
