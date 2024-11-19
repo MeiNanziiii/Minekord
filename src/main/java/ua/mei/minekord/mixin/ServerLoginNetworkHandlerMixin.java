@@ -68,16 +68,14 @@ public abstract class ServerLoginNetworkHandlerMixin {
                 public void run() {
                     GameProfile gameProfile = ServerLoginNetworkHandlerMixin.this.profile;
 
-                    if (gameProfile != null) {
-                        Member member = AuthUtils.INSTANCE.findMember(gameProfile.getName());
+                    Member member = AuthUtils.INSTANCE.findMember(gameProfile.getName());
 
-                        if (member != null) {
-                            ServerLoginNetworkHandlerMixin.this.profile = new GameProfile(AuthUtils.INSTANCE.uuidFromMember(member), gameProfile.getName());
-                            LOGGER.info("Snowflake based UUID of player {} is {}", ServerLoginNetworkHandlerMixin.this.profile.getName(), ServerLoginNetworkHandlerMixin.this.profile.getId());
-                        }
+                    if (member != null) {
+                        ServerLoginNetworkHandlerMixin.this.profile = new GameProfile(AuthUtils.INSTANCE.uuidFromMember(member), gameProfile.getName());
                     }
+
                     if (ServerLoginNetworkHandlerMixin.this.profile != null) {
-                        LOGGER.info("UUID of player {} is {}", ServerLoginNetworkHandlerMixin.this.profile.getName(), ServerLoginNetworkHandlerMixin.this.profile.getId());
+                        LOGGER.info("Snowflake based UUID of player {} is {}", ServerLoginNetworkHandlerMixin.this.profile.getName(), ServerLoginNetworkHandlerMixin.this.profile.getId());
                         ServerLoginNetworkHandlerMixin.this.state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
                     } else if (ServerLoginNetworkHandlerMixin.this.server.isSingleplayer()) {
                         LOGGER.warn("Failed to verify username but will let them in anyway!");
