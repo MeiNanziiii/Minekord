@@ -1,6 +1,5 @@
 package ua.mei.minekord.utils
 
-import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.Role
 import dev.kord.core.entity.channel.Channel
@@ -20,7 +19,7 @@ object MinekordMinecraftRenderer : DefaultMinecraftRenderer() {
 
     override fun appendChannelMention(component: Component, id: String): Component {
         return runBlocking {
-            val channel: Channel? = MinekordBot.guild.getChannelOrNull(Snowflake(id))
+            val channel: Channel? = MinekordBot.guild.getChannelOrNull(id.asSnowflake)
             val name: String = channel?.data?.name?.value ?: "unknown-channel"
 
             component.append("#$name".adventure().color(Colors.mention))
@@ -29,7 +28,7 @@ object MinekordMinecraftRenderer : DefaultMinecraftRenderer() {
 
     override fun appendUserMention(component: Component, id: String): Component {
         return runBlocking {
-            val member: Member? = MinekordBot.guild.getMemberOrNull(Snowflake(id))
+            val member: Member? = MinekordBot.guild.getMemberOrNull(id.asSnowflake)
             val name: String = member?.effectiveName ?: "unknown-member"
 
             component.append("@$name".adventure().color(Colors.link))
@@ -38,7 +37,7 @@ object MinekordMinecraftRenderer : DefaultMinecraftRenderer() {
 
     override fun appendRoleMention(component: Component, id: String): Component {
         return runBlocking {
-            val role: Role? = MinekordBot.guild.getRoleOrNull(Snowflake(id))
+            val role: Role? = MinekordBot.guild.getRoleOrNull(id.asSnowflake)
             val name: String = role?.name ?: "unknown-role"
             val color: TextColor = if (role != null && Chat.Minecraft.coloredRoles) TextColor.color(role.color.rgb) else Colors.mention
 

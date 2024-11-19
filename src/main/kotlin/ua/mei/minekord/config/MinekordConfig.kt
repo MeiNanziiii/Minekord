@@ -3,6 +3,7 @@ package ua.mei.minekord.config
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.source.toml
 import dev.kord.common.Color
+import eu.pb4.placeholders.api.ParserContext
 import eu.pb4.placeholders.api.Placeholders
 import eu.pb4.placeholders.api.node.EmptyNode
 import eu.pb4.placeholders.api.node.TextNode
@@ -12,12 +13,13 @@ import eu.pb4.placeholders.api.parsers.StaticPreParser
 import eu.pb4.placeholders.api.parsers.TextParserV1
 import net.fabricmc.loader.api.FabricLoader
 import net.kyori.adventure.text.format.TextColor
+import net.minecraft.text.Text
+import ua.mei.minekord.config.spec.AuthSpec
 import ua.mei.minekord.config.spec.ChatSpec
 import ua.mei.minekord.config.spec.ColorsSpec
 import ua.mei.minekord.config.spec.CommandsSpec
 import ua.mei.minekord.config.spec.MainSpec
 import ua.mei.minekord.config.spec.PresenceSpec
-import ua.mei.minekord.parser.DynamicNode
 import ua.mei.minekord.utils.MinekordActivityType
 import ua.mei.minekord.utils.toColor
 
@@ -39,6 +41,7 @@ object MinekordConfig {
             addSpec(PresenceSpec)
             addSpec(CommandsSpec)
             addSpec(ColorsSpec)
+            addSpec(AuthSpec)
         }.from.toml.file(FabricLoader.getInstance().configDir.resolve(CONFIG_PATH).toFile())
 
         config.validateRequired()
@@ -48,6 +51,7 @@ object MinekordConfig {
         Presence.load()
         Commands.load()
         Colors.load()
+        Auth.load()
     }
 
     private fun parseNode(text: String): TextNode {
@@ -222,6 +226,39 @@ object MinekordConfig {
 
             mention = TextColor.fromHexString(config[ColorsSpec.mention])!!
             link = TextColor.fromHexString(config[ColorsSpec.link])!!
+        }
+    }
+
+    object Auth {
+        var snowflakeBasedUuid: Boolean = false
+            private set
+        var requiredRoles: List<ULong> = emptyList()
+            private set
+        var ipBasedLogin: Boolean = false
+            private set
+
+        fun load() {
+            snowflakeBasedUuid = config[AuthSpec.snowflakeBasedUuid]
+            requiredRoles = config[AuthSpec.requiredRoles]
+            ipBasedLogin = config[AuthSpec.ipBasedLogin]
+        }
+    }
+
+    data class DynamicNode(val key: String, val text: Text) : TextNode {
+        companion object {
+            fun of(key: String): DynamicNode {
+                return DynamicNode(key, Text.literal("{$key}"))
+            }
+
+            val NODES = ParserContext.Key<Map<String, Text>>("minekord:dynamic", null)
+        }
+
+        override fun toText(context: ParserContext, removeBackslashes: Boolean): Text {
+            return context.get(NODES)?.getOrDefault(this.key, text) ?: text
+        }
+
+        override fun isDynamic(): Boolean {
+            return true
         }
     }
 }

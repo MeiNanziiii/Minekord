@@ -3,6 +3,7 @@ package ua.mei.minekord.utils
 import com.google.gson.JsonParser
 import com.mojang.authlib.GameProfile
 import dev.kord.common.Color
+import dev.kord.common.entity.Snowflake
 import eu.pb4.placeholders.api.PlaceholderContext
 import eu.pb4.placeholders.api.node.EmptyNode
 import eu.pb4.placeholders.api.node.TextNode
@@ -13,7 +14,7 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import ua.mei.minekord.config.MinekordConfig.Chat
-import ua.mei.minekord.parser.DynamicNode
+import ua.mei.minekord.config.MinekordConfig.DynamicNode
 import java.util.Base64
 
 fun String.literal(): MutableText = Text.literal(this)
@@ -74,8 +75,14 @@ class PlaceholderBuilder {
     }
 }
 
-val ServerPlayerEntity.avatar: String
-    get() = Chat.Webhook.playerAvatar.toText(this@avatar) {
-        "nickname" to this@avatar.gameProfile.name.literal()
-        "texture" to this@avatar.gameProfile.texture().literal()
+val ServerPlayerEntity.avatarUrl: String
+    get() = Chat.Webhook.playerAvatar.toText(this@avatarUrl) {
+        "nickname" to this@avatarUrl.gameProfile.name.literal()
+        "texture" to this@avatarUrl.gameProfile.texture().literal()
     }.string
+
+val ULong.asSnowflake: Snowflake
+    get() = Snowflake(this@asSnowflake)
+
+val String.asSnowflake: Snowflake
+    get() = Snowflake(this@asSnowflake)

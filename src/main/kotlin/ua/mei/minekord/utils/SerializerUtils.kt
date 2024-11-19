@@ -1,6 +1,7 @@
 package ua.mei.minekord.utils
 
-import kotlinx.coroutines.flow.firstOrNull
+import dev.kord.core.entity.Member
+import kotlinx.coroutines.flow.toList
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.kyori.adventure.translation.GlobalTranslator
@@ -11,10 +12,11 @@ object SerializerUtils {
     val pingRegex: Regex = Regex("@(\\S{1,32})")
 
     suspend fun convertMentions(message: String): String {
-        return pingRegex.findAll(message).fold(message) { acc, matchResult ->
-            val mention: String? = MinekordBot.guild.members.firstOrNull { it.effectiveName.equals(matchResult.groupValues[1], true) }?.mention
+        val members: Map<String, Member> = MinekordBot.guild.members.toList().associateBy { it.effectiveName.lowercase() }
 
-            if (mention != null) acc.replace(matchResult.value, mention) else acc
+        return pingRegex.replace(message) { matchResult ->
+            val effectiveName = matchResult.groupValues[1].lowercase()
+            members[effectiveName]?.mention ?: matchResult.value
         }
     }
 

@@ -1,7 +1,6 @@
 package ua.mei.minekord.bot
 
 import dev.kord.common.entity.AllowedMentionType
-import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Webhook
 import dev.kord.core.entity.channel.TopGuildMessageChannel
@@ -39,6 +38,7 @@ import ua.mei.minekord.event.ChatMessageEvent
 import ua.mei.minekord.utils.MinekordActivityType
 import ua.mei.minekord.utils.MinekordMinecraftRenderer
 import ua.mei.minekord.utils.SerializerUtils
+import ua.mei.minekord.utils.asSnowflake
 import ua.mei.minekord.utils.toText
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KCallable
@@ -79,7 +79,7 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
                     +Intent.GuildMembers
                 }
                 members {
-                    fill(Main.token)
+                    fill(Main.guild)
                 }
                 hooks {
                     afterKoinSetup {
@@ -89,8 +89,8 @@ object MinekordBot : CoroutineScope, ServerLifecycleEvents.ServerStarting {
                     }
                 }
             }
-            guild = bot.kordRef.getGuild(Snowflake(Main.guild))
-            channel = guild.getChannel(Snowflake(Main.channel)) as TopGuildMessageChannel
+            guild = bot.kordRef.getGuild(Main.guild.asSnowflake)
+            channel = guild.getChannel(Main.channel.asSnowflake) as TopGuildMessageChannel
             webhook = ensureWebhook(channel, Chat.Webhook.webhookName)
 
             mentions.add(AllowedMentionType.UserMentions)

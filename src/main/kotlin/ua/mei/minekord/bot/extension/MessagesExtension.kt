@@ -1,6 +1,5 @@
 package ua.mei.minekord.bot.extension
 
-import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.Message
 import dev.kord.core.entity.effectiveName
@@ -24,7 +23,8 @@ import ua.mei.minekord.config.MinekordConfig.Main
 import ua.mei.minekord.utils.MessageSender
 import ua.mei.minekord.utils.SerializerUtils
 import ua.mei.minekord.utils.adventure
-import ua.mei.minekord.utils.avatar
+import ua.mei.minekord.utils.asSnowflake
+import ua.mei.minekord.utils.avatarUrl
 import ua.mei.minekord.utils.literal
 import ua.mei.minekord.utils.native
 import ua.mei.minekord.utils.summary
@@ -36,7 +36,7 @@ class MessagesExtension : MinekordExtension() {
     override suspend fun setup() {
         event<MessageCreateEvent> {
             check { isNotBot() }
-            check { inChannel(Snowflake(Main.channel)) }
+            check { inChannel(Main.channel.asSnowflake) }
 
             action {
                 val message: Message = event.message
@@ -73,7 +73,7 @@ class MessagesExtension : MinekordExtension() {
     override suspend fun onChatMessage(message: Text, sender: MessageSender) {
         webhookMessage {
             username = sender.name
-            avatarUrl = sender.avatar
+            avatarUrl = sender.avatarUrl
 
             content = DiscordSerializer.INSTANCE.serialize(message.adventure(), MinekordBot.discordOptions).let {
                 if (Chat.convertMentions) {
@@ -97,7 +97,7 @@ class MessagesExtension : MinekordExtension() {
 
         webhookEmbed {
             author {
-                icon = player.avatar
+                icon = player.avatarUrl
                 name = message
             }
             footer {
@@ -111,7 +111,7 @@ class MessagesExtension : MinekordExtension() {
         webhookEmbed {
             author {
                 name = Chat.Discord.joinMessage.toText(player).string
-                icon = player.avatar
+                icon = player.avatarUrl
             }
             color = Colors.green
         }
@@ -121,7 +121,7 @@ class MessagesExtension : MinekordExtension() {
         webhookEmbed {
             author {
                 name = Chat.Discord.leaveMessage.toText(player).string
-                icon = player.avatar
+                icon = player.avatarUrl
             }
             color = Colors.red
         }
@@ -130,7 +130,7 @@ class MessagesExtension : MinekordExtension() {
     override suspend fun onPlayerDeath(player: ServerPlayerEntity, source: DamageSource) {
         webhookEmbed {
             author {
-                icon = player.avatar
+                icon = player.avatarUrl
                 name = Chat.Discord.deathMessage.toText(player) {
                     "message" to source.getDeathMessage(player)
                 }.string
