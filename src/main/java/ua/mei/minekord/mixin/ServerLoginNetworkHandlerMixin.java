@@ -68,7 +68,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
     @Inject(method = "onHello", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isOnlineMode()Z"), cancellable = true)
     public void minekord$replaceUuid(LoginHelloC2SPacket loginHelloC2SPacket, CallbackInfo ci) {
-        if (MinekordConfig.Auth.INSTANCE.getSnowflakeBasedUuid() || MinekordConfig.Auth.INSTANCE.getIpBasedLogin()) {
+        if (MinekordConfig.Auth.INSTANCE.getSnowflakeBasedUuid() || MinekordConfig.Auth.INSTANCE.getIpBasedLogin() || !MinekordConfig.Auth.INSTANCE.getRequiredRoles().isEmpty()) {
             member = AuthUtils.INSTANCE.findMember(loginHelloC2SPacket.comp_765());
         }
 
@@ -96,6 +96,11 @@ public abstract class ServerLoginNetworkHandlerMixin {
                 }
             }
         }
+
+        if (!MinekordConfig.Auth.INSTANCE.getRequiredRoles().isEmpty() && member == null) {
+            this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
+            ci.cancel();
+        }
     }
 
     @Inject(method = "onKey", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;setUncaughtExceptionHandler(Ljava/lang/Thread$UncaughtExceptionHandler;)V"), cancellable = true)
@@ -104,6 +109,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
             Thread thread = new Thread("Minekord User Authenticator #" + NEXT_AUTHENTICATOR_THREAD_ID.incrementAndGet()) {
                 public void run() {
                     GameProfile gameProfile = ServerLoginNetworkHandlerMixin.this.profile;
+                    assert gameProfile != null;
 
                     if (member == null) {
                         member = AuthUtils.INSTANCE.findMember(gameProfile.getName());
