@@ -4,12 +4,13 @@ import dev.kord.core.entity.Member
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import ua.mei.minekord.bot.MinekordBot
+import ua.mei.minekord.config.MinekordConfig
 import java.util.UUID
 
 object AuthUtils {
     fun findMember(name: String): Member? {
         return runBlocking {
-            MinekordBot.guild.members.firstOrNull { it.effectiveName == name }
+            MinekordBot.guild.members.firstOrNull { it.effectiveName == name && it.roleIds.map { it.value }.containsAll(MinekordConfig.Auth.requiredRoles) }
         }
     }
 

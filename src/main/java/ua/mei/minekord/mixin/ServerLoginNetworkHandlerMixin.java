@@ -3,6 +3,7 @@ package ua.mei.minekord.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.GameProfile;
 import dev.kord.core.entity.Member;
+import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
 import net.minecraft.network.packet.c2s.login.LoginKeyC2SPacket;
 import net.minecraft.server.MinecraftServer;
@@ -17,6 +18,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import ua.mei.minekord.cache.IPCache;
 import ua.mei.minekord.config.MinekordConfig;
 import ua.mei.minekord.utils.AuthUtils;
 
@@ -44,7 +46,19 @@ public abstract class ServerLoginNetworkHandlerMixin {
     ServerLoginNetworkHandler.State state;
 
     @Shadow
+    @Final
+    ClientConnection connection;
+
+    @Shadow
     public abstract void disconnect(Text text);
+
+    @Inject(method = "onHello", at = @At("HEAD"), cancellable = true)
+    public void minekord$checkIp(LoginHelloC2SPacket loginHelloC2SPacket, CallbackInfo ci) {
+        if (MinekordConfig.Auth.INSTANCE.getIpBasedLogin() && IPCache.INSTANCE.isBlocked(this.connection.getAddress())) {
+            this.disconnect(Text.translatable("multiplayer.disconnect.ip_banned"));
+            ci.cancel();
+        }
+    }
 
     @Inject(method = "onHello", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isOnlineMode()Z"), cancellable = true)
     public void minekord$replaceUuid(LoginHelloC2SPacket loginHelloC2SPacket, CallbackInfo ci) {
