@@ -27,15 +27,19 @@ public abstract class ServerLoginNetworkHandlerMixin {
     @Shadow
     @Final
     static Logger LOGGER;
+
     @Shadow
     @Final
     private static AtomicInteger NEXT_AUTHENTICATOR_THREAD_ID;
+
     @Shadow
     @Nullable
     GameProfile profile;
+
     @Shadow
     @Final
     MinecraftServer server;
+
     @Shadow
     ServerLoginNetworkHandler.State state;
 
