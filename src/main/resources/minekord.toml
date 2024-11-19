@@ -68,6 +68,10 @@ snowflakeBasedUuid = false
 requiredRoles = []
 ipBasedLogin = false
 
+[LuckPerms]
+
+roles = {}
+
 [Messages]
 
 ipKickMessage = "Joined with new IP! Check your DM."

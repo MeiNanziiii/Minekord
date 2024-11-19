@@ -11,6 +11,7 @@ import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.bot.extension.IPCheckExtension
 import ua.mei.minekord.bot.extension.MessagesExtension
 import ua.mei.minekord.bot.extension.PlayerListExtension
+import ua.mei.minekord.bot.extension.RoleSyncExtension
 import ua.mei.minekord.cache.IPCache
 import ua.mei.minekord.config.MinekordConfig
 import ua.mei.minekord.config.MinekordConfig.CONFIG_PATH
@@ -43,8 +44,10 @@ object Minekord : ModInitializer {
 
         MinekordConfig.load()
 
-        MinekordBot.registerExtension(::MessagesExtension)
         MinekordBot.registerExtension(::IPCheckExtension)
+        MinekordBot.registerExtension(::MessagesExtension)
+        MinekordBot.registerExtension(::RoleSyncExtension)
+
         if (Commands.PlayerList.enabled) {
             MinekordBot.registerExtension(::PlayerListExtension)
         }

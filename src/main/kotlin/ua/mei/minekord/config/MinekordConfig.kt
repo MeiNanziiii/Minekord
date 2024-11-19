@@ -18,6 +18,7 @@ import ua.mei.minekord.config.spec.AuthSpec
 import ua.mei.minekord.config.spec.ChatSpec
 import ua.mei.minekord.config.spec.ColorsSpec
 import ua.mei.minekord.config.spec.CommandsSpec
+import ua.mei.minekord.config.spec.LuckPermsSpec
 import ua.mei.minekord.config.spec.MainSpec
 import ua.mei.minekord.config.spec.MessagesSpec
 import ua.mei.minekord.config.spec.PresenceSpec
@@ -43,6 +44,7 @@ object MinekordConfig {
             addSpec(CommandsSpec)
             addSpec(ColorsSpec)
             addSpec(AuthSpec)
+            addSpec(LuckPermsSpec)
             addSpec(MessagesSpec)
         }.from.toml.file(FabricLoader.getInstance().configDir.resolve(CONFIG_PATH).toFile())
 
@@ -54,6 +56,7 @@ object MinekordConfig {
         Commands.load()
         Colors.load()
         Auth.load()
+        LuckPerms.load()
         Messages.load()
     }
 
@@ -244,6 +247,15 @@ object MinekordConfig {
             snowflakeBasedUuid = config[AuthSpec.snowflakeBasedUuid]
             requiredRoles = config[AuthSpec.requiredRoles]
             ipBasedLogin = config[AuthSpec.ipBasedLogin]
+        }
+    }
+
+    object LuckPerms {
+        lateinit var roles: Map<String, ULong>
+            private set
+
+        fun load() {
+            roles = config[LuckPermsSpec.roles]
         }
     }
 
