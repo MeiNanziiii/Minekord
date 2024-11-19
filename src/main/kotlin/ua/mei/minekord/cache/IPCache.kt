@@ -3,6 +3,7 @@ package ua.mei.minekord.cache
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import com.mojang.authlib.GameProfile
 import io.ktor.util.network.address
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.loader.api.FabricLoader
@@ -15,7 +16,7 @@ import java.nio.file.Path
 
 object IPCache : ServerLifecycleEvents.ServerStarting, ServerLifecycleEvents.ServerStopped {
     var ipCache: MutableMap<String, String> = mutableMapOf()
-    val alreadyRequestedIps: MutableMap<String, String> = mutableMapOf()
+    val alreadyRequestedIps: MutableMap<String, MutableList<String>> = mutableMapOf()
     val blockedIps: MutableList<String> = mutableListOf()
     val path: Path = FabricLoader.getInstance().gameDir.resolve("minekord/ip-cache.json")
     val type: TypeToken<MutableMap<String, String>> = object : TypeToken<MutableMap<String, String>>() {}
@@ -42,5 +43,17 @@ object IPCache : ServerLifecycleEvents.ServerStarting, ServerLifecycleEvents.Ser
 
     fun isBlocked(socketAddress: SocketAddress): Boolean {
         return blockedIps.contains(socketAddress.address)
+    }
+
+    fun isRequested(address: SocketAddress, profile: GameProfile): Boolean {
+        if (alreadyRequestedIps[profile.name]?.contains(address.address) == true) {
+            return true
+        }
+        alreadyRequestedIps.getOrPut(profile.name) { mutableListOf() }.add(address.address)
+        return false
+    }
+
+    fun containsInCache(address: SocketAddress, profile: GameProfile): Boolean {
+        return ipCache[profile.name] == address.address
     }
 }

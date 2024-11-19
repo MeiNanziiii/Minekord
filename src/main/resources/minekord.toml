@@ -67,3 +67,14 @@ link = "#5865F2"
 snowflakeBasedUuid = false
 requiredRoles = []
 ipBasedLogin = false
+
+[Messages]
+
+ipKickMessage = "Joined with new IP! Check your DM."
+embedTitle = "This is your IP?"
+timeLabel = "Time"
+yesButton = "Yes"
+noButton = "No"
+unblockButton = "Unblock"
+ipBlockedTitle = "IP was blocked!"
+ipUnblockedTitle = "IP was unblocked!"

@@ -8,6 +8,7 @@ import net.fabricmc.loader.api.FabricLoader
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import ua.mei.minekord.bot.MinekordBot
+import ua.mei.minekord.bot.extension.IPCheckExtension
 import ua.mei.minekord.bot.extension.MessagesExtension
 import ua.mei.minekord.bot.extension.PlayerListExtension
 import ua.mei.minekord.cache.IPCache
@@ -43,6 +44,7 @@ object Minekord : ModInitializer {
         MinekordConfig.load()
 
         MinekordBot.registerExtension(::MessagesExtension)
+        MinekordBot.registerExtension(::IPCheckExtension)
         if (Commands.PlayerList.enabled) {
             MinekordBot.registerExtension(::PlayerListExtension)
         }
