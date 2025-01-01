@@ -13,17 +13,9 @@ import net.fabricmc.loader.api.FabricLoader
 import net.kyori.adventure.text.format.TextColor
 import net.minecraft.text.Text
 import ua.mei.minekord.Minekord
-import ua.mei.minekord.config.spec.AuthSpec
-import ua.mei.minekord.config.spec.ChatSpec
-import ua.mei.minekord.config.spec.ColorsSpec
-import ua.mei.minekord.config.spec.CommandsSpec
-import ua.mei.minekord.config.spec.LuckPermsSpec
-import ua.mei.minekord.config.spec.MainSpec
-import ua.mei.minekord.config.spec.MessagesSpec
-import ua.mei.minekord.config.spec.PresenceSpec
+import ua.mei.minekord.config.spec.*
 import ua.mei.minekord.utils.MinekordActivityType
 import ua.mei.minekord.utils.toColor
-
 import java.util.function.Function as JavaFunction
 
 object MinekordConfig {

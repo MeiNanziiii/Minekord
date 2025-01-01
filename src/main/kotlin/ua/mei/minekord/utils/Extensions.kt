@@ -16,8 +16,7 @@ import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import ua.mei.minekord.config.MinekordConfig
 import ua.mei.minekord.config.MinekordConfig.Chat
-import java.util.Base64
-
+import java.util.*
 import java.util.function.Function as JavaFunction
 
 fun String.literal(): MutableText = Text.literal(this)

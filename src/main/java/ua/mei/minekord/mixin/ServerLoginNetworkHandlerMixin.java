@@ -58,6 +58,10 @@ public abstract class ServerLoginNetworkHandlerMixin {
     @Shadow
     public abstract void disconnect(Text text);
 
+    @Shadow @Nullable String profileName;
+
+    @Shadow abstract void startVerify(GameProfile gameProfile);
+
     @Inject(method = "onHello", at = @At("HEAD"), cancellable = true)
     public void minekord$checkIp(LoginHelloC2SPacket loginHelloC2SPacket, CallbackInfo ci) {
         if (MinekordConfig.Auth.INSTANCE.getIpBasedLogin() && IPCache.INSTANCE.isBlocked(this.connection.getAddress())) {
@@ -98,27 +102,22 @@ public abstract class ServerLoginNetworkHandlerMixin {
         if (MinekordConfig.Auth.INSTANCE.getSnowflakeBasedUuid()) {
             Thread thread = new Thread("Minekord User Authenticator #" + NEXT_AUTHENTICATOR_THREAD_ID.incrementAndGet()) {
                 public void run() {
-                    GameProfile gameProfile = ServerLoginNetworkHandlerMixin.this.profile;
-                    assert gameProfile != null;
+                    assert ServerLoginNetworkHandlerMixin.this.profileName != null;
 
                     if (member == null) {
-                        member = AuthUtils.INSTANCE.findMember(gameProfile.getName());
+                        member = AuthUtils.INSTANCE.findMember(ServerLoginNetworkHandlerMixin.this.profileName);
                     }
 
                     if (member != null) {
-                        ServerLoginNetworkHandlerMixin.this.profile = new GameProfile(AuthUtils.INSTANCE.uuidFromMember(member), gameProfile.getName());
+                        ServerLoginNetworkHandlerMixin.this.profile = new GameProfile(AuthUtils.INSTANCE.uuidFromMember(member), ServerLoginNetworkHandlerMixin.this.profileName);
                     }
 
                     if (ServerLoginNetworkHandlerMixin.this.profile != null) {
                         LOGGER.info("Snowflake based UUID of player {} is {}", ServerLoginNetworkHandlerMixin.this.profile.getName(), ServerLoginNetworkHandlerMixin.this.profile.getId());
-                        ServerLoginNetworkHandlerMixin.this.state = ServerLoginNetworkHandler.State.PROTOCOL_SWITCHING;
-                    } else if (ServerLoginNetworkHandlerMixin.this.server.isSingleplayer()) {
-                        LOGGER.warn("Failed to verify username but will let them in anyway!");
-                        ServerLoginNetworkHandlerMixin.this.profile = gameProfile;
-                        ServerLoginNetworkHandlerMixin.this.state = ServerLoginNetworkHandler.State.PROTOCOL_SWITCHING;
+                        ServerLoginNetworkHandlerMixin.this.startVerify(ServerLoginNetworkHandlerMixin.this.profile);
                     } else {
                         ServerLoginNetworkHandlerMixin.this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
-                        LOGGER.error("Username '{}' tried to join with an invalid session", gameProfile.getName());
+                        LOGGER.error("Username '{}' tried to join with an invalid session", ServerLoginNetworkHandlerMixin.this.profileName);
                     }
                 }
             };

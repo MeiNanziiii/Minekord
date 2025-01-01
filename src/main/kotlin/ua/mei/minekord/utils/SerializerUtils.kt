@@ -6,7 +6,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.kyori.adventure.translation.GlobalTranslator
 import ua.mei.minekord.bot.MinekordBot
-import java.util.Locale
+import java.util.*
 
 object SerializerUtils {
     val pingRegex: Regex = Regex("@(\\S{1,32})")

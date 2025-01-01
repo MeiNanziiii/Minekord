@@ -14,9 +14,10 @@ import dev.kordex.core.extensions.Extension
 import dev.kordex.core.i18n.toKey
 import dev.kordex.core.time.TimestampType
 import dev.kordex.core.time.toDiscord
-import io.ktor.util.network.address
+import io.ktor.util.network.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import ua.mei.minekord.Minekord
 import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.cache.IPCache
 import ua.mei.minekord.config.MinekordConfig.Auth
@@ -48,7 +49,7 @@ class IPCheckExtension : Extension() {
                         }
                     }
                 } catch (e: Exception) {
-                    println("Error handling IP check: ${e.message}")
+                    Minekord.logger.info("Error handling IP check: ${e.message}")
                 }
             }
         }

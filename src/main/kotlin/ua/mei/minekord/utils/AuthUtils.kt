@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.config.MinekordConfig
-import java.util.UUID
+import java.util.*
 
 object AuthUtils {
     fun findMember(name: String): Member? {
