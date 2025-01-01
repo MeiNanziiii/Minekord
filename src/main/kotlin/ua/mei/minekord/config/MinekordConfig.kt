@@ -4,16 +4,15 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.source.toml
 import dev.kord.common.Color
 import eu.pb4.placeholders.api.ParserContext
-import eu.pb4.placeholders.api.Placeholders
+import eu.pb4.placeholders.api.node.DynamicTextNode
 import eu.pb4.placeholders.api.node.EmptyNode
 import eu.pb4.placeholders.api.node.TextNode
 import eu.pb4.placeholders.api.parsers.NodeParser
-import eu.pb4.placeholders.api.parsers.PatternPlaceholderParser
-import eu.pb4.placeholders.api.parsers.StaticPreParser
-import eu.pb4.placeholders.api.parsers.TextParserV1
+import eu.pb4.placeholders.api.parsers.TagLikeParser
 import net.fabricmc.loader.api.FabricLoader
 import net.kyori.adventure.text.format.TextColor
 import net.minecraft.text.Text
+import ua.mei.minekord.Minekord
 import ua.mei.minekord.config.spec.AuthSpec
 import ua.mei.minekord.config.spec.ChatSpec
 import ua.mei.minekord.config.spec.ColorsSpec
@@ -25,15 +24,20 @@ import ua.mei.minekord.config.spec.PresenceSpec
 import ua.mei.minekord.utils.MinekordActivityType
 import ua.mei.minekord.utils.toColor
 
+import java.util.function.Function as JavaFunction
+
 object MinekordConfig {
     const val CONFIG_PATH: String = "minekord.toml"
 
-    private val parser: NodeParser = NodeParser.merge(
-        TextParserV1.DEFAULT,
-        Placeholders.DEFAULT_PLACEHOLDER_PARSER,
-        PatternPlaceholderParser(PatternPlaceholderParser.ALT_PLACEHOLDER_PATTERN_CUSTOM, DynamicNode.Companion::of),
-        StaticPreParser.INSTANCE
-    )
+    val dynamicKey: ParserContext.Key<JavaFunction<String, Text?>> = DynamicTextNode.key(Minekord.MOD_ID)
+    val parser: NodeParser = NodeParser.builder()
+        .simplifiedTextFormat()
+        .quickText()
+        .globalPlaceholders()
+        .placeholders(TagLikeParser.PLACEHOLDER_ALTERNATIVE, dynamicKey)
+        .staticPreParsing()
+        .build()
+
     private lateinit var config: Config
 
     fun load() {
@@ -286,24 +290,6 @@ object MinekordConfig {
             unblockButton = config[MessagesSpec.unblockButton]
             ipBlockedTitle = config[MessagesSpec.ipBlockedTitle]
             ipUnblockedTitle = config[MessagesSpec.ipUnblockedTitle]
-        }
-    }
-
-    data class DynamicNode(val key: String, val text: Text) : TextNode {
-        companion object {
-            fun of(key: String): DynamicNode {
-                return DynamicNode(key, Text.literal("{$key}"))
-            }
-
-            val NODES = ParserContext.Key<Map<String, Text>>("minekord:dynamic", null)
-        }
-
-        override fun toText(context: ParserContext, removeBackslashes: Boolean): Text {
-            return context.get(NODES)?.getOrDefault(this.key, text) ?: text
-        }
-
-        override fun isDynamic(): Boolean {
-            return true
         }
     }
 }

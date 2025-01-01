@@ -58,15 +58,15 @@ afterEvaluate {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 
     withSourcesJar()
 }
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
+        jvmTarget.set(JvmTarget.JVM_21)
     }
 }
 
@@ -76,9 +76,7 @@ tasks {
 
         filesMatching("fabric.mod.json") {
             expand(
-                "version" to modVersion,
-                "minecraft_version" to libs.versions.minecraft.get(),
-                "kotlin_loader_version" to libs.versions.fabric.kotlin.get()
+                "version" to modVersion
             )
         }
     }
@@ -91,7 +89,7 @@ tasks {
 /* Thanks to https://github.com/jakobkmar for original script */
 fun DependencyHandlerScope.includeTransitive(
     dependencies: Set<ResolvedDependency>,
-    minecraftDependencies: Set<ResolvedDependency>,
+    minecraftLibs: Set<ResolvedDependency>,
     kotlinDependency: ResolvedDependency,
     checkedDependencies: MutableSet<ResolvedDependency> = HashSet()
 ) {
@@ -100,7 +98,7 @@ fun DependencyHandlerScope.includeTransitive(
 
         if (kotlinDependency.children.any { dep -> dep.name == it.name }) {
             println("Skipping -> ${it.name} (already in fabric-language-kotlin)")
-        } else if (minecraftDependencies.any { dep -> dep.moduleGroup == it.moduleGroup && dep.moduleName == it.moduleName }) {
+        } else if (minecraftLibs.any { dep -> dep.moduleGroup == it.moduleGroup && dep.moduleName == it.moduleName }) {
             println("Skipping -> ${it.name} (already in minecraft)")
         } else {
             include(it.name)
@@ -108,7 +106,7 @@ fun DependencyHandlerScope.includeTransitive(
         }
         checkedDependencies += it
 
-        includeTransitive(it.children, minecraftDependencies, kotlinDependency, checkedDependencies)
+        includeTransitive(it.children, minecraftLibs, kotlinDependency, checkedDependencies)
     }
 }
 

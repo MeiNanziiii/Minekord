@@ -9,22 +9,25 @@ import eu.pb4.placeholders.api.node.EmptyNode
 import eu.pb4.placeholders.api.node.TextNode
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
+import net.minecraft.registry.RegistryWrapper
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
+import ua.mei.minekord.config.MinekordConfig
 import ua.mei.minekord.config.MinekordConfig.Chat
-import ua.mei.minekord.config.MinekordConfig.DynamicNode
 import java.util.Base64
+
+import java.util.function.Function as JavaFunction
 
 fun String.literal(): MutableText = Text.literal(this)
 
-fun Component.native(): MutableText {
-    return Text.Serializer.fromJson(GsonComponentSerializer.gson().serialize(this)) ?: Text.empty()
+fun Component.native(wrapperLookup: RegistryWrapper.WrapperLookup): MutableText {
+    return Text.Serialization.fromJson(GsonComponentSerializer.gson().serialize(this), wrapperLookup) ?: Text.empty()
 }
 
-fun Text.adventure(): Component {
-    return GsonComponentSerializer.gson().deserialize(Text.Serializer.toJson(this))
+fun Text.adventure(wrapperLookup: RegistryWrapper.WrapperLookup): Component {
+    return GsonComponentSerializer.gson().deserialize(Text.Serialization.toJsonString(this, wrapperLookup))
 }
 
 fun String.adventure(): Component = Component.text(this)
@@ -40,11 +43,11 @@ fun String.summary(): String {
 fun GameProfile.texture(): String {
     return try {
         JsonParser.parseString(Base64.getDecoder().decode(this.properties.get("textures").firstOrNull()?.value ?: "").toString(Charsets.UTF_8))
-            .getAsJsonObject()
+            .asJsonObject
             .getAsJsonObject("textures")
             .getAsJsonObject("SKIN")
             .getAsJsonPrimitive("url")
-            .getAsString()
+            .asString
             .let { it.substring(it.lastIndexOf('/') + 1) }
             .takeIf { it.isNotBlank() } ?: ""
     } catch (_: Throwable) {
@@ -56,7 +59,10 @@ fun String.toColor(): Color = Color(this.removePrefix("#").toInt(16))
 
 fun TextNode.toText(context: PlaceholderContext, placeholders: PlaceholderBuilder.() -> Unit): Text {
     if (this == EmptyNode.INSTANCE) return Text.empty()
-    return this.toText(context.asParserContext().with(DynamicNode.NODES, PlaceholderBuilder().apply(placeholders).map))
+
+    val map = PlaceholderBuilder().apply(placeholders).map
+
+    return this.toText(context.asParserContext().with(MinekordConfig.dynamicKey, JavaFunction { map[it] }))
 }
 
 fun TextNode.toText(player: ServerPlayerEntity, placeholders: PlaceholderBuilder.() -> Unit = {}): Text {

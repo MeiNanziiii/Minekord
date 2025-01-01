@@ -39,14 +39,14 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
     @Shadow
     @Nullable
-    GameProfile profile;
+    private GameProfile profile;
 
     @Shadow
     @Final
     MinecraftServer server;
 
     @Shadow
-    ServerLoginNetworkHandler.State state;
+    private ServerLoginNetworkHandler.State state;
 
     @Shadow
     @Final
@@ -111,11 +111,11 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
                     if (ServerLoginNetworkHandlerMixin.this.profile != null) {
                         LOGGER.info("Snowflake based UUID of player {} is {}", ServerLoginNetworkHandlerMixin.this.profile.getName(), ServerLoginNetworkHandlerMixin.this.profile.getId());
-                        ServerLoginNetworkHandlerMixin.this.state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
+                        ServerLoginNetworkHandlerMixin.this.state = ServerLoginNetworkHandler.State.PROTOCOL_SWITCHING;
                     } else if (ServerLoginNetworkHandlerMixin.this.server.isSingleplayer()) {
                         LOGGER.warn("Failed to verify username but will let them in anyway!");
                         ServerLoginNetworkHandlerMixin.this.profile = gameProfile;
-                        ServerLoginNetworkHandlerMixin.this.state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
+                        ServerLoginNetworkHandlerMixin.this.state = ServerLoginNetworkHandler.State.PROTOCOL_SWITCHING;
                     } else {
                         ServerLoginNetworkHandlerMixin.this.disconnect(Text.translatable("multiplayer.disconnect.unverified_username"));
                         LOGGER.error("Username '{}' tried to join with an invalid session", gameProfile.getName());

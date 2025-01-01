@@ -29,6 +29,7 @@ import ua.mei.minekord.utils.literal
 import ua.mei.minekord.utils.native
 import ua.mei.minekord.utils.summary
 import ua.mei.minekord.utils.toText
+import kotlin.jvm.optionals.getOrNull
 
 class MessagesExtension : MinekordExtension() {
     override val name: String = "minekord.messages"
@@ -43,13 +44,13 @@ class MessagesExtension : MinekordExtension() {
                 val sender: Member = event.member ?: return@action
 
                 var content: Text = if (Chat.convertMarkdown) {
-                    MinecraftSerializer.INSTANCE.serialize(message.content, MinekordBot.minecraftOptions).native()
+                    MinecraftSerializer.INSTANCE.serialize(message.content, MinekordBot.minecraftOptions).native(server.registryManager)
                 } else {
                     message.content.literal()
                 }
 
                 if (message.referencedMessage != null) {
-                    val replyContent: Text = MinecraftSerializer.INSTANCE.serialize(message.referencedMessage!!.content, MinekordBot.minecraftOptions).native()
+                    val replyContent: Text = MinecraftSerializer.INSTANCE.serialize(message.referencedMessage!!.content, MinekordBot.minecraftOptions).native(server.registryManager)
 
                     val reply: Text = Chat.Minecraft.replyFormat.toText(server) {
                         "sender" to (message.referencedMessage!!.author?.effectiveName ?: message.referencedMessage!!.data.author.username).literal()
@@ -75,7 +76,7 @@ class MessagesExtension : MinekordExtension() {
             username = sender.name
             avatarUrl = sender.avatarUrl
 
-            content = DiscordSerializer.INSTANCE.serialize(message.adventure(), MinekordBot.discordOptions).let {
+            content = DiscordSerializer.INSTANCE.serialize(message.adventure(server.registryManager), MinekordBot.discordOptions).let {
                 if (Chat.convertMentions) {
                     SerializerUtils.convertMentions(it)
                 } else {
@@ -86,7 +87,7 @@ class MessagesExtension : MinekordExtension() {
     }
 
     override suspend fun onAdvancementGrant(player: ServerPlayerEntity, advancement: Advancement) {
-        val display: AdvancementDisplay = advancement.display ?: return
+        val display: AdvancementDisplay = advancement.comp_1913.getOrNull() ?: return
         val frame: AdvancementFrame = display.frame
 
         val message = when (frame) {

@@ -25,9 +25,9 @@ class PlayerListExtension : MinekordExtension() {
                     embed {
                         title = Commands.PlayerList.title.toText(server).string
                         color = Colors.green
-                        description = server.playerManager.playerList.map {
+                        description = server.playerManager.playerList.joinToString("\n") {
                             Commands.PlayerList.format.toText(it).string
-                        }.joinToString("\n")
+                        }
                     }
                 }
             }
