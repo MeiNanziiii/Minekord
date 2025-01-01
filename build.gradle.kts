@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     kotlin("jvm") version "2.0.20"
-    id("fabric-loom") version "1.8-SNAPSHOT"
+    id("fabric-loom") version "1.9-SNAPSHOT"
 }
 
 loom {
@@ -25,7 +25,7 @@ repositories {
     maven("https://repo.kord.dev/snapshots")
 }
 
-val includeImplementation by configurations.creating {
+val includeImplementation: Configuration by configurations.creating {
     configurations.implementation.configure { extendsFrom(this@creating) }
 }
 
@@ -88,28 +88,19 @@ tasks {
     }
 }
 
-/* Thanks to https://github.com/jakobkmar for this script */
+/* Thanks to https://github.com/jakobkmar for original script */
 fun DependencyHandlerScope.includeTransitive(
     dependencies: Set<ResolvedDependency>,
-    fabricLanguageKotlinDependency: ResolvedDependency,
+    minecraftDependencies: Set<ResolvedDependency>,
+    kotlinDependency: ResolvedDependency,
     checkedDependencies: MutableSet<ResolvedDependency> = HashSet()
 ) {
-    val minecraftDependencies = listOf(
-        "slf4j-api",
-        "commons-logging",
-        "oshi-core",
-        "jna",
-        "jna-platform",
-        "gson",
-        "commons-lang3"
-    )
-
     dependencies.forEach {
         if (checkedDependencies.contains(it) || it.moduleGroup == "org.jetbrains.kotlin" || it.moduleGroup == "org.jetbrains.kotlinx") return@forEach
 
-        if (fabricLanguageKotlinDependency.children.any { kotlinDep -> kotlinDep.name == it.name }) {
+        if (kotlinDependency.children.any { dep -> dep.name == it.name }) {
             println("Skipping -> ${it.name} (already in fabric-language-kotlin)")
-        } else if (minecraftDependencies.any { dep -> dep == it.moduleName }) {
+        } else if (minecraftDependencies.any { dep -> dep.moduleGroup == it.moduleGroup && dep.moduleName == it.moduleName }) {
             println("Skipping -> ${it.name} (already in minecraft)")
         } else {
             include(it.name)
@@ -117,13 +108,14 @@ fun DependencyHandlerScope.includeTransitive(
         }
         checkedDependencies += it
 
-        includeTransitive(it.children, fabricLanguageKotlinDependency, checkedDependencies)
+        includeTransitive(it.children, minecraftDependencies, kotlinDependency, checkedDependencies)
     }
 }
 
 fun DependencyHandlerScope.handleIncludes(configuration: Configuration) {
     includeTransitive(
         configuration.resolvedConfiguration.firstLevelModuleDependencies,
+        configurations.minecraftLibraries.get().resolvedConfiguration.firstLevelModuleDependencies,
         configurations.modImplementation.get().resolvedConfiguration.firstLevelModuleDependencies
             .first { it.moduleGroup == "net.fabricmc" && it.moduleName == "fabric-language-kotlin" },
     )
