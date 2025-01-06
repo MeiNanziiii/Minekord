@@ -33,21 +33,6 @@ class RoleSyncExtension : MinekordExtension() {
         syncPlayer(player.gameProfile.name)
     }
 
-    override suspend fun onServerStart() {
-        if (!MinekordConfig.LuckPerms.roles.isEmpty() && FabricLoader.getInstance().isModLoaded("luckperms")) {
-            val startTime = System.currentTimeMillis()
-
-            val members: List<Member> = MinekordBot.guild.members.filter { it.roleIds.map { it.value }.containsAll(MinekordConfig.Auth.requiredRoles) }.toList()
-
-            members.forEach { member ->
-                syncPlayer(member.effectiveName)
-            }
-
-            val endTime = System.currentTimeMillis()
-            Minekord.logger.info("Roles successfully synced! Sync time: ${endTime - startTime}ms")
-        }
-    }
-
     fun syncPlayer(nickname: String) {
         if (!MinekordConfig.LuckPerms.roles.isEmpty() && FabricLoader.getInstance().isModLoaded("luckperms")) {
             val lp: LuckPerms = LuckPermsProvider.get()
