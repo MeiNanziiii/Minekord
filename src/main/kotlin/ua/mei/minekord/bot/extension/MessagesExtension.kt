@@ -9,6 +9,7 @@ import dev.kordex.core.checks.isNotBot
 import dev.kordex.core.extensions.event
 import dev.vankka.mcdiscordreserializer.discord.DiscordSerializer
 import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializer
+import eu.pb4.placeholders.api.PlaceholderContext
 import net.minecraft.advancement.Advancement
 import net.minecraft.advancement.AdvancementDisplay
 import net.minecraft.advancement.AdvancementFrame
@@ -17,6 +18,7 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.bot.MinekordExtension
+import ua.mei.minekord.config.MinekordConfig
 import ua.mei.minekord.config.MinekordConfig.Chat
 import ua.mei.minekord.config.MinekordConfig.Colors
 import ua.mei.minekord.config.MinekordConfig.Main
@@ -54,6 +56,7 @@ class MessagesExtension : MinekordExtension() {
                 }
 
                 content = Chat.Minecraft.messageFormat.toText(server) {
+                    "prefix" to MinekordConfig.parser.parseText(LuckPermsUtils.prefixByNickname(sender.effectiveName, server), PlaceholderContext.of(server).asParserContext())
                     "sender" to sender.effectiveName.literal()
                     "message" to content
                 }
