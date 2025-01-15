@@ -41,10 +41,7 @@ fun String.summary(): String {
 
 fun GameProfile.texture(): String {
     return try {
-        JsonParser.parseString(
-            Base64.getDecoder().decode(this.properties.get("textures").firstOrNull()?.value ?: "")
-                .toString(Charsets.UTF_8)
-        )
+        JsonParser.parseString(Base64.getDecoder().decode(this.properties.get("textures").firstOrNull()?.value ?: "").toString(Charsets.UTF_8))
             .asJsonObject
             .getAsJsonObject("textures")
             .getAsJsonObject("SKIN")

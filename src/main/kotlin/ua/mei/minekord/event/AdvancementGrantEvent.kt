@@ -9,13 +9,12 @@ fun interface AdvancementGrantEvent {
     fun grant(player: ServerPlayerEntity, advancement: Advancement)
 
     companion object {
-        val EVENT: Event<AdvancementGrantEvent> =
-            EventFactory.createArrayBacked(AdvancementGrantEvent::class.java) { listeners ->
-                AdvancementGrantEvent { player, advancement ->
-                    listeners.forEach { listener ->
-                        listener.grant(player, advancement)
-                    }
+        val EVENT: Event<AdvancementGrantEvent> = EventFactory.createArrayBacked(AdvancementGrantEvent::class.java) { listeners ->
+            AdvancementGrantEvent { player, advancement ->
+                listeners.forEach { listener ->
+                    listener.grant(player, advancement)
                 }
             }
+        }
     }
 }

@@ -38,7 +38,8 @@ class MessagesExtension : MinekordExtension() {
                 val sender: Member = event.member ?: return@action
 
                 var content: Text = if (Chat.convertMarkdown) {
-                    MinecraftSerializer.INSTANCE.serialize(message.content, MinekordBot.minecraftOptions)
+                    MinecraftSerializer.INSTANCE
+                        .serialize(message.content, MinekordBot.minecraftOptions)
                         .native(server.registryManager)
                 } else {
                     message.content.literal()
@@ -51,8 +52,7 @@ class MessagesExtension : MinekordExtension() {
                     ).native(server.registryManager)
 
                     val reply: Text = Chat.Minecraft.replyFormat.toText(server) {
-                        "sender" to (message.referencedMessage!!.author?.effectiveName
-                            ?: message.referencedMessage!!.data.author.username).literal()
+                        "sender" to (message.referencedMessage!!.author?.effectiveName ?: message.referencedMessage!!.data.author.username).literal()
                         "message" to replyContent
                         "summary" to replyContent.string.summary().literal()
                     }

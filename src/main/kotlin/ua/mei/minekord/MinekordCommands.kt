@@ -11,11 +11,7 @@ import net.minecraft.text.Text
 import ua.mei.minekord.config.MinekordConfig
 
 object MinekordCommands : CommandRegistrationCallback {
-    override fun register(
-        dispatcher: CommandDispatcher<ServerCommandSource>,
-        access: CommandRegistryAccess,
-        environment: CommandManager.RegistrationEnvironment
-    ) {
+    override fun register(dispatcher: CommandDispatcher<ServerCommandSource>, access: CommandRegistryAccess, environment: CommandManager.RegistrationEnvironment) {
         dispatcher.register(
             literal<ServerCommandSource>("minekord")
                 .requires(Permissions.require("minekord.main", 4))

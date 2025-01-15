@@ -39,8 +39,11 @@ object MinekordMinecraftRenderer : DefaultMinecraftRenderer() {
         return runBlocking {
             val role: Role? = MinekordBot.guild.getRoleOrNull(id.asSnowflake)
             val name: String = role?.name ?: "unknown-role"
-            val color: TextColor =
-                if (role != null && Chat.Minecraft.coloredRoles) TextColor.color(role.color.rgb) else Colors.mention
+            val color: TextColor = if (role != null && Chat.Minecraft.coloredRoles) {
+                TextColor.color(role.color.rgb)
+            } else {
+                Colors.mention
+            }
 
             component.append("@$name".adventure().color(color))
         }

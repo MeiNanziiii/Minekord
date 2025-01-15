@@ -30,10 +30,7 @@ object LuckPermsUtils {
 
     suspend fun syncPlayer(nickname: String) {
         if (!MinekordConfig.LuckPerms.roles.isEmpty() && FabricLoader.getInstance().isModLoaded("luckperms")) {
-            val member: Member = MinekordBot.guild.members.firstOrNull {
-                it.effectiveName == nickname && it.roleIds.map { it.value }
-                    .containsAll(MinekordConfig.Auth.requiredRoles)
-            } ?: return
+            val member: Member = MinekordBot.guild.members.firstOrNull { it.effectiveName == nickname && it.roleIds.map { it.value }.containsAll(MinekordConfig.Auth.requiredRoles) } ?: return
 
             val lp: LuckPerms = LuckPermsProvider.get()
             val user: User = lp.userManager.getUser(nickname) ?: return

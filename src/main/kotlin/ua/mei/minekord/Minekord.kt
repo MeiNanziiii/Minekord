@@ -53,8 +53,7 @@ object Minekord : ModInitializer {
         }
 
         ServerMessageEvents.CHAT_MESSAGE.register { message, sender, type ->
-            ChatMessageEvent.EVENT.invoker()
-                .message(message.content, MessageSender(sender.gameProfile.name, sender.avatarUrl))
+            ChatMessageEvent.EVENT.invoker().message(message.content, MessageSender(sender.gameProfile.name, sender.avatarUrl))
         }
         ServerMessageEvents.COMMAND_MESSAGE.register { message, source, parameters ->
             if (source.isExecutedByPlayer) {
@@ -63,8 +62,10 @@ object Minekord : ModInitializer {
                     MessageSender(source.player!!.gameProfile.name, source.player!!.avatarUrl)
                 )
             } else {
-                ChatMessageEvent.EVENT.invoker()
-                    .message(message.content, MessageSender(Chat.Webhook.webhookName, Chat.Webhook.webhookAvatar))
+                ChatMessageEvent.EVENT.invoker().message(
+                    message.content,
+                    MessageSender(Chat.Webhook.webhookName, Chat.Webhook.webhookAvatar)
+                )
             }
         }
         ServerLifecycleEvents.SERVER_STARTING.register(IPCache)
