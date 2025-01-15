@@ -12,6 +12,12 @@ object ChatSpec : ConfigSpec() {
         val summaryMaxLength by required<Int>()
 
         val coloredRoles by required<Boolean>()
+
+        val appendImages by required<Boolean>()
+
+        val imageInterpolation by required<String>()
+        val imageMaxWidth by required<Int>()
+        val imageMaxHeight by required<Int>()
     }
 
     object DiscordSpec : ConfigSpec() {

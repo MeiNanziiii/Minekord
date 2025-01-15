@@ -1,4 +1,4 @@
-package ua.mei.minekord.utils
+package ua.mei.minekord.util
 
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.Role
@@ -39,7 +39,8 @@ object MinekordMinecraftRenderer : DefaultMinecraftRenderer() {
         return runBlocking {
             val role: Role? = MinekordBot.guild.getRoleOrNull(id.asSnowflake)
             val name: String = role?.name ?: "unknown-role"
-            val color: TextColor = if (role != null && Chat.Minecraft.coloredRoles) TextColor.color(role.color.rgb) else Colors.mention
+            val color: TextColor =
+                if (role != null && Chat.Minecraft.coloredRoles) TextColor.color(role.color.rgb) else Colors.mention
 
             component.append("@$name".adventure().color(color))
         }

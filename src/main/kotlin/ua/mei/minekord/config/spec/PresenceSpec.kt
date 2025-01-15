@@ -1,7 +1,7 @@
 package ua.mei.minekord.config.spec
 
 import com.uchuhimo.konf.ConfigSpec
-import ua.mei.minekord.utils.MinekordActivityType
+import ua.mei.minekord.config.MinekordConfig.Presence.MinekordActivityType
 
 object PresenceSpec : ConfigSpec() {
     val activityType by required<MinekordActivityType>()

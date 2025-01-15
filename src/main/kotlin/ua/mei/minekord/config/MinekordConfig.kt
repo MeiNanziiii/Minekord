@@ -14,8 +14,8 @@ import net.kyori.adventure.text.format.TextColor
 import net.minecraft.text.Text
 import ua.mei.minekord.Minekord
 import ua.mei.minekord.config.spec.*
-import ua.mei.minekord.utils.MinekordActivityType
-import ua.mei.minekord.utils.toColor
+import ua.mei.minekord.util.toColor
+import java.awt.Image
 import java.util.function.Function as JavaFunction
 
 object MinekordConfig {
@@ -42,9 +42,7 @@ object MinekordConfig {
             addSpec(AuthSpec)
             addSpec(LuckPermsSpec)
             addSpec(MessagesSpec)
-        }.from.toml.file(FabricLoader.getInstance().configDir.resolve(CONFIG_PATH).toFile())
-
-        config.validateRequired()
+        }.from.toml.file(FabricLoader.getInstance().configDir.resolve(CONFIG_PATH).toFile()).validateRequired()
 
         Main.load()
         Chat.load()
@@ -101,12 +99,35 @@ object MinekordConfig {
             var coloredRoles: Boolean = true
                 private set
 
+            var appendImages: Boolean = true
+                private set
+
+            var imageInterpolation: Int = Image.SCALE_DEFAULT
+                private set
+            var imageMaxWidth: Int = 40
+                private set
+            var imageMaxHeight: Int = 40
+                private set
+
             fun load() {
                 messageFormat = parseNode(config[ChatSpec.MinecraftSpec.messageFormat])
                 replyFormat = parseNode(config[ChatSpec.MinecraftSpec.replyFormat])
                 summaryMaxLength = config[ChatSpec.MinecraftSpec.summaryMaxLength]
 
                 coloredRoles = config[ChatSpec.MinecraftSpec.coloredRoles]
+
+                appendImages = config[ChatSpec.MinecraftSpec.appendImages]
+
+                imageInterpolation = when (config[ChatSpec.MinecraftSpec.imageInterpolation]) {
+                    "fast" -> Image.SCALE_FAST
+                    "smooth" -> Image.SCALE_SMOOTH
+                    "replicate" -> Image.SCALE_REPLICATE
+                    "area_averaging" -> Image.SCALE_AREA_AVERAGING
+
+                    else -> Image.SCALE_DEFAULT
+                }
+                imageMaxWidth = config[ChatSpec.MinecraftSpec.imageMaxWidth]
+                imageMaxHeight = config[ChatSpec.MinecraftSpec.imageMaxHeight]
             }
         }
 
@@ -173,6 +194,14 @@ object MinekordConfig {
             activityText = parseNode(config[PresenceSpec.activityText])
             updateTicks = config[PresenceSpec.updateTicks]
         }
+
+        enum class MinekordActivityType {
+            NONE,
+            PLAYING,
+            LISTENING,
+            WATCHING,
+            COMPETING
+        }
     }
 
     object Commands {
@@ -232,15 +261,12 @@ object MinekordConfig {
     }
 
     object Auth {
-        var snowflakeBasedUuid: Boolean = false
-            private set
         var requiredRoles: List<ULong> = emptyList()
             private set
         var ipBasedLogin: Boolean = false
             private set
 
         fun load() {
-            snowflakeBasedUuid = config[AuthSpec.snowflakeBasedUuid]
             requiredRoles = config[AuthSpec.requiredRoles]
             ipBasedLogin = config[AuthSpec.ipBasedLogin]
         }

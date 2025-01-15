@@ -3,7 +3,7 @@ package ua.mei.minekord.event
 import net.fabricmc.fabric.api.event.Event
 import net.fabricmc.fabric.api.event.EventFactory
 import net.minecraft.text.Text
-import ua.mei.minekord.utils.MessageSender
+import ua.mei.minekord.util.MessageSender
 
 fun interface ChatMessageEvent {
     fun message(message: Text, sender: MessageSender)

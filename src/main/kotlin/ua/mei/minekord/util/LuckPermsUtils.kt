@@ -1,7 +1,8 @@
-package ua.mei.minekord.utils
+package ua.mei.minekord.util
 
 import com.mojang.authlib.GameProfile
 import dev.kord.core.entity.Member
+import kotlinx.coroutines.flow.firstOrNull
 import net.fabricmc.loader.api.FabricLoader
 import net.luckperms.api.LuckPerms
 import net.luckperms.api.LuckPermsProvider
@@ -9,6 +10,7 @@ import net.luckperms.api.model.user.User
 import net.luckperms.api.node.types.InheritanceNode
 import net.luckperms.api.query.QueryOptions
 import net.minecraft.server.MinecraftServer
+import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.config.MinekordConfig
 import kotlin.jvm.optionals.getOrNull
 
@@ -26,9 +28,12 @@ object LuckPermsUtils {
         return user.cachedData.getMetaData(QueryOptions.defaultContextualOptions()).prefix ?: ""
     }
 
-    fun syncPlayer(nickname: String) {
+    suspend fun syncPlayer(nickname: String) {
         if (!MinekordConfig.LuckPerms.roles.isEmpty() && FabricLoader.getInstance().isModLoaded("luckperms")) {
-            val member: Member = AuthUtils.findMember(nickname) ?: return
+            val member: Member = MinekordBot.guild.members.firstOrNull {
+                it.effectiveName == nickname && it.roleIds.map { it.value }
+                    .containsAll(MinekordConfig.Auth.requiredRoles)
+            } ?: return
 
             val lp: LuckPerms = LuckPermsProvider.get()
             val user: User = lp.userManager.getUser(nickname) ?: return

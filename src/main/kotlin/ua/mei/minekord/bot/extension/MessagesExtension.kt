@@ -22,7 +22,7 @@ import ua.mei.minekord.config.MinekordConfig
 import ua.mei.minekord.config.MinekordConfig.Chat
 import ua.mei.minekord.config.MinekordConfig.Colors
 import ua.mei.minekord.config.MinekordConfig.Main
-import ua.mei.minekord.utils.*
+import ua.mei.minekord.util.*
 import kotlin.jvm.optionals.getOrNull
 
 class MessagesExtension : MinekordExtension() {
@@ -38,16 +38,21 @@ class MessagesExtension : MinekordExtension() {
                 val sender: Member = event.member ?: return@action
 
                 var content: Text = if (Chat.convertMarkdown) {
-                    MinecraftSerializer.INSTANCE.serialize(message.content, MinekordBot.minecraftOptions).native(server.registryManager)
+                    MinecraftSerializer.INSTANCE.serialize(message.content, MinekordBot.minecraftOptions)
+                        .native(server.registryManager)
                 } else {
                     message.content.literal()
                 }
 
                 if (message.referencedMessage != null) {
-                    val replyContent: Text = MinecraftSerializer.INSTANCE.serialize(message.referencedMessage!!.content, MinekordBot.minecraftOptions).native(server.registryManager)
+                    val replyContent: Text = MinecraftSerializer.INSTANCE.serialize(
+                        message.referencedMessage!!.content,
+                        MinekordBot.minecraftOptions
+                    ).native(server.registryManager)
 
                     val reply: Text = Chat.Minecraft.replyFormat.toText(server) {
-                        "sender" to (message.referencedMessage!!.author?.effectiveName ?: message.referencedMessage!!.data.author.username).literal()
+                        "sender" to (message.referencedMessage!!.author?.effectiveName
+                            ?: message.referencedMessage!!.data.author.username).literal()
                         "message" to replyContent
                         "summary" to replyContent.string.summary().literal()
                     }
@@ -56,12 +61,23 @@ class MessagesExtension : MinekordExtension() {
                 }
 
                 content = Chat.Minecraft.messageFormat.toText(server) {
-                    "prefix" to MinekordConfig.parser.parseText(LuckPermsUtils.prefixByNickname(sender.effectiveName, server), PlaceholderContext.of(server).asParserContext())
+                    "prefix" to MinekordConfig.parser.parseText(
+                        LuckPermsUtils.prefixByNickname(
+                            sender.effectiveName,
+                            server
+                        ), PlaceholderContext.of(server).asParserContext()
+                    )
                     "sender" to sender.effectiveName.literal()
                     "message" to content
                 }
 
+                val attachments: List<Text> = ImageUtils.attachmentsToText(message)
+
                 server.playerManager.broadcast(content, false)
+
+                attachments.forEach {
+                    server.playerManager.broadcast(it, false)
+                }
             }
         }
     }
@@ -71,7 +87,10 @@ class MessagesExtension : MinekordExtension() {
             username = sender.name
             avatarUrl = sender.avatarUrl
 
-            content = DiscordSerializer.INSTANCE.serialize(message.adventure(server.registryManager), MinekordBot.discordOptions).let {
+            content = DiscordSerializer.INSTANCE.serialize(
+                message.adventure(server.registryManager),
+                MinekordBot.discordOptions
+            ).let {
                 if (Chat.convertMentions) {
                     SerializerUtils.convertMentions(it)
                 } else {

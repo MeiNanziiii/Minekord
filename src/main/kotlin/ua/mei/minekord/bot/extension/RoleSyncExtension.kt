@@ -4,7 +4,7 @@ import dev.kord.core.event.guild.MemberUpdateEvent
 import dev.kordex.core.extensions.event
 import net.minecraft.server.network.ServerPlayerEntity
 import ua.mei.minekord.bot.MinekordExtension
-import ua.mei.minekord.utils.LuckPermsUtils
+import ua.mei.minekord.util.LuckPermsUtils
 
 class RoleSyncExtension : MinekordExtension() {
     override val name: String = "minekord.rolesync"

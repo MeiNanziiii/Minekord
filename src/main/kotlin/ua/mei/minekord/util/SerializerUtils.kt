@@ -1,4 +1,4 @@
-package ua.mei.minekord.utils
+package ua.mei.minekord.util
 
 import dev.kord.core.entity.Member
 import kotlinx.coroutines.flow.toList
@@ -12,7 +12,8 @@ object SerializerUtils {
     val pingRegex: Regex = Regex("@(\\S{1,32})")
 
     suspend fun convertMentions(message: String): String {
-        val members: Map<String, Member> = MinekordBot.guild.members.toList().associateBy { it.effectiveName.lowercase() }
+        val members: Map<String, Member> =
+            MinekordBot.guild.members.toList().associateBy { it.effectiveName.lowercase() }
 
         return pingRegex.replace(message) { matchResult ->
             val effectiveName = matchResult.groupValues[1].lowercase()

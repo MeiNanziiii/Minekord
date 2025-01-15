@@ -17,7 +17,6 @@ import java.nio.file.Path
 object IPCache : ServerLifecycleEvents.ServerStarting, ServerLifecycleEvents.ServerStopped {
     var ipCache: MutableMap<String, String> = mutableMapOf()
     val alreadyRequestedIps: MutableMap<String, MutableList<String>> = mutableMapOf()
-    val blockedIps: MutableList<String> = mutableListOf()
     val path: Path = FabricLoader.getInstance().gameDir.resolve("minekord/ip-cache.json")
     val type: TypeToken<MutableMap<String, String>> = object : TypeToken<MutableMap<String, String>>() {}
     val gson: Gson = GsonBuilder()
@@ -41,19 +40,15 @@ object IPCache : ServerLifecycleEvents.ServerStarting, ServerLifecycleEvents.Ser
         }
     }
 
-    fun isBlocked(socketAddress: SocketAddress): Boolean {
-        return blockedIps.contains(socketAddress.address)
-    }
-
-    fun isRequested(address: SocketAddress, profile: GameProfile): Boolean {
-        if (alreadyRequestedIps[profile.name]?.contains(address.address) == true) {
+    fun isRequested(socketAddress: SocketAddress, profile: GameProfile): Boolean {
+        if (alreadyRequestedIps[profile.name]?.contains(socketAddress.address) == true) {
             return true
         }
-        alreadyRequestedIps.getOrPut(profile.name) { mutableListOf() }.add(address.address)
+        alreadyRequestedIps.getOrPut(profile.name) { mutableListOf() }.add(socketAddress.address)
         return false
     }
 
-    fun containsInCache(address: SocketAddress, profile: GameProfile): Boolean {
-        return ipCache[profile.name] == address.address
+    fun containsInCache(socketAddress: SocketAddress, profile: GameProfile): Boolean {
+        return ipCache[profile.name] == socketAddress.address
     }
 }

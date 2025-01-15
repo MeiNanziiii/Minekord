@@ -33,9 +33,13 @@ import ua.mei.minekord.Minekord
 import ua.mei.minekord.config.MinekordConfig.Chat
 import ua.mei.minekord.config.MinekordConfig.Main
 import ua.mei.minekord.config.MinekordConfig.Presence
+import ua.mei.minekord.config.MinekordConfig.Presence.MinekordActivityType
 import ua.mei.minekord.event.AdvancementGrantEvent
 import ua.mei.minekord.event.ChatMessageEvent
-import ua.mei.minekord.utils.*
+import ua.mei.minekord.util.MinekordMinecraftRenderer
+import ua.mei.minekord.util.SerializerUtils
+import ua.mei.minekord.util.asSnowflake
+import ua.mei.minekord.util.toText
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KCallable
 

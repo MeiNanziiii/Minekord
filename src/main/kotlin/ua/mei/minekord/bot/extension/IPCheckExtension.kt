@@ -10,23 +10,24 @@ import dev.kordex.core.components.ComponentContainer
 import dev.kordex.core.components.components
 import dev.kordex.core.components.disabledButton
 import dev.kordex.core.components.publicButton
-import dev.kordex.core.extensions.Extension
 import dev.kordex.core.i18n.toKey
 import dev.kordex.core.time.TimestampType
 import dev.kordex.core.time.toDiscord
 import io.ktor.util.network.*
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import net.minecraft.server.BannedIpEntry
 import ua.mei.minekord.Minekord
 import ua.mei.minekord.bot.MinekordBot
+import ua.mei.minekord.bot.MinekordExtension
 import ua.mei.minekord.cache.IPCache
 import ua.mei.minekord.config.MinekordConfig.Auth
 import ua.mei.minekord.config.MinekordConfig.Messages
 import ua.mei.minekord.event.IPCheckEvent
-import ua.mei.minekord.utils.AuthUtils
 import java.net.SocketAddress
 
-class IPCheckExtension : Extension() {
+class IPCheckExtension : MinekordExtension() {
     override val name: String = "minekord.ipcheck"
 
     override suspend fun setup() {
@@ -35,9 +36,11 @@ class IPCheckExtension : Extension() {
 
             MinekordBot.launch {
                 try {
-                    val member: Member? = AuthUtils.findMember(profile.name)
+                    val member: Member = MinekordBot.guild.members.firstOrNull {
+                        it.effectiveName == name && it.roleIds.map { it.value }.containsAll(Auth.requiredRoles)
+                    } ?: return@launch
 
-                    member?.getDmChannelOrNull()?.createMessage {
+                    member.getDmChannelOrNull()?.createMessage {
                         embed {
                             title = Messages.embedTitle
                             addIpField(socketAddress)
@@ -97,7 +100,7 @@ class IPCheckExtension : Extension() {
             style = ButtonStyle.Danger
 
             action {
-                IPCache.blockedIps += socketAddress.address
+                server.playerManager.ipBanList.add(BannedIpEntry(socketAddress.address))
 
                 edit {
                     embed {
@@ -119,7 +122,8 @@ class IPCheckExtension : Extension() {
             style = ButtonStyle.Danger
 
             action {
-                IPCache.blockedIps.removeAll { it == socketAddress.address }
+                server.playerManager.ipBanList.remove(socketAddress.address)
+
                 IPCache.alreadyRequestedIps[profile.name]?.removeAll { it == socketAddress.address }
 
                 edit {

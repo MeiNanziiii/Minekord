@@ -7,8 +7,8 @@ import ua.mei.minekord.bot.MinekordExtension
 import ua.mei.minekord.config.MinekordConfig.Colors
 import ua.mei.minekord.config.MinekordConfig.Commands
 import ua.mei.minekord.config.MinekordConfig.Main
-import ua.mei.minekord.utils.asSnowflake
-import ua.mei.minekord.utils.toText
+import ua.mei.minekord.util.asSnowflake
+import ua.mei.minekord.util.toText
 
 class PlayerListExtension : MinekordExtension() {
     override val name: String = "minekord.playerlist"

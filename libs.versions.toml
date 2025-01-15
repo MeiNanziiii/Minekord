@@ -19,6 +19,8 @@ placeholder-api="2.5.1+1.21.3"
 luckperms="5.4"
 permissions="0.3.3"
 
+thumbnailator = "0.4.20"
+
 [libraries]
 
 minecraft = { module = "net.minecraft:minecraft", version.ref = "minecraft" }

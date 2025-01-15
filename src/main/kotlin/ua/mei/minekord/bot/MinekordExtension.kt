@@ -12,7 +12,7 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import org.koin.core.component.inject
 import ua.mei.minekord.config.MinekordConfig.Chat
-import ua.mei.minekord.utils.MessageSender
+import ua.mei.minekord.util.MessageSender
 
 abstract class MinekordExtension : Extension() {
     abstract override val name: String

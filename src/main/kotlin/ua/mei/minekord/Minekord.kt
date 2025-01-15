@@ -18,8 +18,8 @@ import ua.mei.minekord.config.MinekordConfig.CONFIG_PATH
 import ua.mei.minekord.config.MinekordConfig.Chat
 import ua.mei.minekord.config.MinekordConfig.Commands
 import ua.mei.minekord.event.ChatMessageEvent
-import ua.mei.minekord.utils.MessageSender
-import ua.mei.minekord.utils.avatarUrl
+import ua.mei.minekord.util.MessageSender
+import ua.mei.minekord.util.avatarUrl
 import java.nio.file.Files
 
 object Minekord : ModInitializer {
@@ -53,13 +53,18 @@ object Minekord : ModInitializer {
         }
 
         ServerMessageEvents.CHAT_MESSAGE.register { message, sender, type ->
-            ChatMessageEvent.EVENT.invoker().message(message.content, MessageSender(sender.gameProfile.name, sender.avatarUrl))
+            ChatMessageEvent.EVENT.invoker()
+                .message(message.content, MessageSender(sender.gameProfile.name, sender.avatarUrl))
         }
         ServerMessageEvents.COMMAND_MESSAGE.register { message, source, parameters ->
             if (source.isExecutedByPlayer) {
-                ChatMessageEvent.EVENT.invoker().message(message.content, MessageSender(source.player!!.gameProfile.name, source.player!!.avatarUrl))
+                ChatMessageEvent.EVENT.invoker().message(
+                    message.content,
+                    MessageSender(source.player!!.gameProfile.name, source.player!!.avatarUrl)
+                )
             } else {
-                ChatMessageEvent.EVENT.invoker().message(message.content, MessageSender(Chat.Webhook.webhookName, Chat.Webhook.webhookAvatar))
+                ChatMessageEvent.EVENT.invoker()
+                    .message(message.content, MessageSender(Chat.Webhook.webhookName, Chat.Webhook.webhookAvatar))
             }
         }
         ServerLifecycleEvents.SERVER_STARTING.register(IPCache)
