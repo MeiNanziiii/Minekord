@@ -60,13 +60,13 @@ class MessagesExtension : MinekordExtension() {
                     content = Text.empty().append(reply).append("\n").append(content)
                 }
 
+                val prefix: Text = MinekordConfig.parser.parseText(
+                    LuckPermsUtils.prefixByNickname(sender.effectiveName),
+                    PlaceholderContext.of(server).asParserContext()
+                )
+
                 content = Chat.Minecraft.messageFormat.toText(server) {
-                    "prefix" to MinekordConfig.parser.parseText(
-                        LuckPermsUtils.prefixByNickname(
-                            sender.effectiveName,
-                            server
-                        ), PlaceholderContext.of(server).asParserContext()
-                    )
+                    "prefix" to prefix
                     "sender" to sender.effectiveName.literal()
                     "message" to content
                 }

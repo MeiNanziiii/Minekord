@@ -12,12 +12,14 @@ class RoleSyncExtension : MinekordExtension() {
     override suspend fun setup() {
         event<MemberUpdateEvent> {
             action {
-                LuckPermsUtils.syncPlayer(event.member.effectiveName)
+                val player: ServerPlayerEntity = server.playerManager.getPlayer(event.member.effectiveName) ?: return@action
+
+                LuckPermsUtils.syncPlayer(player)
             }
         }
     }
 
     override suspend fun onPlayerJoin(player: ServerPlayerEntity) {
-        LuckPermsUtils.syncPlayer(player.gameProfile.name)
+        LuckPermsUtils.syncPlayer(player)
     }
 }

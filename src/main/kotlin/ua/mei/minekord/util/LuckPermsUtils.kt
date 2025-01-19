@@ -1,39 +1,46 @@
 package ua.mei.minekord.util
 
-import com.mojang.authlib.GameProfile
 import dev.kord.core.entity.Member
 import kotlinx.coroutines.flow.firstOrNull
 import net.fabricmc.loader.api.FabricLoader
 import net.luckperms.api.LuckPerms
 import net.luckperms.api.LuckPermsProvider
+import net.luckperms.api.model.group.Group
 import net.luckperms.api.model.user.User
+import net.luckperms.api.node.NodeType
 import net.luckperms.api.node.types.InheritanceNode
-import net.luckperms.api.query.QueryOptions
-import net.minecraft.server.MinecraftServer
+import net.minecraft.server.network.ServerPlayerEntity
 import ua.mei.minekord.bot.MinekordBot
 import ua.mei.minekord.config.MinekordConfig
-import kotlin.jvm.optionals.getOrNull
 
 object LuckPermsUtils {
-    fun prefixByNickname(nickname: String, server: MinecraftServer): String {
-        if (!FabricLoader.getInstance().isModLoaded("luckperms")) {
+    suspend fun prefixByNickname(nickname: String): String {
+        if (!FabricLoader.getInstance().isModLoaded("luckperms") || MinekordConfig.LuckPerms.roles.isEmpty()) {
             return ""
         }
 
+        val member: Member = MinekordBot.guild.members.firstOrNull { it.effectiveName == nickname && it.roleIds.map { it.value }.containsAll(MinekordConfig.Auth.requiredRoles) } ?: return ""
+        val roles: List<ULong> = member.roleIds.map { it.value }
+
         val lp: LuckPerms = LuckPermsProvider.get()
-        val profile: GameProfile = server.userCache?.findByName(nickname)?.getOrNull() ?: return ""
 
-        val user: User = lp.userManager.loadUser(profile.id).get()
+        return MinekordConfig.LuckPerms.roles.filter { it.value in roles }.map {
+            val group: Group = lp.groupManager.getGroup(it.key) ?: return@map ""
 
-        return user.cachedData.getMetaData(QueryOptions.defaultContextualOptions()).prefix ?: ""
+            group.getNodes(NodeType.PREFIX).firstOrNull()?.metaValue ?: ""
+        }.joinToString(
+            separator = MinekordConfig.LuckPerms.middleSpacer,
+            prefix = MinekordConfig.LuckPerms.startSpacer,
+            postfix = MinekordConfig.LuckPerms.endSpacer
+        )
     }
 
-    suspend fun syncPlayer(nickname: String) {
+    suspend fun syncPlayer(player: ServerPlayerEntity) {
         if (!MinekordConfig.LuckPerms.roles.isEmpty() && FabricLoader.getInstance().isModLoaded("luckperms")) {
-            val member: Member = MinekordBot.guild.members.firstOrNull { it.effectiveName == nickname && it.roleIds.map { it.value }.containsAll(MinekordConfig.Auth.requiredRoles) } ?: return
+            val member: Member = MinekordBot.guild.members.firstOrNull { it.effectiveName == player.gameProfile.name && it.roleIds.map { it.value }.containsAll(MinekordConfig.Auth.requiredRoles) } ?: return
 
             val lp: LuckPerms = LuckPermsProvider.get()
-            val user: User = lp.userManager.getUser(nickname) ?: return
+            val user: User = lp.userManager.getUser(player.uuid) ?: return
 
             val roles: List<ULong> = member.roleIds.map { it.value }
 

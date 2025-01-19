@@ -77,6 +77,10 @@ ipBasedLogin = false
 
 roles = {}
 
+startSpacer = ""
+middleSpacer = ""
+endSpacer = ""
+
 [Messages]
 
 ipKickMessage = "Joined with new IP! Check your DM."

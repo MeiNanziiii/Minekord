@@ -276,8 +276,19 @@ object MinekordConfig {
         lateinit var roles: Map<String, ULong>
             private set
 
+        lateinit var startSpacer: String
+            private set
+        lateinit var middleSpacer: String
+            private set
+        lateinit var endSpacer: String
+            private set
+
         fun load() {
             roles = config[LuckPermsSpec.roles]
+
+            startSpacer = config[LuckPermsSpec.startSpacer]
+            middleSpacer = config[LuckPermsSpec.middleSpacer]
+            endSpacer = config[LuckPermsSpec.endSpacer]
         }
     }
 
