@@ -28,11 +28,11 @@ object LuckPermsUtils {
             val group: Group = lp.groupManager.getGroup(it.key) ?: return@map ""
 
             group.getNodes(NodeType.PREFIX).firstOrNull()?.metaValue ?: ""
-        }.joinToString(
+        }.takeIf { !it.isEmpty() }?.joinToString(
             separator = MinekordConfig.LuckPerms.middleSpacer,
             prefix = MinekordConfig.LuckPerms.startSpacer,
             postfix = MinekordConfig.LuckPerms.endSpacer
-        )
+        ) ?: ""
     }
 
     suspend fun syncPlayer(player: ServerPlayerEntity) {
