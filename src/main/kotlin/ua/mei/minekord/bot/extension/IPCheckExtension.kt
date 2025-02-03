@@ -36,7 +36,7 @@ class IPCheckExtension : MinekordExtension() {
 
             MinekordBot.launch {
                 try {
-                    val member: Member = MinekordBot.guild.members.firstOrNull { it.effectiveName == name && it.roleIds.map { it.value }.containsAll(Auth.requiredRoles) } ?: return@launch
+                    val member: Member = MinekordBot.guild.members.firstOrNull { it.effectiveName == profile.name && it.roleIds.map { it.value }.containsAll(Auth.requiredRoles) } ?: return@launch
 
                     member.getDmChannelOrNull()?.createMessage {
                         embed {
