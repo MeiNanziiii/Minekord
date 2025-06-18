@@ -1,14 +1,17 @@
 {
     "schemaVersion": 1,
-    "id": "minekord",
+    "id": "${id}",
     "version": "${version}",
     "name": "Minekord",
     "description": "",
     "authors": [
         "BonfireMC"
     ],
-    "contact": {},
-    "license": "CC0-1.0",
+    "contact": {
+        "sources": "https://github.com/BonfireMC/Minekord",
+        "issues": "https://github.com/BonfireMC/Minekord/issues"
+    },
+    "license": "LGPL-3.0",
     "icon": "assets/minekord/icon.png",
     "environment": "server",
     "entrypoints": {
@@ -23,8 +26,8 @@
         "minekord.mixins.json"
     ],
     "depends": {
-        "fabric-language-kotlin": "*",
-        "fabric": "*",
-        "minecraft": "*"
+        "fabric-language-kotlin": ">=${fabricKotlin}",
+        "fabric": ">=${fabricApi}",
+        "minecraft": ">=${minecraft}"
     }
 }

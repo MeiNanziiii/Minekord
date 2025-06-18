@@ -1,18 +1,19 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    kotlin("jvm") version "2.0.20"
-    id("fabric-loom") version "1.9-SNAPSHOT"
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.loom)
 }
 
 loom {
     serverOnlyMinecraftJar()
 }
 
+val modId: String by project
 val modVersion: String by project
 val mavenGroup: String by project
 
-base.archivesName.set("minekord")
+base.archivesName.set(modId)
 
 version = "$modVersion+${libs.versions.minecraft.get()}"
 group = mavenGroup
@@ -26,8 +27,8 @@ dependencies {
     mappings(libs.yarn)
 
     modImplementation(libs.fabric.loader)
-    modImplementation(libs.fabric.kotlin)
     modImplementation(libs.fabric.api)
+    modImplementation(libs.fabric.kotlin)
 }
 
 java {
@@ -45,11 +46,16 @@ kotlin {
 
 tasks {
     processResources {
+        inputs.property("id", modId)
         inputs.property("version", modVersion)
 
         filesMatching("fabric.mod.json") {
             expand(
-                "version" to modVersion
+                "id" to modId,
+                "version" to modVersion,
+                "fabricKotlin" to libs.versions.fabric.kotlin.get(),
+                "fabricApi" to libs.versions.fabric.api.get(),
+                "minecraft" to libs.versions.minecraft.get()
             )
         }
     }
