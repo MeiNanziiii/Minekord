@@ -83,11 +83,11 @@ tasks {
 
 afterEvaluate {
     dependencies {
+        includeTransitive(libs.kord.get().toString())
+        includeTransitive(libs.kordex.get().toString())
+
         includeTransitive(libs.konf.core.get().toString())
         includeTransitive(libs.konf.toml.get().toString())
-
-        includeTransitive("dev.kord:kord-core:feat-components-v2-SNAPSHOT")
-        includeTransitive("dev.kordex:kord-extensions:2.3.2-SNAPSHOT")
     }
 }
 
