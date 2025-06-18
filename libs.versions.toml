@@ -7,6 +7,11 @@ fabric-loader = "0.16.14"
 fabric-api = "0.102.0+1.21"
 fabric-kotlin = "1.13.3+kotlin.2.1.21"
 
+konf = "1.1.2"
+
+kord = "feat-components-v2-SNAPSHOT"
+kordex = "2.3.2-SNAPSHOT"
+
 [libraries]
 
 minecraft = { module = "net.minecraft:minecraft", version.ref = "minecraft" }
@@ -16,7 +21,12 @@ fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-l
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 fabric-kotlin = { module = "net.fabricmc:fabric-language-kotlin", version.ref = "fabric-kotlin" }
 
+konf-core = { module = "com.uchuhimo:konf-core", version.ref = "konf" }
+konf-toml = { module = "com.uchuhimo:konf-toml", version.ref = "konf" }
+
 [plugins]
 
 kotlin = { id = "org.jetbrains.kotlin.jvm", version = "2.1.21" }
+kordex = { id = "dev.kordex.gradle.kordex", version = "1.7.1" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version = "1.23.8" }
 loom = { id = "fabric-loom", version = "1.10.+" }
