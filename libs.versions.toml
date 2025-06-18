@@ -7,20 +7,6 @@ fabric-loader="0.16.9"
 fabric-kotlin="1.13.0+kotlin.2.1.0"
 fabric-api="0.114.0+1.21.4"
 
-kordex="2.3.1-SNAPSHOT"
-konf="1.1.2"
-
-discord-reserializer="4.3.0"
-simple-ast="2.2.8"
-
-kyori="6.2.0"
-placeholder-api="2.5.1+1.21.3"
-
-luckperms="5.4"
-permissions="0.3.3"
-
-thumbnailator = "0.4.20"
-
 [libraries]
 
 minecraft = { module = "net.minecraft:minecraft", version.ref = "minecraft" }
@@ -29,16 +15,3 @@ yarn = { module = "net.fabricmc:yarn", version.ref = "yarn" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 fabric-kotlin = { module = "net.fabricmc:fabric-language-kotlin", version.ref = "fabric-kotlin" }
-
-kordex = { module = "dev.kordex:kord-extensions", version.ref = "kordex" }
-konf-core = { module = "com.uchuhimo:konf-core", version.ref = "konf" }
-konf-toml = { module = "com.uchuhimo:konf-toml", version.ref = "konf" }
-
-discord-reserializer = { module = "dev.vankka:mcdiscordreserializer", version.ref = "discord-reserializer"}
-simple-ast = { module = "dev.vankka:SimpleAST", version.ref = "simple-ast"}
-
-kyori = { module = "net.kyori:adventure-platform-fabric", version.ref = "kyori"}
-placeholder-api = { module = "eu.pb4:placeholder-api", version.ref = "placeholder-api" }
-
-luckperms = { module = "net.luckperms:api", version.ref = "luckperms" }
-permissions = { module = "me.lucko:fabric-permissions-api", version.ref = "permissions" }

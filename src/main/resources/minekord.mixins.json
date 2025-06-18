@@ -1,12 +1,9 @@
 {
     "required": true,
     "minVersion": "0.8",
-    "package": "ua.mei.minekord.mixin",
+    "package": "xyz.bonfiremc.minekord.mixin",
     "compatibilityLevel": "JAVA_21",
     "mixins": [
-        "AboutExtensionMixin",
-        "PlayerAdvancementTrackerMixin",
-        "PlayerManagerMixin"
     ],
     "injectors": {
         "defaultRequire": 1
