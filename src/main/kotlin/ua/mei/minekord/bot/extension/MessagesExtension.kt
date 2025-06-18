@@ -30,7 +30,7 @@ class MessagesExtension : MinekordExtension() {
 
     override suspend fun setup() {
         event<MessageCreateEvent> {
-            check { isNotBot() }
+            check { failIf { event.message.author?.id == kord.selfId || event.message.webhookId != null } }
             check { inChannel(Main.channel.asSnowflake) }
 
             action {
