@@ -1,5 +1,7 @@
 {
     "id": "minekord",
-    "platform": "modrinth",
-    "slug": "minekord"
+    "platforms": {
+        "modrinth": "minekord"
+    },
+    "modid": "minekord"
 }
