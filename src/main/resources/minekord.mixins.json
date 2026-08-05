@@ -1,11 +1,14 @@
 {
     "required": true,
     "minVersion": "0.8",
-    "package": "xyz.bonfiremc.minekord.mixin",
-    "compatibilityLevel": "JAVA_21",
+    "package": "ua.bonfiremc.minekord.mixin",
+    "compatibilityLevel": "JAVA_25",
     "mixins": [
     ],
     "injectors": {
         "defaultRequire": 1
+    },
+    "overwrites": {
+        "requireAnnotations": true
     }
 }
