@@ -6,8 +6,10 @@ fabric-loader = "0.19.3"
 fabric-kotlin = "1.13.13+kotlin.2.4.10"
 fabric-api = "0.156.0+26.2"
 
-kotlin = "2.4.10"
+kordex="2.5.0-SNAPSHOT"
+
 fabric-loom = "1.17-SNAPSHOT"
+kotlin = "2.4.10"
 
 [libraries]
 
@@ -17,7 +19,9 @@ fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-l
 fabric-kotlin = { module = "net.fabricmc:fabric-language-kotlin", version.ref = "fabric-kotlin" }
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 
+kordex = { module = "dev.kordex:kord-extensions", version.ref = "kordex" }
+
 [plugins]
 
-kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "fabric-loom" }
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
