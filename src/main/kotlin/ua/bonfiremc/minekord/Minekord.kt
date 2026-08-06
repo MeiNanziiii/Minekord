@@ -14,12 +14,13 @@ import net.minecraft.commands.Commands
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.permissions.Permissions
 import org.slf4j.Logger
+import ua.bonfiremc.minekord.bot.MessagesExtension
 import ua.bonfiremc.minekord.config.BotSpec
 import java.nio.file.Path
 import kotlin.io.path.copyTo
 import kotlin.io.path.notExists
 
-object Minekord : ModInitializer, ServerLifecycleEvents.ServerStarting, ServerLifecycleEvents.ServerStopped {
+object Minekord : ModInitializer, ServerLifecycleEvents.ServerStarting {
     const val MOD_ID: String = "minekord"
     const val CONFIG_NAME: String = "$MOD_ID.config.toml"
 
@@ -57,7 +58,6 @@ object Minekord : ModInitializer, ServerLifecycleEvents.ServerStarting, ServerLi
         }
 
         ServerLifecycleEvents.SERVER_STARTING.register(this)
-        ServerLifecycleEvents.SERVER_STOPPED.register(this)
     }
 
     override fun onServerStarting(server: MinecraftServer) {
@@ -66,20 +66,19 @@ object Minekord : ModInitializer, ServerLifecycleEvents.ServerStarting, ServerLi
         } else {
             runBlocking {
                 bot = ExtensibleBot(config[BotSpec.token]) {
+                    applicationCommands {
+                        enabled = false
+                    }
+
                     dataCollectionMode = DataCollection.None
+
+                    extensions {
+                        add(::MessagesExtension)
+                    }
                 }
             }
 
             bot.startAsync()
-        }
-    }
-
-    override fun onServerStopped(server: MinecraftServer) {
-        if (::bot.isInitialized) {
-            logger.info("a")
-            runBlocking {
-                bot.stop()
-            }
         }
     }
 }
