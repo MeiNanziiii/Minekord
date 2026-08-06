@@ -18,6 +18,10 @@ import dev.kordex.core.components.components
 import dev.kordex.core.extensions.Extension
 import dev.kordex.core.extensions.event
 import dev.kordex.core.utils.ensureWebhook
+import eu.pb4.placeholders.api.ParserContext
+import eu.pb4.placeholders.api.node.DynamicTextNode
+import eu.pb4.placeholders.api.parsers.NodeParser
+import eu.pb4.placeholders.api.parsers.TagLikeParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,6 +35,7 @@ import net.minecraft.advancements.AdvancementHolder
 import net.minecraft.advancements.AdvancementType
 import net.minecraft.network.chat.ChatType
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.PlayerChatMessage
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
@@ -38,8 +43,11 @@ import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.LivingEntity
 import ua.bonfiremc.minekord.Minekord
 import ua.bonfiremc.minekord.config.BotSpec
+import ua.bonfiremc.minekord.config.DiscordSpec
+import ua.bonfiremc.minekord.config.MinecraftSpec
 import ua.bonfiremc.minekord.event.AdvancementGrantEvent
 import kotlin.coroutines.CoroutineContext
+import java.util.function.Function as JavaFunction
 
 class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, ServerLifecycleEvents.ServerStopped, ServerPlayerEvents.Join, ServerPlayerEvents.Leave, ServerMessageEvents.ChatMessage, ServerLivingEntityEvents.AllowDeath, AdvancementGrantEvent, CoroutineScope {
     override val name: String = "minekord:messages_extension"
@@ -47,6 +55,15 @@ class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, Serv
     private lateinit var channel: TextChannel
     private lateinit var webhook: Webhook
     private lateinit var server: MinecraftServer
+
+    private val dynamicKey: ParserContext.Key<JavaFunction<String, Component?>> = DynamicTextNode.key(Minekord.MOD_ID)
+    private val parser: NodeParser = NodeParser.builder()
+        .simplifiedTextFormat()
+        .quickText()
+        .commonPlaceholders()
+        .placeholders(TagLikeParser.PLACEHOLDER_ALTERNATIVE, dynamicKey)
+        .staticPreParsing()
+        .build()
 
     override suspend fun setup() {
         val channel: Channel = bot.kordRef.getChannel(Minekord.config[BotSpec.channel]) ?: return
@@ -65,22 +82,104 @@ class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, Serv
 
             ServerMessageEvents.CHAT_MESSAGE.register(this)
 
-            webhook = channel.ensureWebhook("test")
+            webhook = channel.ensureWebhook("Minekord")
 
             event<MessageCreateEvent> {
                 check { failIf { event.message.author?.id == kord.selfId || event.message.webhookId != null } }
                 check { inChannel(Minekord.config[BotSpec.channel]) }
 
                 action {
-                    if (this@MessagesExtension::server.isInitialized) {
-                        val message: Message = event.message
-                        val sender: Member = event.member ?: return@action
+                    if (!this@MessagesExtension::server.isInitialized) return@action
 
-                        server.playerList.broadcastSystemMessage(Component.literal("${sender.effectiveName}: ${message.content}"), false)
+                    val message: Message = event.message
+                    val sender: Member = event.member ?: return@action
+
+                    if (message.content.isBlank()) return@action
+
+                    val text: MutableComponent = Component.empty()
+
+                    if (message.referencedMessage != null) {
+                        val args: Map<String, Component> = mapOf(
+                            "sender" to Component.literal(sender.effectiveName),
+                            "message" to parser.parseComponent(
+                                message.referencedMessage!!.content,
+                                ParserContext.of()
+                            ),
+                            "summary" to parser.parseComponent(
+                                summary(message.referencedMessage!!.content),
+                                ParserContext.of()
+                            )
+                        )
+
+                        text.append(
+                            parser.parseComponent(
+                                Minekord.config[MinecraftSpec.replyFormat],
+                                ParserContext.of().with(dynamicKey, JavaFunction { args[it] })
+                            )
+                        ).append("\n")
                     }
+
+                    val args: Map<String, Component> = mapOf(
+                        "sender" to Component.literal(sender.effectiveName),
+                        "message" to parser.parseComponent(
+                            message.content,
+                            ParserContext.of()
+                        )
+                    )
+
+                    text.append(
+                        parser.parseComponent(
+                            Minekord.config[MinecraftSpec.messageFormat],
+                            ParserContext.of().with(dynamicKey, JavaFunction { args[it] })
+                        )
+                    )
+
+                    server.playerList.broadcastSystemMessage(text, false)
                 }
             }
         }
+    }
+
+    override fun onChatMessage(message: PlayerChatMessage, sender: ServerPlayer, boundChatType: ChatType.Bound) {
+        launch {
+            webhook.execute(webhook.token!!) {
+                username = sender.plainTextName
+                avatarUrl = replacePlaceholders(Minekord.config[DiscordSpec.playerAvatarUrl], mapOf("player" to sender.plainTextName))
+
+                content = message.signedContent()
+            }
+        }
+    }
+
+    override fun onJoin(player: ServerPlayer) {
+        playerContainer(
+            Minekord.config[DiscordSpec.joinMessages],
+            mapOf("player" to player.plainTextName),
+            Color(0x2ECC71)
+        )
+    }
+
+    override fun onLeave(player: ServerPlayer) {
+        playerContainer(
+            Minekord.config[DiscordSpec.leaveMessages],
+            mapOf("player" to player.plainTextName),
+            Color(0xE74C3C)
+        )
+    }
+
+    override fun allowDeath(entity: LivingEntity, damageSource: DamageSource, damageAmount: Float): Boolean {
+        if (entity is ServerPlayer) {
+            playerContainer(
+                Minekord.config[DiscordSpec.deathMessages],
+                mapOf(
+                    "player" to entity.plainTextName,
+                    "death_message" to entity.combatTracker.deathMessage.string
+                ),
+                Color(0xF1C40F)
+            )
+        }
+
+        return true
     }
 
     override fun onServerStarted(server: MinecraftServer) {
@@ -94,120 +193,7 @@ class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, Serv
                     container {
                         accentColor = Color(0x2ECC71)
 
-                        textDisplay("### :white_check_mark:   Сервер запущено")
-                    }
-                }
-            }
-        }
-    }
-
-    override fun onChatMessage(message: PlayerChatMessage, sender: ServerPlayer, boundChatType: ChatType.Bound) {
-        launch {
-            webhook.execute(webhook.token!!) {
-                username = sender.plainTextName
-                avatarUrl = "https://cravatar.eu/helmavatar/${sender.plainTextName}/256"
-
-                content = message.signedContent()
-            }
-        }
-    }
-
-    override fun onJoin(player: ServerPlayer) {
-        launch {
-            channel.createMessage {
-                flags = MessageFlags(MessageFlag.IsComponentsV2)
-
-                components {
-                    container {
-                        accentColor = Color(0x2ECC71)
-
-                        section {
-                            textDisplay("### :wave:   ${player.plainTextName} приєднався до гри")
-                            textDisplay("Бажаємо гарно провести час на сервері!")
-
-                            thumbnailAccessory {
-                                url = "https://cravatar.eu/helmavatar/${player.plainTextName}/256"
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    override fun onAdvancementGrant(player: ServerPlayer, holder: AdvancementHolder) {
-        launch {
-            channel.createMessage {
-                flags = MessageFlags(MessageFlag.IsComponentsV2)
-
-                components {
-                    container {
-                        accentColor = Color(if (holder.value.display.get().type == AdvancementType.CHALLENGE) 0xAA00AA else 0x55FF55)
-
-                        val text: String = when (holder.value.display.get().type) {
-                            AdvancementType.TASK -> "отримав досягнення"
-                            AdvancementType.CHALLENGE -> "виконав випробування"
-                            AdvancementType.GOAL -> "досяг цілі"
-                        }
-
-                        section {
-                            textDisplay("### :sparkles:   ${player.plainTextName} $text ${Advancement.name(holder).string}")
-                            textDisplay(holder.value.display.get().description.string)
-
-                            thumbnailAccessory {
-                                url = "https://cravatar.eu/helmavatar/${player.plainTextName}/256"
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    override fun allowDeath(entity: LivingEntity, damageSource: DamageSource, damageAmount: Float): Boolean {
-        if (entity is ServerPlayer) {
-            launch {
-                channel.createMessage {
-                    flags = MessageFlags(MessageFlag.IsComponentsV2)
-
-                    components {
-                        container {
-                            accentColor = Color(0xF1C40F)
-
-                            section {
-                                textDisplay("### :skull_crossbones:   ${entity.combatTracker.deathMessage.string}")
-                                textDisplay("Буває")
-
-                                thumbnailAccessory {
-                                    url = "https://cravatar.eu/helmavatar/${entity.plainTextName}/256"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return true
-    }
-
-    override fun onLeave(player: ServerPlayer) {
-        launch {
-            channel.createMessage {
-                flags = MessageFlags(MessageFlag.IsComponentsV2)
-
-                components {
-                    container {
-                        accentColor = Color(0xE74C3C)
-
-                        section {
-                            textDisplay("### :door:   ${player.plainTextName} покинув гру")
-                            textDisplay("Сподіваємося, що Ви ще повернетеся!")
-
-                            thumbnailAccessory {
-                                url = "https://cravatar.eu/helmavatar/${player.plainTextName}/256"
-                            }
-                        }
+                        Minekord.config[DiscordSpec.startMessages].forEach(::textDisplay)
                     }
                 }
             }
@@ -223,13 +209,77 @@ class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, Serv
                     container {
                         accentColor = Color(0xE74C3C)
 
-                        textDisplay("### :octagonal_sign:   Сервер зупинено")
+                        Minekord.config[DiscordSpec.stopMessages].forEach(::textDisplay)
                     }
                 }
             }
 
             bot.stop()
         }
+    }
+
+    override fun onAdvancementGrant(player: ServerPlayer, holder: AdvancementHolder) {
+        val type: AdvancementType = holder.value.display.get().type
+
+        val texts: List<String> = when (type) {
+            AdvancementType.TASK -> Minekord.config[DiscordSpec.advancementMessages]
+            AdvancementType.CHALLENGE -> Minekord.config[DiscordSpec.challengeMessages]
+            AdvancementType.GOAL -> Minekord.config[DiscordSpec.goalMessages]
+        }
+
+        playerContainer(
+            texts,
+            mapOf(
+                "player" to player.plainTextName,
+                "advancement_name" to Advancement.name(holder).string,
+                "advancement_description" to holder.value.display.get().description.string
+            ),
+            Color(if (type == AdvancementType.CHALLENGE) 0xAA00AA else 0x55FF55)
+        )
+    }
+
+    private fun summary(text: String): String {
+        val length: Int = Minekord.config[MinecraftSpec.summaryMaxLength]
+
+        return if (text.replace("\n", " ").length <= length) {
+            text.replace("\n", " ").trim()
+        } else {
+            text.replace("\n", " ").take(length).trim() + "…"
+        }
+    }
+
+    private fun playerContainer(texts: List<String>, args: Map<String, String>, color: Color) {
+        launch {
+            channel.createMessage {
+                flags = MessageFlags(MessageFlag.IsComponentsV2)
+
+                components {
+                    container {
+                        accentColor = color
+
+                        section {
+                            texts.forEach {
+                                textDisplay(replacePlaceholders(it, args))
+                            }
+
+                            thumbnailAccessory {
+                                url = replacePlaceholders(Minekord.config[DiscordSpec.playerAvatarUrl], args)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun replacePlaceholders(text: String, args: Map<String, String>): String {
+        var result: String = text
+
+        args.forEach { (key, value) ->
+            result = result.replace("{$key}", value)
+        }
+
+        return result
     }
 
     override val coroutineContext: CoroutineContext = Dispatchers.Default

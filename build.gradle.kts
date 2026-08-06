@@ -15,6 +15,7 @@ repositories {
     maven("https://snapshots.kord.dev")
     maven("https://snapshots-repo.kordex.dev")
     maven("https://releases-repo.kordex.dev")
+    maven("https://maven.nucleoid.xyz")
 }
 
 val includeImplementation: Configuration by configurations.creating {
@@ -32,6 +33,9 @@ dependencies {
 
     includeImplementation(libs.konf.core)
     includeImplementation(libs.konf.toml)
+
+    implementation(libs.placeholder.api)
+    include(libs.placeholder.api)
 }
 
 java {

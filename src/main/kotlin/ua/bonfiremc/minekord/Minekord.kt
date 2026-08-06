@@ -16,6 +16,8 @@ import net.minecraft.server.permissions.Permissions
 import org.slf4j.Logger
 import ua.bonfiremc.minekord.bot.MessagesExtension
 import ua.bonfiremc.minekord.config.BotSpec
+import ua.bonfiremc.minekord.config.DiscordSpec
+import ua.bonfiremc.minekord.config.MinecraftSpec
 import java.nio.file.Path
 import kotlin.io.path.copyTo
 import kotlin.io.path.notExists
@@ -41,9 +43,11 @@ object Minekord : ModInitializer, ServerLifecycleEvents.ServerStarting {
                 .copyTo(configFile)
         }
 
-        config = Config { addSpec(BotSpec) }
-            .from.toml.file(configFile.toFile())
-            .validateRequired()
+        config = Config {
+            addSpec(BotSpec)
+            addSpec(DiscordSpec)
+            addSpec(MinecraftSpec)
+        }.from.toml.file(configFile.toFile()).validateRequired()
     }
 
     override fun onInitialize() {

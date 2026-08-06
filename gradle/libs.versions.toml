@@ -9,6 +9,8 @@ fabric-api = "0.156.0+26.2"
 kordex="2.5.0-SNAPSHOT"
 konf="1.1.2"
 
+placeholder-api="3.1.0-beta.1+26.2"
+
 fabric-loom = "1.17-SNAPSHOT"
 kotlin = "2.4.10"
 
@@ -23,6 +25,8 @@ fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fab
 kordex = { module = "dev.kordex:kord-extensions", version.ref = "kordex" }
 konf-core = { module = "com.uchuhimo:konf-core", version.ref = "konf" }
 konf-toml = { module = "com.uchuhimo:konf-toml", version.ref = "konf" }
+
+placeholder-api = { module = "eu.pb4:placeholder-api", version.ref = "placeholder-api" }
 
 [plugins]
 

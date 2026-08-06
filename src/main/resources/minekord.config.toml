@@ -1,2 +1,44 @@
 token = ""
 channel = 0
+
+[Minecraft]
+
+messageFormat = "{sender} » {message}"
+replyFormat = "<gray>(Replying to @{sender} » <hover:'{message}'>{summary}</hover>)</gray>"
+summaryMaxLength = 20
+
+coloredRoles = true
+
+[Discord]
+
+playerAvatarUrl = "https://cravatar.eu/helmavatar/{player}/256"
+
+joinMessages = [
+    "### :wave:   {player} joined the game"
+]
+leaveMessages = [
+    "### :door:   {player} left the game"
+]
+deathMessages = [
+    "### :skull_crossbones:   {death_message}"
+]
+
+startMessages = [
+    "### :white_check_mark:   Server started"
+]
+stopMessages = [
+    "### :octagonal_sign:   Server stopped"
+]
+
+advancementMessages = [
+    "### :sparkles:   {player} has made the advancement {advancement_name}",
+    "{advancement_description}"
+]
+goalMessages = [
+    "### :sparkles:   {player} has reached the goal {advancement_name}",
+    "{advancement_description}"
+]
+challengeMessages = [
+    "### :sparkles:   {player} has completed the challenge {advancement_name}",
+    "{advancement_description}"
+]
