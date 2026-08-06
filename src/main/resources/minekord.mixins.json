@@ -4,6 +4,7 @@
     "package": "ua.bonfiremc.minekord.mixin",
     "compatibilityLevel": "JAVA_25",
     "mixins": [
+        "PlayerAdvancementsMixin"
     ],
     "injectors": {
         "defaultRequire": 1

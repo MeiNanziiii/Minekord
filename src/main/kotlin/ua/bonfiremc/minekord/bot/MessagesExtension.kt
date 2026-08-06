@@ -26,6 +26,9 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
+import net.minecraft.advancements.Advancement
+import net.minecraft.advancements.AdvancementHolder
+import net.minecraft.advancements.AdvancementType
 import net.minecraft.network.chat.ChatType
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.PlayerChatMessage
@@ -35,9 +38,10 @@ import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.LivingEntity
 import ua.bonfiremc.minekord.Minekord
 import ua.bonfiremc.minekord.config.BotSpec
+import ua.bonfiremc.minekord.event.AdvancementGrantEvent
 import kotlin.coroutines.CoroutineContext
 
-class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, ServerLifecycleEvents.ServerStopped, ServerPlayerEvents.Join, ServerPlayerEvents.Leave, ServerMessageEvents.ChatMessage, ServerLivingEntityEvents.AllowDeath, CoroutineScope {
+class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, ServerLifecycleEvents.ServerStopped, ServerPlayerEvents.Join, ServerPlayerEvents.Leave, ServerMessageEvents.ChatMessage, ServerLivingEntityEvents.AllowDeath, AdvancementGrantEvent, CoroutineScope {
     override val name: String = "minekord:messages_extension"
 
     private lateinit var channel: TextChannel
@@ -57,6 +61,7 @@ class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, Serv
             ServerPlayerEvents.LEAVE.register(this)
 
             ServerLivingEntityEvents.ALLOW_DEATH.register(this)
+            AdvancementGrantEvent.EVENT.register(this)
 
             ServerMessageEvents.CHAT_MESSAGE.register(this)
 
@@ -119,6 +124,35 @@ class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, Serv
                         section {
                             textDisplay("### :wave:   ${player.plainTextName} приєднався до гри")
                             textDisplay("Бажаємо гарно провести час на сервері!")
+
+                            thumbnailAccessory {
+                                url = "https://cravatar.eu/helmavatar/${player.plainTextName}/256"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onAdvancementGrant(player: ServerPlayer, holder: AdvancementHolder) {
+        launch {
+            channel.createMessage {
+                flags = MessageFlags(MessageFlag.IsComponentsV2)
+
+                components {
+                    container {
+                        accentColor = Color(if (holder.value.display.get().type == AdvancementType.CHALLENGE) 0xAA00AA else 0x55FF55)
+
+                        val text: String = when (holder.value.display.get().type) {
+                            AdvancementType.TASK -> "отримав досягнення"
+                            AdvancementType.CHALLENGE -> "виконав випробування"
+                            AdvancementType.GOAL -> "досяг цілі"
+                        }
+
+                        section {
+                            textDisplay("### :sparkles:   ${player.plainTextName} $text ${Advancement.name(holder).string}")
+                            textDisplay(holder.value.display.get().description.string)
 
                             thumbnailAccessory {
                                 url = "https://cravatar.eu/helmavatar/${player.plainTextName}/256"
