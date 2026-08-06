@@ -175,7 +175,7 @@ class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, Serv
                             accentColor = Color(0xF1C40F)
 
                             section {
-                                textDisplay("### :skull_crossbones:   ${damageSource.getLocalizedDeathMessage(entity).string}")
+                                textDisplay("### :skull_crossbones:   ${entity.combatTracker.deathMessage.string}")
                                 textDisplay("Буває")
 
                                 thumbnailAccessory {
