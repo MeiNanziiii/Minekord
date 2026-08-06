@@ -29,6 +29,9 @@ dependencies {
     implementation(libs.fabric.api)
 
     includeImplementation(libs.kordex)
+
+    includeImplementation(libs.konf.core)
+    includeImplementation(libs.konf.toml)
 }
 
 java {
