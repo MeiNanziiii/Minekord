@@ -3,15 +3,21 @@ package ua.bonfiremc.minekord.bot
 import dev.kord.common.Color
 import dev.kord.common.entity.MessageFlag
 import dev.kord.common.entity.MessageFlags
+import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.execute
+import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.Message
+import dev.kord.core.entity.Role
+import dev.kord.core.entity.User
 import dev.kord.core.entity.Webhook
 import dev.kord.core.entity.channel.Channel
 import dev.kord.core.entity.channel.TextChannel
+import dev.kord.core.entity.effectiveName
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.rest.builder.component.section
+import dev.kord.rest.builder.message.AllowedMentionsBuilder
 import dev.kord.rest.builder.message.container
 import dev.kordex.core.checks.inChannel
 import dev.kordex.core.components.components
@@ -122,7 +128,7 @@ class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, Serv
                     val args: Map<String, Component> = mapOf(
                         "sender" to Component.literal(sender.effectiveName),
                         "message" to parser.parseComponent(
-                            message.content,
+                            replaceMentions(message),
                             ParserContext.of()
                         )
                     )
@@ -143,6 +149,8 @@ class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, Serv
     override fun onChatMessage(message: PlayerChatMessage, sender: ServerPlayer, boundChatType: ChatType.Bound) {
         launch {
             webhook.execute(webhook.token!!) {
+                allowedMentions = AllowedMentionsBuilder()
+
                 username = sender.plainTextName
                 avatarUrl = replacePlaceholders(Minekord.config[DiscordSpec.playerAvatarUrl], mapOf("player" to sender.plainTextName))
 
@@ -280,6 +288,40 @@ class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, Serv
         }
 
         return result
+    }
+
+    private suspend fun replaceMentions(message: Message): String {
+        val guild: Guild? = message.getGuildOrNull()
+
+        return message.content
+            .replace(userRegex) { match ->
+                runBlocking {
+                    val user: Member? = guild?.getMemberOrNull(Snowflake(match.groupValues[1].toULong()))
+
+                    "<color:${"#%06X".format(user?.accentColor?.rgb)}>@" + (user?.effectiveName ?: "unknown-user") + "</color>"
+                }
+            }
+            .replace(channelRegex) { match ->
+                runBlocking {
+                    "<blue>#" + (guild?.getChannelOrNull(Snowflake(match.groupValues[1].toULong()))?.data?.name?.value ?: "unknown-channel") + "</blue>"
+                }
+            }
+            .replace(roleRegex) { match ->
+                runBlocking {
+                    val role: Role? = guild?.getRoleOrNull(Snowflake(match.groupValues[1].toULong()))
+
+                    "<color:${"#%06X".format(role?.color?.rgb)}>@" + (role?.name ?: "unknown-role") + "</color>"
+                }
+            }
+            .replace(urlRegex) { match -> "<underline><blue><url:'${match.value}'>${match.value}</url></blue></underline>" }
+    }
+
+    companion object {
+        val userRegex: Regex = Regex("<@(\\d+)>")
+        val channelRegex: Regex = Regex("<#(\\d+)>")
+        val roleRegex: Regex = Regex("<@&(\\d+)>")
+
+        val urlRegex: Regex = Regex("https?://(www\\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)")
     }
 
     override val coroutineContext: CoroutineContext = Dispatchers.Default
