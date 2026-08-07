@@ -9,6 +9,10 @@ summaryMaxLength = 20
 
 coloredRoles = true
 
+appendImages = true
+imageMaxWidth = 60
+imageMaxHeight = 30
+
 [Discord]
 
 playerAvatarUrl = "https://cravatar.eu/helmavatar/{player}/256"

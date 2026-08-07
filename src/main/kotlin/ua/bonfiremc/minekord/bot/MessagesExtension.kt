@@ -3,18 +3,13 @@ package ua.bonfiremc.minekord.bot
 import dev.kord.common.Color
 import dev.kord.common.entity.MessageFlag
 import dev.kord.common.entity.MessageFlags
-import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.execute
-import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.Message
-import dev.kord.core.entity.Role
-import dev.kord.core.entity.User
 import dev.kord.core.entity.Webhook
 import dev.kord.core.entity.channel.Channel
 import dev.kord.core.entity.channel.TextChannel
-import dev.kord.core.entity.effectiveName
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.rest.builder.component.section
 import dev.kord.rest.builder.message.AllowedMentionsBuilder
@@ -52,6 +47,7 @@ import ua.bonfiremc.minekord.config.BotSpec
 import ua.bonfiremc.minekord.config.DiscordSpec
 import ua.bonfiremc.minekord.config.MinecraftSpec
 import ua.bonfiremc.minekord.event.AdvancementGrantEvent
+import ua.bonfiremc.minekord.util.MessageUtils
 import kotlin.coroutines.CoroutineContext
 import java.util.function.Function as JavaFunction
 
@@ -68,7 +64,7 @@ class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, Serv
         .quickText()
         .commonPlaceholders()
         .placeholders(TagLikeParser.PLACEHOLDER_ALTERNATIVE, dynamicKey)
-        .staticPreParsing()
+        .markdown()
         .build()
 
     override suspend fun setup() {
@@ -100,7 +96,7 @@ class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, Serv
                     val message: Message = event.message
                     val sender: Member = event.member ?: return@action
 
-                    if (message.content.isBlank()) return@action
+                    if (message.content.isBlank() && !message.attachments.any { it.isImage }) return@action
 
                     val text: MutableComponent = Component.empty()
 
@@ -128,7 +124,7 @@ class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, Serv
                     val args: Map<String, Component> = mapOf(
                         "sender" to Component.literal(sender.effectiveName),
                         "message" to parser.parseComponent(
-                            replaceMentions(message),
+                            MessageUtils.getFormattedContent(message),
                             ParserContext.of()
                         )
                     )
@@ -140,7 +136,13 @@ class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, Serv
                         )
                     )
 
+                    val attachments: List<Component> = MessageUtils.getAttachmentsAsText(message)
+
                     server.playerList.broadcastSystemMessage(text, false)
+
+                    attachments.forEach {
+                        server.playerList.broadcastSystemMessage(it, false)
+                    }
                 }
             }
         }
@@ -288,40 +290,6 @@ class MessagesExtension : Extension(), ServerLifecycleEvents.ServerStarted, Serv
         }
 
         return result
-    }
-
-    private suspend fun replaceMentions(message: Message): String {
-        val guild: Guild? = message.getGuildOrNull()
-
-        return message.content
-            .replace(userRegex) { match ->
-                runBlocking {
-                    val user: Member? = guild?.getMemberOrNull(Snowflake(match.groupValues[1].toULong()))
-
-                    "<color:${"#%06X".format(user?.accentColor?.rgb)}>@" + (user?.effectiveName ?: "unknown-user") + "</color>"
-                }
-            }
-            .replace(channelRegex) { match ->
-                runBlocking {
-                    "<blue>#" + (guild?.getChannelOrNull(Snowflake(match.groupValues[1].toULong()))?.data?.name?.value ?: "unknown-channel") + "</blue>"
-                }
-            }
-            .replace(roleRegex) { match ->
-                runBlocking {
-                    val role: Role? = guild?.getRoleOrNull(Snowflake(match.groupValues[1].toULong()))
-
-                    "<color:${"#%06X".format(role?.color?.rgb)}>@" + (role?.name ?: "unknown-role") + "</color>"
-                }
-            }
-            .replace(urlRegex) { match -> "<underline><blue><url:'${match.value}'>${match.value}</url></blue></underline>" }
-    }
-
-    companion object {
-        val userRegex: Regex = Regex("<@(\\d+)>")
-        val channelRegex: Regex = Regex("<#(\\d+)>")
-        val roleRegex: Regex = Regex("<@&(\\d+)>")
-
-        val urlRegex: Regex = Regex("https?://(www\\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)")
     }
 
     override val coroutineContext: CoroutineContext = Dispatchers.Default

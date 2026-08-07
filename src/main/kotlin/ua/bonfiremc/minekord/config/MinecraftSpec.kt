@@ -8,4 +8,8 @@ object MinecraftSpec : ConfigSpec() {
     val summaryMaxLength by required<Int>()
 
     val coloredRoles by required<Boolean>()
+
+    val appendImages by required<Boolean>()
+    val imageMaxWidth by required<Int>()
+    val imageMaxHeight by required<Int>()
 }
