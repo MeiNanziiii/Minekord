@@ -25,7 +25,7 @@ import java.net.URI
 import java.util.*
 import javax.imageio.ImageIO
 
-object FormatUtils {
+object MessageUtils {
     val userRegex: Regex = Regex("<@(\\d+)>")
     val channelRegex: Regex = Regex("<#(\\d+)>")
     val roleRegex: Regex = Regex("<@&(\\d+)>")
@@ -53,7 +53,7 @@ object FormatUtils {
 
         return content
             .replace(userRegex) { match ->
-                val member: String = members[match.snowflake()] ?: "unknown-user"
+                val member: String = members[match.snowflake()] ?: "unknown-member"
 
                 "<color:#5865F2>@$member</color>"
             }
@@ -76,7 +76,7 @@ object FormatUtils {
     private fun findMatches(content: String, regex: Regex): Set<Snowflake> {
         return regex
             .findAll(content)
-            .map { it.snowflake() }
+            .map { match -> match.snowflake() }
             .toSet()
     }
 
@@ -86,7 +86,7 @@ object FormatUtils {
         if (!Minekord.config[MinecraftSpec.appendImages]) return emptyList()
 
         return message.attachments
-            .filter { it.isImage && it.size < 8 * 1024 * 1024 }
+            .filter { attachment -> attachment.isImage && attachment.size < 8 * 1024 * 1024 }
             .mapNotNull { attachment ->
                 val image: BufferedImage = ImageIO.read(URI(attachment.url).toURL()) ?: return@mapNotNull null
 
@@ -124,7 +124,11 @@ object FormatUtils {
                             count++
                         } else {
                             val child: MutableComponent = Component.literal("█".repeat(count))
-                                .withStyle { it.withColor(color).withShadowColor(color or 0xFF000000.toInt()).withItalic(false) }
+                                .withStyle { style ->
+                                    style.withColor(color)
+                                        .withShadowColor(color or 0xFF000000.toInt())
+                                        .withItalic(false)
+                                }
 
                             if (component == null) {
                                 component = child
@@ -138,7 +142,11 @@ object FormatUtils {
                     }
 
                     val child: MutableComponent = Component.literal("█".repeat(count))
-                        .withStyle { it.withColor(color).withShadowColor(color or 0xFF000000.toInt()).withItalic(false) }
+                        .withStyle { style ->
+                            style.withItalic(false)
+                                .withColor(color)
+                                .withShadowColor(color or 0xFF000000.toInt())
+                        }
 
                     if (component == null) {
                         component = child
@@ -167,12 +175,16 @@ object FormatUtils {
             }
     }
 
-    fun messageToDiscordText(message: PlayerChatMessage): String {
+    fun message2String(message: PlayerChatMessage): String {
         if (message.unsignedContent == null) return message.signedContent()
 
+        return component2String(message.unsignedContent!!)
+    }
+
+    fun component2String(component: Component): String {
         val text: StringBuilder = StringBuilder()
 
-        message.unsignedContent!!.visit({ style, content ->
+        component.visit({ style, content ->
             var formatted: String = content
 
             if (style.isBold) {

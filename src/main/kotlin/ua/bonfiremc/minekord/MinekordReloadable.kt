@@ -1,5 +1,5 @@
 package ua.bonfiremc.minekord
 
-interface MinekordExtension {
+interface MinekordReloadable {
     suspend fun onMinekordReload()
 }

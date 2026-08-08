@@ -1,14 +1,16 @@
 package ua.bonfiremc.minekord
 
 import dev.kordex.core.ExtensibleBot
+import dev.kordex.core.utils.loadModule
 import dev.kordex.data.api.DataCollection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import net.minecraft.server.MinecraftServer
 import ua.bonfiremc.minekord.Minekord.config
-import ua.bonfiremc.minekord.bot.MessagesExtension
 import ua.bonfiremc.minekord.config.BotSpec
+import ua.bonfiremc.minekord.messages.MessagesExtension
 import kotlin.coroutines.CoroutineContext
 
 object MinekordBot : CoroutineScope {
@@ -18,7 +20,7 @@ object MinekordBot : CoroutineScope {
     lateinit var instance: ExtensibleBot
         private set
 
-    fun start() {
+    fun start(server: MinecraftServer) {
         if (started) return
 
         started = true
@@ -33,6 +35,14 @@ object MinekordBot : CoroutineScope {
 
                 extensions {
                     add(::MessagesExtension)
+                }
+
+                hooks {
+                    afterKoinSetup {
+                        loadModule {
+                            single { server }
+                        }
+                    }
                 }
             }
         }

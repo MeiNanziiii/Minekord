@@ -34,13 +34,13 @@ object Minekord : ModInitializer, ServerLifecycleEvents.ServerStarting {
         CommandRegistrationCallback.EVENT.register { dispatcher, _, _ ->
             dispatcher.register(
                 Commands.literal("minekord")
-                    .requires { it.permissions().hasPermission(Permissions.COMMANDS_ADMIN) }
+                    .requires { source -> source.permissions().hasPermission(Permissions.COMMANDS_ADMIN) }
                     .then(Commands.literal("reload").executes {
                         loadConfig()
 
                         if (MinekordBot.started) {
                             MinekordBot.launch {
-                                MinekordBot.instance.findExtensions<MinekordExtension>().forEach { extension ->
+                                MinekordBot.instance.findExtensions<MinekordReloadable>().forEach { extension ->
                                     extension.onMinekordReload()
                                 }
                             }
@@ -57,7 +57,7 @@ object Minekord : ModInitializer, ServerLifecycleEvents.ServerStarting {
         if (config[BotSpec.token].isBlank()) {
             logger.warn("Config field \"token\" is empty, change it in \"$CONFIG_NAME\" to start bot!")
         } else {
-            MinekordBot.start()
+            MinekordBot.start(server)
         }
     }
 
