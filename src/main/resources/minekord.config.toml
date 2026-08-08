@@ -27,22 +27,18 @@ deathMessages = [
     "### :skull_crossbones:   {death_message}"
 ]
 
-startMessages = [
-    "### :white_check_mark:   Server started"
-]
-stopMessages = [
-    "### :octagonal_sign:   Server stopped"
-]
-
 advancementMessages = [
-    "### :sparkles:   {player} has made the advancement {advancement_name}",
+    "### :dart:   {player} has made the advancement {advancement_name}",
     "{advancement_description}"
 ]
 goalMessages = [
-    "### :sparkles:   {player} has reached the goal {advancement_name}",
+    "### :dart:   {player} has reached the goal {advancement_name}",
     "{advancement_description}"
 ]
 challengeMessages = [
-    "### :sparkles:   {player} has completed the challenge {advancement_name}",
+    "### :dart:   {player} has completed the challenge {advancement_name}",
     "{advancement_description}"
 ]
+
+startMessage = "### :white_check_mark:   Server started"
+stopMessage = "### :octagonal_sign:   Server stopped"

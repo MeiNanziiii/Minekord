@@ -11,17 +11,21 @@ import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
 import net.minecraft.network.chat.MutableComponent
+import net.minecraft.network.chat.PlayerChatMessage
+import net.minecraft.network.chat.Style
 import net.minecraft.world.item.ItemStackTemplate
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.component.ItemLore
 import ua.bonfiremc.minekord.Minekord
 import ua.bonfiremc.minekord.config.MinecraftSpec
 import java.awt.Graphics2D
+import java.awt.Image
 import java.awt.image.BufferedImage
 import java.net.URI
+import java.util.*
 import javax.imageio.ImageIO
 
-object MessageUtils {
+object FormatUtils {
     val userRegex: Regex = Regex("<@(\\d+)>")
     val channelRegex: Regex = Regex("<#(\\d+)>")
     val roleRegex: Regex = Regex("<@&(\\d+)>")
@@ -51,12 +55,12 @@ object MessageUtils {
             .replace(userRegex) { match ->
                 val member: String = members[match.snowflake()] ?: "unknown-user"
 
-                "<blue>@$member</blue>"
+                "<color:#5865F2>@$member</color>"
             }
             .replace(channelRegex) { match ->
                 val channel: String = channels[match.snowflake()] ?: "unknown-channel"
 
-                "<blue>#$channel</blue>"
+                "<color:#5865F2>#$channel</color>"
             }
             .replace(roleRegex) { match ->
                 val role: Role? = roles[match.snowflake()]
@@ -64,13 +68,10 @@ object MessageUtils {
                 if (role != null) {
                     "<color:${"#%06X".format(role.color.rgb and 0xFFFFFF)}>@${role.name}</color>"
                 } else {
-                    "<blue>@unknown-role</blue>"
+                    "<color:#5865F2>@unknown-role</color>"
                 }
             }
-            // .replace(urlRegex) { match -> "<underline><blue><url:'${match.value}'>${match.value}</url></blue></underline>" }
     }
-
-    private fun MatchResult.snowflake() = Snowflake(groupValues[1].toULong())
 
     private fun findMatches(content: String, regex: Regex): Set<Snowflake> {
         return regex
@@ -79,13 +80,15 @@ object MessageUtils {
             .toSet()
     }
 
+    private fun MatchResult.snowflake() = Snowflake(groupValues[1].toULong())
+
     fun getAttachmentsAsText(message: Message): List<Component> {
         if (!Minekord.config[MinecraftSpec.appendImages]) return emptyList()
 
         return message.attachments
             .filter { it.isImage && it.size < 8 * 1024 * 1024 }
             .mapNotNull { attachment ->
-                val image: BufferedImage = ImageIO.read(URI(attachment.proxyUrl).toURL()) ?: return@mapNotNull null
+                val image: BufferedImage = ImageIO.read(URI(attachment.url).toURL()) ?: return@mapNotNull null
 
                 val scale: Double = minOf(
                     1.0,
@@ -100,9 +103,8 @@ object MessageUtils {
                     val graphics: Graphics2D = createGraphics()
 
                     graphics.drawImage(
-                        image,
+                        image.getScaledInstance(width, height, Image.SCALE_SMOOTH),
                         0, 0,
-                        width, height,
                         null
                     )
 
@@ -155,7 +157,7 @@ object MessageUtils {
                                 ItemStackTemplate(
                                     Items.PAPER,
                                     DataComponentPatch.builder()
-                                        .set(DataComponents.CUSTOM_NAME, Component.empty())
+                                        .set(DataComponents.ITEM_NAME, Component.literal(attachment.filename))
                                         .set(DataComponents.LORE, ItemLore(components))
                                         .build()
                                 )
@@ -163,5 +165,31 @@ object MessageUtils {
                         )
                 }
             }
+    }
+
+    fun messageToDiscordText(message: PlayerChatMessage): String {
+        if (message.unsignedContent == null) return message.signedContent()
+
+        val text: StringBuilder = StringBuilder()
+
+        message.unsignedContent!!.visit({ style, content ->
+            var formatted: String = content
+
+            if (style.isBold) {
+                formatted = "**$formatted**"
+            }
+            if (style.isItalic) {
+                formatted = "*$formatted*"
+            }
+            if (style.isUnderlined) {
+                formatted = "__${formatted}__"
+            }
+
+            text.append(formatted)
+
+            Optional.empty()
+        }, Style.EMPTY)
+
+        return text.toString()
     }
 }
