@@ -55,7 +55,9 @@ object Minekord : ModInitializer, ServerLifecycleEvents.ServerStarting {
 
     override fun onServerStarting(server: MinecraftServer) {
         if (config[BotSpec.token].isBlank()) {
-            logger.warn("Config field \"token\" is empty, change it in \"$CONFIG_NAME\" to start bot!")
+            logger.warn("Config field \"token\" is not set, change it in \"$CONFIG_NAME\" to start bot!")
+        } else if (config[BotSpec.channel].value == 0UL) {
+            logger.warn("Config field \"channel\" is not set, change it in \"$CONFIG_NAME\" to start bot!")
         } else {
             MinekordBot.start(server)
         }

@@ -10,12 +10,13 @@ import net.minecraft.network.chat.MutableComponent
 import ua.bonfiremc.minekord.Minekord
 import ua.bonfiremc.minekord.config.BotSpec
 import ua.bonfiremc.minekord.config.MinecraftSpec
+import ua.bonfiremc.minekord.util.AttachmentUtils
 import ua.bonfiremc.minekord.util.ComponentParser
-import ua.bonfiremc.minekord.util.MessageUtils
+import ua.bonfiremc.minekord.util.MessageFormatter
 
 class D2MMessages(val ext: MessagesExtension) {
     suspend fun onDiscordMessage(message: Message, member: Member) {
-        val formattedContent: String = MessageUtils.getFormattedContent(message)
+        val formattedContent: String = MessageFormatter.discordMessage(message)
 
         val content: Component = ComponentParser.parse(Minekord.config[MinecraftSpec.messageFormat]) {
             "sender" to Component.literal(member.effectiveName)
@@ -23,7 +24,7 @@ class D2MMessages(val ext: MessagesExtension) {
         }
 
         val reply: Component? = message.referencedMessage?.let { replyMessage ->
-            val referencedContent: String = MessageUtils.getFormattedContent(replyMessage)
+            val referencedContent: String = MessageFormatter.discordMessage(replyMessage)
             val sender: String = replyMessage.getAuthorAsMemberOrNull()?.effectiveName ?: "unknown-member"
 
             ComponentParser.parse(Minekord.config[MinecraftSpec.replyFormat]) {
@@ -35,7 +36,7 @@ class D2MMessages(val ext: MessagesExtension) {
 
         val component: MutableComponent = reply?.copy()?.append(content) ?: content.copy()
 
-        val attachments: List<Component> = MessageUtils.getAttachmentsAsText(message).let { list ->
+        val attachments: List<Component> = AttachmentUtils.getAsComponents(message.attachments).let { list ->
             if (message.content.isBlank() && list.isNotEmpty()) {
                 component.append(list[0])
 

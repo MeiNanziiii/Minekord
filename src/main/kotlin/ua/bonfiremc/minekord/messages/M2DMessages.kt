@@ -26,8 +26,8 @@ import ua.bonfiremc.minekord.Minekord
 import ua.bonfiremc.minekord.MinekordBot
 import ua.bonfiremc.minekord.config.DiscordSpec
 import ua.bonfiremc.minekord.event.AdvancementGrantEvent
-import ua.bonfiremc.minekord.util.MessageUtils
-import ua.bonfiremc.minekord.util.Placeholders
+import ua.bonfiremc.minekord.util.MessageFormatter
+import ua.bonfiremc.minekord.util.PlaceholderBuilder
 
 class M2DMessages(val ext: MessagesExtension) {
     val mentions: AllowedMentionsBuilder = AllowedMentionsBuilder()
@@ -39,7 +39,7 @@ class M2DMessages(val ext: MessagesExtension) {
             username = player.plainTextName
             avatarUrl = getPlayerAvatar(player)
 
-            content = MessageUtils.message2String(message)
+            content = MessageFormatter.minecraftMessage(message)
         }
     }
 
@@ -53,7 +53,7 @@ class M2DMessages(val ext: MessagesExtension) {
 
     suspend fun onPlayerDeath(player: ServerPlayer) {
         sendPlayerContainer(Minekord.config[DiscordSpec.deathMessages], Colors.orange, player) {
-            "death_message" to MessageUtils.component2String(player.combatTracker.deathMessage)
+            "death_message" to MessageFormatter.component(player.combatTracker.deathMessage)
         }
     }
 
@@ -65,10 +65,11 @@ class M2DMessages(val ext: MessagesExtension) {
             AdvancementType.CHALLENGE -> Minekord.config[DiscordSpec.challengeMessages]
             AdvancementType.GOAL -> Minekord.config[DiscordSpec.goalMessages]
         }
+        val color: Color = if (display.type == AdvancementType.CHALLENGE) Colors.purple else Colors.yellow
 
-        sendPlayerContainer(messages, if (display.type == AdvancementType.CHALLENGE) Colors.purple else Colors.yellow, player) {
-            "advancement_name" to MessageUtils.component2String(Advancement.name(holder))
-            "advancement_description" to MessageUtils.component2String(display.description)
+        sendPlayerContainer(messages, color, player) {
+            "advancement_name" to MessageFormatter.component(Advancement.name(holder))
+            "advancement_description" to MessageFormatter.component(display.description)
         }
     }
 
@@ -76,7 +77,7 @@ class M2DMessages(val ext: MessagesExtension) {
         ext.channel.createMessage {
             allowedMentions = mentions
 
-            content = MessageUtils.message2String(message)
+            content = MessageFormatter.minecraftMessage(message)
         }
     }
 
@@ -112,8 +113,8 @@ class M2DMessages(val ext: MessagesExtension) {
         }
     }
 
-    private suspend fun sendPlayerContainer(messages: List<String>, color: Color, player: ServerPlayer, builder: Placeholders<String>.() -> Unit = {}) {
-        val placeholders: Placeholders<String> = Placeholders<String>().apply {
+    private suspend fun sendPlayerContainer(messages: List<String>, color: Color, player: ServerPlayer, builder: PlaceholderBuilder<String>.() -> Unit = {}) {
+        val placeholders: PlaceholderBuilder<String> = PlaceholderBuilder<String>().apply {
             map["player"] = player.plainTextName
             builder()
         }

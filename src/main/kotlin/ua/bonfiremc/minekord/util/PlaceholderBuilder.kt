@@ -1,6 +1,6 @@
 package ua.bonfiremc.minekord.util
 
-class Placeholders<T> {
+class PlaceholderBuilder<T> {
     val map: MutableMap<String, T> = mutableMapOf()
 
     infix fun String.to(component: T) {

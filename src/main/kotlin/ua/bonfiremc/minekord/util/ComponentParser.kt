@@ -23,8 +23,8 @@ object ComponentParser {
         return parser.parseComponent(content, ParserContext.of())
     }
 
-    fun parse(content: String, builder: Placeholders<Component>.() -> Unit): Component {
-        val placeholders: Placeholders<Component> = Placeholders<Component>().apply(builder)
+    fun parse(content: String, builder: PlaceholderBuilder<Component>.() -> Unit): Component {
+        val placeholders: PlaceholderBuilder<Component> = PlaceholderBuilder<Component>().apply(builder)
 
         return parser.parseComponent(
             content,
