@@ -7,8 +7,6 @@ messageFormat = "{sender} » {message}"
 replyFormat = "<gray>(Replying to @{sender} » <hover:'{message}'>{summary}</hover>)</gray>"
 summaryMaxLength = 20
 
-coloredRoles = true
-
 appendImages = true
 imageMaxWidth = 60
 imageMaxHeight = 30
