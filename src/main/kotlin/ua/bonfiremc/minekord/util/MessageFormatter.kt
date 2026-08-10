@@ -4,19 +4,20 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Message
 import dev.kord.core.entity.Role
+import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.PlayerChatMessage
 import net.minecraft.network.chat.Style
 import java.util.*
 
 object MessageFormatter {
+    val urlRegex: Regex = Regex("https?://(www\\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)")
+
     val userRegex: Regex = Regex("<@(\\d{17,19})>")
     val channelRegex: Regex = Regex("<#(\\d{17,19})>")
     val roleRegex: Regex = Regex("<@&(\\d{17,19})>")
 
     val emojiRegex: Regex = Regex("<a?(:\\w+:)\\d{17,19}>")
-
-    val urlRegex: Regex = Regex("https?://(www\\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)")
 
     suspend fun discordMessage(message: Message): String {
         val content: String = message.content.replace(urlRegex) { match -> "<underline><blue><url:'${match.value}'>${match.value}</url></blue></underline>" }
@@ -89,7 +90,7 @@ object MessageFormatter {
             if (style.isItalic) {
                 formatted = "*$formatted*"
             }
-            if (style.isUnderlined) {
+            if (style.isUnderlined && style.clickEvent !is ClickEvent.OpenUrl) {
                 formatted = "__${formatted}__"
             }
 
