@@ -34,8 +34,7 @@ dependencies {
     includeImplementation(libs.konf.core)
     includeImplementation(libs.konf.toml)
 
-    implementation(libs.placeholder.api)
-    include(libs.placeholder.api)
+    implementAndInclude(libs.placeholder.api)
 }
 
 java {
